@@ -1,0 +1,21 @@
+# Configuration
+python-dotenv
+
+# Backend
+flask
+
+# Data Validation
+pydantic
+
+# Database Driver
+psycopg2-binary
+
+# LLM & Agent Framework
+pandas
+langchain
+langchain-core
+langchain-community
+langchain-openai
+
+# HTTP Client (Used in agent.py for custom SSL config)
+httpx
