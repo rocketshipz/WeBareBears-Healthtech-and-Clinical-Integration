@@ -1,21 +1,28 @@
-# Configuration
-python-dotenv
+# Environment & Configuration
+python-dotenv>=1.0.0
+pydantic>=2.7.0
+pydantic-settings>=2.2.0
 
-# Backend
-flask
+# Web Framework & ASGI Server
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
 
-# Data Validation
-pydantic
+# HTTP Client
+httpx>=0.27.0
 
-# Database Driver
-psycopg2-binary
+# Database & ORM (PostgreSQL / Supabase)
+psycopg2-binary>=2.9.9
+sqlalchemy>=2.0.0
 
-# LLM & Agent Framework
-pandas
-langchain
-langchain-core
-langchain-community
-langchain-openai
+# AI & Agent Framework
+langchain>=0.2.0
+langchain-core>=0.2.0
+langchain-community>=0.2.0
+langchain-groq>=0.1.0
+groq>=0.9.0
+langchain-google-genai>=2.0.0
+google-genai>=1.0.0
 
-# HTTP Client (Used in agent.py for custom SSL config)
-httpx
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0

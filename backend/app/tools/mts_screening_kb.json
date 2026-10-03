@@ -1,0 +1,1313 @@
+{
+  "schema_version": "2.1.0",
+  "knowledge_base_type": "source_grounded_mts_patient_screening",
+  "metadata": {
+    "name": "MTS 2019 Patient-Reportable Screening Knowledge Base",
+    "version": "2.1.0",
+    "purpose": "Preliminary emergency urgency screening from patient-reported or directly observable information while the user is travelling to or seeking a medical facility.",
+    "clinical_scope": "Screening only; non-diagnostic; not a replacement for professional triage.",
+    "source_policy": {
+      "source_only": true,
+      "primary_source": "Malaysian Triage Scale (New Revised Version 2019)",
+      "do_not_invent_rules": true,
+      "do_not_substitute_other_triage_scales": true,
+      "preserve_source_rule_wording": true,
+      "note": "This KB is an app-specific screening adaptation of the supplied MTS-derived source content. Criteria requiring measurements or clinician assessment are excluded from the active patient screening path rather than replaced with new thresholds."
+    },
+    "screening_constraints": {
+      "patient_reportable_or_observable_only": true,
+      "do_not_ask_user_to_measure_vitals": true,
+      "excluded_measurements": [
+        "SpO2 / oxygen saturation",
+        "respiratory rate",
+        "blood pressure",
+        "capillary refill time",
+        "pulse assessment",
+        "temperature measurement"
+      ],
+      "pain_score_allowed": true,
+      "history_allowed": true,
+      "history_use": "Use past medical history only when the applicable source rule explicitly makes the history relevant; do not independently escalate because of a diagnosis.",
+      "insufficient_information_action": "Ask only source-relevant follow-up questions; if classification remains unsupported, return insufficient_information rather than guessing."
+    },
+    "limitations": [
+      "This knowledge base is strictly for preliminary, non-diagnostic urgency screening by non-clinicians/patients.",
+      "It does not replace professional clinical triage, physical examination, ECG, laboratory tests, or diagnostic evaluation.",
+      "Clinician/measured criteria from the source are not part of the active self-screening decision path.",
+      "Australian Triage Scale (ATS) and other international triage rules are excluded from direct MTS mapping.",
+      "Children under 8 years of age are generally excluded from Level 5 (Routine) care and should be triaged at Level 4 (Early Care) or higher."
+    ]
+  },
+  "triage_levels": {
+    "1": "Resuscitation",
+    "2": "Emergency",
+    "3": "Urgent",
+    "4": "Early Care",
+    "5": "Routine"
+  },
+  "assessment_modes": {
+    "patient_reportable": "Criterion can be obtained from the user's report or direct observation without equipment.",
+    "excluded_clinician_only": "Source criteria requiring measurements or clinician assessment are excluded from the active screening path."
+  },
+  "patient_context": {
+    "required": [
+      "age",
+      "current_symptoms"
+    ],
+    "recommended": [
+      "symptom_onset",
+      "symptom_duration",
+      "symptom_severity",
+      "current_functional_status",
+      "relevant_past_medical_history",
+      "relevant_medications",
+      "pregnancy_status_when_applicable",
+      "injury_mechanism_when_applicable"
+    ],
+    "rule": "Only use a history item as a triage modifier when the applicable MTS-derived rule explicitly supports that use."
+  },
+  "screening_categories": [
+    {
+      "category": "Critical First Look & General Emergency Indicators",
+      "questions": [
+        {
+          "question_id": "Q_CRIT_01",
+          "text": "Is the person conscious, breathing normally, and able to respond to call?",
+          "answers": [
+            "Yes",
+            "Not responding to call / Unresponsive",
+            "Not breathing / Cardiac arrest",
+            "Severe respiratory distress / Unable to speak",
+            "Confused / Agitated"
+          ]
+        },
+        {
+          "question_id": "Q_CRIT_02",
+          "text": "Is there severe, active uncontrolled bleeding, arterial limb bleeding, or active vomiting/coughing of blood?",
+          "answers": [
+            "Yes - active uncontrolled or arterial bleeding",
+            "Yes - active vomiting or coughing of blood",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_CRIT_03",
+          "text": "Is the person currently experiencing ongoing seizures or unable to sit/stand unsupported?",
+          "answers": [
+            "Ongoing seizures",
+            "Cannot sit or stand unsupported",
+            "Alert, walking, and talking normally"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "rule_id": "RULE_CRIT_L1_01",
+          "conditions": [
+            "Cardiac arrest or not breathing",
+            "Not responding to call",
+            "Major trauma in shock",
+            "Ongoing seizures",
+            "Active uncontrolled bleeding or arterial limb bleeding"
+          ],
+          "triage_level": "Level 1",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Primary Triage - Critical First Look & Rapid Assessment",
+            "page": "Slide 3-4",
+            "criterion": "Level 1 Resuscitation indicators for Appearance, Respiratory Distress, Shock State, Conscious Levels, and Bleeding"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_CRIT_L2_01",
+          "conditions": [
+            "Severe chest pain or severe pain score",
+            "Altered mental state, confused, agitated, or disoriented",
+            "Cannot communicate or short phrases only",
+            "Cannot sit or stand unsupported",
+            "Massive vaginal bleeding or active vomiting/coughing blood"
+          ],
+          "triage_level": "Level 2",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Primary Triage - Critical First Look & Rapid Assessment",
+            "page": "Slide 3-4",
+            "criterion": "Level 2 Emergency indicators for Appearance, Respiratory Distress, Shock State, Conscious Levels, and Bleeding"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_CRIT_L3_01",
+          "conditions": [
+            "Walking and talking, not distressed, not aggressive",
+            "Wheeze or expiratory rhonchi with intact airway",
+            "Cannot stand or walk unsupported",
+            "Bleeding from fractures, dislocations, joints, or wounds"
+          ],
+          "triage_level": "Level 3",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Primary Triage - Rapid Assessment",
+            "page": "Slide 3-4",
+            "criterion": "Level 3 Urgent indicators for Appearance, Respiratory Distress, Shock State, and Bleeding"
+          },
+          "assessment_mode": "patient_reportable"
+        }
+      ]
+    },
+    {
+      "category": "Chest Pain & Cardiac Symptoms",
+      "questions": [
+        {
+          "question_id": "Q_CP_01",
+          "text": "When did the chest pain start, and is it ongoing?",
+          "answers": [
+            "New onset starting within less than 6 hours and currently ongoing",
+            "Started more than 6 hours ago or is reducing",
+            "Persisting mild pain",
+            "Pain has completely resolved"
+          ]
+        },
+        {
+          "question_id": "Q_CP_02",
+          "text": "Are you experiencing profuse sweating alongside the ongoing chest pain?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_CP_03",
+          "text": "How severe is the chest pain on a scale of 0 to 10?",
+          "answers": [
+            "Severe pain (8-10)",
+            "Moderate pain (4-7)",
+            "Mild pain (1-3)",
+            "No pain (0)"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "rule_id": "RULE_CP_L2_01",
+          "conditions": [
+            "New onset chest pain starting within less than 6 hours (<6 H)",
+            "Ongoing chest pain with profuse sweating",
+            "Severe pain score (8-10)"
+          ],
+          "triage_level": "Level 2",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Chest Pain",
+            "page": "Slide 7",
+            "criterion": "New onset <6H, ongoing chest pain, profuse sweating, severe pain score 8-10"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_CP_L3_01",
+          "conditions": [
+            "Chest pain onset greater than 6 hours (>6 H)",
+            "Reduced chest pain",
+            "Moderate pain score (4-7)"
+          ],
+          "triage_level": "Level 3",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Chest Pain",
+            "page": "Slide 7",
+            "criterion": "Onset >6H, reduced chest pain, moderate risk assessment"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_CP_L4_01",
+          "conditions": [
+            "Persisting mild chest pain",
+            "Pain score 1-3"
+          ],
+          "triage_level": "Level 4",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Chest Pain",
+            "page": "Slide 7",
+            "criterion": "Persisting mild pain, low risk assessment"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_CP_L5_01",
+          "conditions": [
+            "No further chest pain",
+            "Chest pain completely resolved and non-cardiac cause suspected"
+          ],
+          "triage_level": "Level 5",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Chest Pain",
+            "page": "Slide 7",
+            "criterion": "No further pain, cause unlikely cardiac"
+          },
+          "assessment_mode": "patient_reportable"
+        }
+      ]
+    },
+    {
+      "category": "Shortness of Breath & Respiratory Complaints",
+      "questions": [
+        {
+          "question_id": "Q_RESP_01",
+          "text": "Are you able to speak full sentences without stopping for breath?",
+          "answers": [
+            "Cannot speak or single-word reply only",
+            "Short phrases only",
+            "Able to speak full sentences easily"
+          ]
+        },
+        {
+          "question_id": "Q_RESP_02",
+          "text": "Are you experiencing stridor (harsh high-pitched breathing sound) or inability to swallow?",
+          "answers": [
+            "Yes - stridor sound or inability to swallow",
+            "Yes - wheezing sound",
+            "No abnormal sounds"
+          ]
+        },
+        {
+          "question_id": "Q_RESP_03",
+          "text": "Is the shortness of breath accompanied by ongoing chest pain, severe exhaustion, agitation, or anxiety?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "rule_id": "RULE_RESP_L1_01",
+          "conditions": [
+            "Stridor present",
+            "Cannot speak or single-word reply only",
+            "Unprotected airway or inability to swallow",
+            "Slow breaths or poor respiratory effort"
+          ],
+          "triage_level": "Level 1",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - SOB / Respiratory",
+            "page": "Slide 3, 9, 10",
+            "criterion": "Stridor, slow breaths, lost airway reflexes, unable to speak"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_RESP_L2_01",
+          "conditions": [
+            "Increased work of breathing and tired/exhausted",
+            "Agitation or anxiety with breathing difficulty",
+            "Ongoing chest pain combined with shortness of breath"
+          ],
+          "triage_level": "Level 2",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - SOB",
+            "page": "Slide 10",
+            "criterion": "SOB with increased work of breathing, agitation, ongoing chest pain, rapid breaths"
+          },
+          "assessment_mode": "patient_reportable",
+          "source_conditions_excluded_from_screening": [
+            {
+              "reason": "Clinician/measured assessment excluded from self-screening workflow."
+            }
+          ]
+        },
+        {
+          "rule_id": "RULE_RESP_L3_01",
+          "conditions": [
+            "Wheeze / expiratory rhonchi with intact airway",
+            "Breathless with voice change",
+            "Child <12 presenting with shortness of breath"
+          ],
+          "triage_level": "Level 3",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - SOB",
+            "page": "Slide 10",
+            "criterion": "Wheeze, expiratory rhonchi, breathless with voice change, child <12"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_RESP_L4_01",
+          "conditions": [
+            "Mild upper respiratory tract (URTI) symptoms"
+          ],
+          "triage_level": "Level 4",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Respiratory / SOB",
+            "page": "Slide 9-10",
+            "criterion": "Mild URTI symptoms, mild/minimal SOB, normal RR"
+          },
+          "assessment_mode": "patient_reportable",
+          "source_conditions_excluded_from_screening": [
+            {
+              "reason": "Clinician/measured assessment excluded from self-screening workflow."
+            },
+            {
+              "reason": "Clinician/measured assessment excluded from self-screening workflow."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Abdominal Pain",
+      "questions": [
+        {
+          "question_id": "Q_ABD_01",
+          "text": "How severe is your abdominal pain on a scale of 0 to 10?",
+          "answers": [
+            "Severe pain (8-10)",
+            "Moderate pain (4-7)",
+            "Mild / Subsided pain (1-3)"
+          ]
+        },
+        {
+          "question_id": "Q_ABD_02",
+          "text": "Do you have a tense rigid (hard) abdomen, bleeding from rectum or mouth, sudden onset, or associated back pain?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_ABD_03",
+          "text": "Are you over 65 years old, experiencing repeated vomiting, or possibly pregnant?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "rule_id": "RULE_ABD_L2_01",
+          "conditions": [
+            "Tense rigid abdomen",
+            "Bleeding per rectum (PR) or per os (PO)",
+            "Pain score 8-10",
+            "Very sudden onset abdominal pain",
+            "Associated back pain",
+            "Abdominal pain and possibly pregnant"
+          ],
+          "triage_level": "Level 2",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Abdominal Pain",
+            "page": "Slide 7",
+            "criterion": "Tense rigid abdomen, bleeding PR/PO, pain score 8-10, sudden onset, back pain, possibly pregnant"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_ABD_L3_01",
+          "conditions": [
+            "Elderly >65 years old with abdominal pain",
+            "Pain score 4-7",
+            "Colicky pain only",
+            "Abdominal pain with repeated vomiting"
+          ],
+          "triage_level": "Level 3",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Abdominal Pain",
+            "page": "Slide 7",
+            "criterion": "Elderly >65, pain score 4-7, colicky pain, repeated vomiting"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_ABD_L4_01",
+          "conditions": [
+            "Chronic or repeated episodes of abdominal pain"
+          ],
+          "triage_level": "Level 4",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Abdominal Pain",
+            "page": "Slide 7",
+            "criterion": "Chronic or repeated episodes"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_ABD_L5_01",
+          "conditions": [
+            "Abdominal pain reduced or subsided"
+          ],
+          "triage_level": "Level 5",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Abdominal Pain",
+            "page": "Slide 7",
+            "criterion": "Pain reduced / subsided"
+          },
+          "assessment_mode": "patient_reportable"
+        }
+      ]
+    },
+    {
+      "category": "Altered Mental State, Seizures & Neurological Symptoms",
+      "questions": [
+        {
+          "question_id": "Q_NEURO_01",
+          "text": "Is the person currently experiencing an ongoing seizure or unresponsive?",
+          "answers": [
+            "Yes - ongoing active seizure or unresponsive",
+            "No - seizure has stopped or fully conscious"
+          ]
+        },
+        {
+          "question_id": "Q_NEURO_02",
+          "text": "Are there sudden neurological deficits (slurred speech, visual difficulty, face drooping, limb weakness, or confusion/agitation)?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_NEURO_03",
+          "text": "If a seizure occurred, what is the current recovery state?",
+          "answers": [
+            "First episode of seizure",
+            "Persistent post-ictal drowsiness",
+            "Seizure associated with trauma, neck stiffness, or overdose",
+            "Full recovery in patient with known epilepsy history"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "rule_id": "RULE_NEURO_L1_01",
+          "conditions": [
+            "Ongoing seizures at presentation",
+            "Unresponsive patient or unprotected airway"
+          ],
+          "triage_level": "Level 1",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Seizures / Primary Triage",
+            "page": "Slide 3, 10",
+            "criterion": "Ongoing seizures, unresponsive"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_NEURO_L2_01",
+          "conditions": [
+            "Acute stroke onset <3 hours",
+            "First episode seizure or persistent post-ictal drowsiness",
+            "Seizure associated with overdose, poisoning, skin rashes, trauma, or neck stiffness",
+            "Neurological deficits, agitation, or confusion"
+          ],
+          "triage_level": "Level 2",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Altered Mental State / Seizures / Lethargy",
+            "page": "Slide 7, 9, 10",
+            "criterion": "First episode seizure, persistent post-ictal drowsiness, acute stroke <3H, neuro deficits, confused/agitated"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_NEURO_L3_01",
+          "conditions": [
+            "Acute stroke onset >3 hours",
+            "Seizure in patient with known epilepsy history after full recovery",
+            "Improved consciousness with psychiatric or drug use history"
+          ],
+          "triage_level": "Level 3",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Altered Mental State / Seizures / Lethargy",
+            "page": "Slide 7, 9, 10",
+            "criterion": "Acute stroke >3H, epilepsy history with full recovery, improved consciousness"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_NEURO_L4_01",
+          "conditions": [
+            "Comfortable patient with no current neurological symptoms post-recovery"
+          ],
+          "triage_level": "Level 4",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Altered Mental State / Seizures",
+            "page": "Slide 7, 10",
+            "criterion": "Comfortable, no current symptoms, full recovery"
+          },
+          "assessment_mode": "patient_reportable"
+        }
+      ]
+    },
+    {
+      "category": "Allergy & Anaphylaxis",
+      "questions": [
+        {
+          "question_id": "Q_ALLERGY_01",
+          "text": "Are you experiencing swelling of the face or tongue, inability to swallow, or difficulty speaking?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_ALLERGY_02",
+          "text": "Do you have skin rash or blisters accompanied by abdominal pain, vomiting, or diarrhoea?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_ALLERGY_03",
+          "text": "Are symptoms limited to localized swelling or itchiness while feeling comfortable?",
+          "answers": [
+            "Yes - local swelling or itchiness only",
+            "No - widespread or severe pain"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "rule_id": "RULE_ALLERGY_L1_01",
+          "conditions": [
+            "Face or tongue oedema",
+            "Unable to swallow or speaking difficulty",
+            "Near-fainting or stridor following allergen exposure"
+          ],
+          "triage_level": "Level 1",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Allergy / Anaphylaxis",
+            "page": "Slide 7",
+            "criterion": "Face/tongue oedema, unable to swallow, speaking difficulty, near-fainting"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_ALLERGY_L2_01",
+          "conditions": [
+            "Skin rash or blisters combined with abdominal pain, vomiting, or diarrhoea",
+            "Chemical or toxin exposure",
+            "Hornet stings",
+            "Severe pain score (8-10)"
+          ],
+          "triage_level": "Level 2",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Allergy / Anaphylaxis",
+            "page": "Slide 7",
+            "criterion": "Skin rash/blisters with abdo pain/vomit/diarrhoea, chemical/toxin, hornet stings, severe pain"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_ALLERGY_L3_01",
+          "conditions": [
+            "Skin rash or blisters with pain as main symptom",
+            "Pain score 4-7"
+          ],
+          "triage_level": "Level 3",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Allergy / Anaphylaxis",
+            "page": "Slide 7",
+            "criterion": "Skin rash/blisters, pain main symptom, pain score 4-7"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_ALLERGY_L4_01",
+          "conditions": [
+            "Comfortable patient with local swelling or itchiness only"
+          ],
+          "triage_level": "Level 4",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Allergy / Anaphylaxis",
+            "page": "Slide 7",
+            "criterion": "Comfortable, local swelling, itchiness"
+          },
+          "assessment_mode": "patient_reportable"
+        }
+      ]
+    },
+    {
+      "category": "Burns & Scalds",
+      "questions": [
+        {
+          "question_id": "Q_BURN_01",
+          "text": "Was the burn caused by chemical exposure, electricity, lightning, facial thermal fire, or smoke inhalation?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_BURN_02",
+          "text": "Does the burn involve critical body areas (hands, feet, joints, face, or perineum/groin) or go all the way around a limb (circumferential)?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_BURN_03",
+          "text": "What is the estimated burn area size?",
+          "answers": [
+            "Major burn area >15% BSA in adults (>10% BSA in children)",
+            "Burn area <15% BSA in adults (<10% BSA in children)",
+            "Sunburns only"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "rule_id": "RULE_BURN_L1_01",
+          "conditions": [
+            "Inhalational burn injury",
+            "Lightning related or electrical burn",
+            "Chemical burn injury",
+            "Facial thermal burns",
+            "Major burn area >15% BSA in adults (>10% BSA in children)"
+          ],
+          "triage_level": "Level 1",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult & Paediatrics) - Burns Scalds",
+            "page": "Slide 7, 15",
+            "criterion": "Inhalational, lightning, electrical, chemical, facial thermal, major burn >15% (>10% paeds)"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_BURN_L2_01",
+          "conditions": [
+            "Major burn area <15% BSA in adults (<10% in children) involving hands, feet, joints, or perineum",
+            "Circumferential burns",
+            "Severe burn pain score (>7)"
+          ],
+          "triage_level": "Level 2",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult & Paediatrics) - Burns Scalds",
+            "page": "Slide 7, 15",
+            "criterion": "Burn <15% (<10% paeds) involving hands/feet/joints/perineum, circumferential burns, severe pain >7"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_BURN_L3_01",
+          "conditions": [
+            "Burn area <15% BSA in adults (<10% in children) without critical area involvement",
+            "Burn pain as main symptom (pain score 4-7)"
+          ],
+          "triage_level": "Level 3",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult & Paediatrics) - Burns Scalds",
+            "page": "Slide 7, 15",
+            "criterion": "Pain main symptom, pain score 4-7, burn <10% BSA without critical area involvement"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_BURN_L4_01",
+          "conditions": [
+            "Sunburns only without systemic distress"
+          ],
+          "triage_level": "Level 4",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Paediatrics) - Burns Scalds",
+            "page": "Slide 15",
+            "criterion": "Sunburns only"
+          },
+          "assessment_mode": "patient_reportable"
+        }
+      ]
+    },
+    {
+      "category": "Headache",
+      "questions": [
+        {
+          "question_id": "Q_HA_01",
+          "text": "Did the headache start very suddenly with high intensity, or is it accompanied by neck stiffness or confusion?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_HA_02",
+          "text": "Are you experiencing visual changes, speech difficulty, weakness, or trouble walking alongside the headache?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_HA_03",
+          "text": "How severe is your headache on a 0 to 10 scale?",
+          "answers": [
+            "Severe pain (8-10)",
+            "Moderate pain (4-7)",
+            "Mild pain (1-3)"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "rule_id": "RULE_HA_L2_01",
+          "conditions": [
+            "Altered mental state or neurological deficits",
+            "Severe headache pain score (>7)",
+            "Sudden onset headache",
+            "Associated neck pain / stiffness",
+            "Visual / speech difficulty or ataxia / gait difficulty"
+          ],
+          "triage_level": "Level 2",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Headache",
+            "page": "Slide 8",
+            "criterion": "Altered mental state, neuro deficits, pain score >7, sudden onset, assoc neck pain, visual/speech/gait difficulty"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_HA_L3_01",
+          "conditions": [
+            "Moderate headache pain score (4-7)",
+            "Behavioral change",
+            "Aura / unilateral headache",
+            "Vomiting or associated fever"
+          ],
+          "triage_level": "Level 3",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Headache",
+            "page": "Slide 8",
+            "criterion": "Pain score 4-7, behavioral change, aura/unilateral, vomiting, associated fever"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_HA_L4_01",
+          "conditions": [
+            "Headache symptoms only without neurological red flags or fever"
+          ],
+          "triage_level": "Level 4",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Headache",
+            "page": "Slide 8",
+            "criterion": "Symptoms only"
+          },
+          "assessment_mode": "patient_reportable"
+        }
+      ]
+    },
+    {
+      "category": "Vomiting, Diarrhoea & Dehydration",
+      "questions": [
+        {
+          "question_id": "Q_VD_01",
+          "text": "Are you vomiting fresh blood or dark coffee-ground material, or passing black tarry stools or fresh blood in stool?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_VD_02",
+          "text": "Are you unable to tolerate any fluids orally or showing severe dehydration with confusion or shock signs?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_VD_03",
+          "text": "How many episodes of vomiting/diarrhoea have occurred, and can you drink fluids?",
+          "answers": [
+            "Persisting vomiting / diarrhoea unable to tolerate orally",
+            "Single episode / small quantity, stable and tolerating orally"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "rule_id": "RULE_VD_L1_01",
+          "conditions": [
+            "Severe dehydration with signs of shock and altered mental state",
+            "Fresh blood haematemesis or fresh blood per rectum (PR) with shock state"
+          ],
+          "triage_level": "Level 1",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Dehydration & Diarrhoea / Vomiting",
+            "page": "Slide 7",
+            "criterion": "Severe dehydration with shock/altered mental state, fresh blood haematemesis/PR"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_VD_L2_01",
+          "conditions": [
+            "Bloody diarrhoea, black stools, or coffee-ground vomitus",
+            "Persisting vomiting unable to tolerate orally",
+            "Child <5 years old with dehydration / not taking orally"
+          ],
+          "triage_level": "Level 2",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult & Paediatrics) - Dehydration & Diarrhoea / Vomiting",
+            "page": "Slide 7, 15",
+            "criterion": "Bloody diarrhoea, black stools, coffee ground vomitus, persisting vomiting, child <5 not taking orally"
+          },
+          "assessment_mode": "patient_reportable",
+          "source_conditions_excluded_from_screening": [
+            {
+              "reason": "Clinician/measured assessment excluded from self-screening workflow."
+            }
+          ]
+        },
+        {
+          "rule_id": "RULE_VD_L3_01",
+          "conditions": [
+            "Fully conscious but cannot take fluids orally",
+            "Child 5-12 years old with dehydration / not taking orally"
+          ],
+          "triage_level": "Level 3",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult & Paediatrics) - Dehydration",
+            "page": "Slide 7, 15",
+            "criterion": "Fully conscious cannot take orally, child 5-12 years not taking orally"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_VD_L4_01",
+          "conditions": [
+            "Single episode or small quantity of diarrhoea or vomiting",
+            "Patient stable and tolerating oral fluids"
+          ],
+          "triage_level": "Level 4",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult & Paediatrics) - Diarrhoea / Vomiting",
+            "page": "Slide 7, 15",
+            "criterion": "Single episode, small qty, stable, tolerating orally"
+          },
+          "assessment_mode": "patient_reportable"
+        }
+      ]
+    },
+    {
+      "category": "Trauma & Physical Injuries",
+      "questions": [
+        {
+          "question_id": "Q_TRAUMA_01",
+          "text": "Was the injury caused by a high-velocity accident, penetrating wound (knife/gunshot) to head/neck/chest/abdomen, or fall from >6 meters (>3m in child)?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_TRAUMA_02",
+          "text": "Is there arterial bleeding, mangled limb, loss of limb above wrist/ankle, open bone fracture, or joint dislocation?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "rule_id": "RULE_TRAUMA_L1_01",
+          "conditions": [
+            "Penetrating trauma or high velocity to head, neck, chest, or abdomen",
+            "Arterial limb bleeding or ongoing uncontrolled hemorrhage",
+            "Mangled limb or amputation proximal to wrist"
+          ],
+          "triage_level": "Level 1",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Trauma Head/Neck/Chest/Abdo/Limb",
+            "page": "Slide 7, 10, 11",
+            "criterion": "Penetrating type, high velocity, arterial bleeding, mangled limb, proximal amputation"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_TRAUMA_L2_01",
+          "conditions": [
+            "Fall >6m height (>3m height or >2x height in child)",
+            "Scalp wounds with active bleeding, retrograde amnesia, or neck pain",
+            "Open bone fractures, joint dislocations, or distal limb amputations"
+          ],
+          "triage_level": "Level 2",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult & Paediatrics) - Fall / Trauma Head Neck / Limb Trauma",
+            "page": "Slide 8, 10, 16, 18",
+            "criterion": "Fall >6m (>3m paeds), open fractures, dislocations, cold dusky limb pulse absent"
+          },
+          "assessment_mode": "patient_reportable",
+          "source_conditions_excluded_from_screening": [
+            {
+              "reason": "Clinician/measured assessment excluded from self-screening workflow."
+            }
+          ]
+        },
+        {
+          "rule_id": "RULE_TRAUMA_L3_01",
+          "conditions": [
+            "Trauma with pain as main symptom (pain score 4-7)",
+            "Limb injury with inability to bear weight",
+            "Hand injuries or likely rib fractures"
+          ],
+          "triage_level": "Level 3",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Trauma / Limb Pain",
+            "page": "Slide 7, 9, 10",
+            "criterion": "Pain main symptom, not able to bear weight, hand injuries"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_TRAUMA_L4_01",
+          "conditions": [
+            "Scalp wounds only without loss of consciousness or neurological symptoms",
+            "Small bone fractures likely with pulses felt and moving fingers/toes",
+            "Mobilizing well with mild trauma symptoms"
+          ],
+          "triage_level": "Level 4",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Trauma Head Neck / Limb Trauma",
+            "page": "Slide 10",
+            "criterion": "Scalp wounds only, small bone fractures moving fingers/toes, mobilizing well"
+          },
+          "assessment_mode": "patient_reportable"
+        }
+      ]
+    },
+    {
+      "category": "Pregnancy-Related Complaints",
+      "questions": [
+        {
+          "question_id": "Q_PREG_01",
+          "text": "Are you experiencing seizures during pregnancy, massive vaginal bleeding, or active labour?",
+          "answers": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "question_id": "Q_PREG_03",
+          "text": "Is your pregnancy early (<20 weeks) or late (>20 weeks to 6 weeks post-partum)?",
+          "answers": [
+            "Early (<20 weeks)",
+            "Late (>20 weeks to 6 weeks post-partum)",
+            "Not pregnant"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "rule_id": "RULE_PREG_L1_01",
+          "conditions": [
+            "Seizures in late pregnancy (>20 weeks to 6 weeks post-partum)",
+            "Active labour with emergency complications",
+            "Massive per vaginal (PV) bleeding with septic or shock appearance"
+          ],
+          "triage_level": "Level 1",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Pregnancy Related (Late)",
+            "page": "Slide 9",
+            "criterion": "Seizures, active labour, massive PV bleeding, septic appearance"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_PREG_L2_01",
+          "conditions": [
+            "Active per vaginal (PV) bleeding in early (<20W) or late (>20W) pregnancy",
+            "Likely abortion",
+            "Head, neck, torso, or limb trauma during pregnancy"
+          ],
+          "triage_level": "Level 2",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Pregnancy Related (Early & Late)",
+            "page": "Slide 9",
+            "criterion": "Active PV bleeding, BP >140/90, likely abortion, trauma in pregnancy"
+          },
+          "assessment_mode": "patient_reportable",
+          "source_conditions_excluded_from_screening": [
+            {
+              "reason": "Clinician/measured assessment excluded from self-screening workflow."
+            }
+          ]
+        },
+        {
+          "rule_id": "RULE_PREG_L3_01",
+          "conditions": [
+            "Lower abdominal pain or cramping",
+            "Diagnosed pregnancy complications",
+            "Persistent vomiting during pregnancy"
+          ],
+          "triage_level": "Level 3",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Pregnancy Related (Late)",
+            "page": "Slide 9",
+            "criterion": "Lower abdo pain/cramping, diagnosed pregnancy complications, persistent vomiting"
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_PREG_L4_01",
+          "conditions": [
+            "Urinary symptoms during pregnancy without systemic distress"
+          ],
+          "triage_level": "Level 4",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Adult) - Pregnancy Related (Early & Late)",
+            "page": "Slide 9",
+            "criterion": "Urinary symptoms"
+          },
+          "assessment_mode": "patient_reportable"
+        }
+      ]
+    },
+    {
+      "category": "Paediatric Screening Protocols (Under 12 Years)",
+      "questions": [
+        {
+          "question_id": "Q_PAED_01",
+          "text": "Is the child limp/flaccid, unresponsive, not crying, or exhibiting a blank stare?",
+          "answers": [
+            "Yes - danger signs in appearance",
+            "No - alert, attentive, consolable"
+          ]
+        },
+        {
+          "question_id": "Q_PAED_02",
+          "text": "Is the child showing abnormal breathing (stridor, grunting, head bobbing, supraclavicular/substernal retractions, or nasal flaring)?",
+          "answers": [
+            "Yes - stridor, grunting, or severe retractions",
+            "Yes - increased work of breathing or tachypnoea alone",
+            "No abnormal breathing signs"
+          ]
+        },
+        {
+          "question_id": "Q_PAED_03",
+          "text": "Is the child an infant crying continuously for >2 hours, inconsolable, or refusing to feed?",
+          "answers": [
+            "Yes - unresponsive/lethargic, floppy cry, fever >38C, or inconsolable >2H",
+            "No - feeding normally, active, and comfortable"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "rule_id": "RULE_PAED_AGE_RESTRICT_01",
+          "conditions": [
+            "Patient age is under 8 years old"
+          ],
+          "triage_level": "Level 4 or Higher (Level 1-4 only)",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Paediatric Triage Guidelines",
+            "page": "Slide 13",
+            "criterion": "Generally, children, especially those below 8 years old should not be triaged at Level 5 - Routine."
+          },
+          "assessment_mode": "patient_reportable"
+        },
+        {
+          "rule_id": "RULE_PAED_L1_01",
+          "conditions": [
+            "Paediatric Assessment Triangle (PAT) Appearance: Limp or flaccid, unresponsive, blank stare, no speech or cry",
+            "PAT Work of Breathing: Stridor, grunting, head bobbing, severe retractions, inability to swallow"
+          ],
+          "triage_level": "Level 1",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Paediatric Triage - Primary Triage & PAT",
+            "page": "Slide 12-13",
+            "criterion": "PAT Level 1 danger signs in Appearance, Work of Breathing, and Circulation"
+          },
+          "assessment_mode": "patient_reportable",
+          "source_conditions_excluded_from_screening": [
+            {
+              "reason": "Clinician/measured assessment excluded from self-screening workflow."
+            }
+          ]
+        },
+        {
+          "rule_id": "RULE_PAED_CRYING_L2_01",
+          "conditions": [
+            "Infant crying continuously for >2 hours, inconsolable by parents on arrival"
+          ],
+          "triage_level": "Level 2",
+          "source_basis": {
+            "source": "Malaysian Triage Scale New Revised 2019-1.pdf",
+            "section": "Complaints List (Paediatrics) - Crying Infant",
+            "page": "Slide 15",
+            "criterion": "Unresponsive/lethargic, floppy/weak cry, temp >38C, inconsolable, prolonged crying >2H"
+          },
+          "assessment_mode": "patient_reportable",
+          "source_conditions_excluded_from_screening": [
+            {
+              "reason": "Clinician/measured assessment excluded from self-screening workflow."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "agent_contract": {
+    "role": "Medical triage orchestration agent",
+    "instructions": [
+      "Understand the user's reported symptoms and current condition.",
+      "Ask only additional questions necessary to evaluate applicable rules in this knowledge base.",
+      "Use patient-reported and directly observable information only.",
+      "Consider relevant past medical history when the source rule explicitly identifies it as relevant.",
+      "Do not diagnose.",
+      "Do not invent, infer, interpolate, or substitute a medical triage rule.",
+      "Do not ask the user to obtain a vital sign or clinical measurement for this screening workflow.",
+      "When a source rule contains both reportable and clinician/measured criteria, evaluate only the reportable criteria retained in this KB.",
+      "When multiple applicable rules are present, select the highest-priority triage level (Level 1 is highest urgency).",
+      "If the available information does not support a classification, ask a source-relevant question or return insufficient_information; never guess.",
+      "Return the matched rule IDs and source basis.",
+      "After preliminary triage classification, the hospital-routing tool may be invoked.",
+      "Hospital routing must never modify the MTS-derived triage level."
+    ],
+    "priority_order": [
+      "Level 1",
+      "Level 2",
+      "Level 3",
+      "Level 4",
+      "Level 5"
+    ],
+    "emergency_override": {
+      "trigger": "Immediate collapse, cardiac/respiratory arrest, or unresponsive state",
+      "action": "Treat as Level 1 and direct the user to call 999 immediately."
+    }
+  },
+  "decision_policy": {
+    "classification_states": [
+      "classified",
+      "insufficient_information"
+    ],
+    "higher_urgency_wins": true,
+    "level_1_is_highest_urgency": true,
+    "no_diagnosis": true,
+    "no_cross_scale_mapping": true,
+    "no_hospital_routing_influence_on_triage": true
+  },
+  "safety_and_escalation": [
+    {
+      "trigger": "Immediate physiological collapse, cardiac/respiratory arrest, or unresponsive state",
+      "action": "Immediate Level 1 emergency dispatch / Call emergency medical services (999) without delay"
+    },
+    {
+      "trigger": "Suspected highly contagious respiratory spread (MERS-CoV, Pandemic Influenza) or hazardous chemical/toxin exposure",
+      "action": "Enforce immediate isolation or external wash-off decontamination protocols prior to facility entry"
+    },
+    {
+      "trigger": "Aggressive, violent, or armed individuals at triage threshold",
+      "action": "Initiate immediate verbal de-escalation, physical safety measures, and police/security activation (Code GREY)"
+    },
+    {
+      "trigger": "Re-assessment / Condition change",
+      "action": "Repeat triage process immediately when new symptoms develop, symptoms worsen, or every 1 hour while waiting"
+    }
+  ],
+  "routing_interface": {
+    "purpose": "Pass the preliminary MTS-derived urgency level to the separate hospital-routing tool.",
+    "routing_tool_may_use": [
+      "triage_level",
+      "patient_location",
+      "destination_type",
+      "hospital_service_availability",
+      "hospital crowding/traffic/waiting information",
+      "travel time"
+    ],
+    "routing_tool_must_not": [
+      "change the triage level",
+      "reclassify symptoms using a different triage scale",
+      "diagnose the patient"
+    ]
+  },
+  "agent_output_contract": {
+    "status": "classified | insufficient_information",
+    "triage_level": "1 | 2 | 3 | 4 | 5 | null",
+    "triage_name": "Resuscitation | Emergency | Urgent | Early Care | Routine | null",
+    "matched_rule_ids": [],
+    "key_findings": [],
+    "relevant_history_modifiers": [],
+    "missing_information": [],
+    "routing_required": false,
+    "source_references": []
+  },
+  "excluded_from_active_screening": {
+    "purpose": "Audit/provenance only. These items are not used to make patient self-screening decisions.",
+    "items": [
+      {
+        "type": "rule",
+        "id": "RULE_RESP_L5_01",
+        "category": "Shortness of Breath & Respiratory Complaints",
+        "reason": "Rule depends entirely on clinician/measured criteria and is not used by the self-screening agent."
+      },
+      {
+        "type": "question",
+        "id": "Q_TRAUMA_03",
+        "category": "Trauma & Physical Injuries",
+        "reason": "Requires or explicitly asks for a clinician/measured vital sign or measurement."
+      },
+      {
+        "type": "question",
+        "id": "Q_PREG_02",
+        "category": "Pregnancy-Related Complaints",
+        "reason": "Requires or explicitly asks for a clinician/measured vital sign or measurement."
+      }
+    ]
+  },
+  "source_references": [
+    {
+      "title": "Malaysian Triage Scale (New Revised Version 2019)",
+      "type": "National Clinical Guideline",
+      "authors": "Ministry of Health Malaysia",
+      "relevance": "Core clinical criteria, Complaints Lists (Adult & Paediatrics), Primary & Secondary Triage rules"
+    },
+    {
+      "title": "Malaysian Triage Scale New Revised 2019-1.pdf - Slideshare",
+      "type": "Educational Slideshare Document",
+      "authors": "MathanRaj581834",
+      "relevance": "Slide-by-slide structure of Appendix 8 MTS 2019 guidelines"
+    }
+  ]
+}

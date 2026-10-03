@@ -1,18 +1,15 @@
-import sys
-import os
-# Ensure the backend module can be imported when running from the root folder
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from pathlib import Path
+from dotenv import load_dotenv
 
-from api import app
+# Load .env variables immediately
+load_dotenv()
 
-def main():
-    print("=====================================================")
-    print("Starting Energy Company AI Assistant Backend Server")
-    print("Running on http://127.0.0.1:8000")
-    print("=====================================================")
-    
-    # Run the flask app on port 8000
-    app.run(host="127.0.0.1", port=8000, debug=True)
+# Add backend directory to sys.path
+backend_dir = Path(__file__).resolve().parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
+
+from app.main import app, main
 
 if __name__ == "__main__":
     main()
