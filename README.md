@@ -29,14 +29,52 @@ Flutter Mobile App (Frontend)
   - `backend/app/`: Core application modules (API, agents, tools, services, models, schemas, repositories, core).
   - `backend/data/`: Data storage directories (`patients/`, `triage/`, `hospitals/`).
   - `backend/tests/`: Integration and unit tests.
-- Flutter mobile frontend (to be connected).
+- `frontend/`: Flutter mobile frontend application (`triagemy`).
+  - `frontend/lib/`: Mobile application code and UI screens.
+  - `frontend/android/`, `ios/`, `web/`, `windows/`, `macos/`, `linux/`: Platform support configurations.
 
 ## Getting Started
 
-See [backend/README.md](file:///C:/Users/user/OneDrive/Documents/Projects/MedicTri/backend/README.md) for detailed backend setup and startup instructions.
+### 1. Backend Service (FastAPI)
 
-AI Architecture
+1. Open a terminal and navigate to `backend/`:
+   ```bash
+   cd backend
+   ```
+2. Create and activate a Python virtual environment, then install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Configure your `.env` (copy from `.env.example`).
+4. Run the backend server:
+   ```bash
+   python main.py
+   ```
+   Or using Uvicorn:
+   ```bash
+   uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+   ```
+See [backend/README.md](backend/README.md) for full backend documentation.
 
+### 2. Frontend Application (Flutter)
+
+1. Open a terminal and navigate to `frontend/`:
+   ```bash
+   cd frontend
+   ```
+2. Install Flutter packages:
+   ```bash
+   flutter pub get
+   ```
+3. Run the application:
+   ```bash
+   flutter run
+   ```
+See [frontend/README.md](frontend/README.md) for full mobile client documentation.
+
+## AI Architecture
+
+```
                          USER
                            │
                            ▼
@@ -77,20 +115,4 @@ AI Architecture
                           │
                           ▼
                   Patient Report
-# triagemy
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```
