@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -55,44 +54,22 @@ Thumbs.db
 ehthumbs.db
 [Dd]esktop.ini
 
-=======
->>>>>>> 4e23d20 (Add triage app updates)
 # Miscellaneous
 *.class
-*.log
-*.pyc
-*.swp
-<<<<<<< HEAD
 .atom/
 .build/
 .buildlog/
 .history
 .svn/
 .swiftpm/
-=======
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
->>>>>>> 4e23d20 (Add triage app updates)
 migrate_working_dir/
 
 # IntelliJ related
 *.iml
 *.ipr
 *.iws
-<<<<<<< HEAD
-=======
-.idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
->>>>>>> 4e23d20 (Add triage app updates)
-
-# Flutter/Dart/Pub related
+# Flutter/Dart/Pub related (root and frontend)
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
@@ -101,16 +78,15 @@ migrate_working_dir/
 .packages
 .pub-cache/
 .pub/
-<<<<<<< HEAD
 build/
 coverage/
 frontend/build/
 frontend/.dart_tool/
 frontend/.flutter-plugins
 frontend/.flutter-plugins-dependencies
-=======
-/build/
->>>>>>> 4e23d20 (Add triage app updates)
+
+# Android local properties
+**/android/local.properties
 
 # Symbolication related
 app.*.symbols
@@ -119,15 +95,9 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
-<<<<<<< HEAD
 **/android/app/debug
 **/android/app/profile
 **/android/app/release
-=======
-/android/app/debug
-/android/app/profile
-/android/app/release
->>>>>>> 4e23d20 (Add triage app updates)
 
 # Widget Preview related
 .widget_preview/

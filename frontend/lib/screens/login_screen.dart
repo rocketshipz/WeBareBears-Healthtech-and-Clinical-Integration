@@ -1,26 +1,7 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const TriageMYApp());
-}
-
-class TriageMYApp extends StatelessWidget {
-  const TriageMYApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'TriageMY',
-      theme: ThemeData(
-        useMaterial3: true,
-        fontFamily: 'Helvetica',
-        scaffoldBackgroundColor: const Color(0xFFF7FBFB),
-      ),
-      home: const LoginScreen(),
-    );
-  }
-}
+import 'signup_page.dart';
+import 'forgot_password.dart';
+import '../pages/home_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,14 +12,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
-  // Brand colours
   static const Color teal = Color(0xFF3BB8C1);
   static const Color darkTeal = Color(0xFF0D5C63);
   static const Color red = Color(0xFFED254E);
   static const Color grey = Color(0xFF7A8C8D);
   static const Color fieldBackground = Color(0xFFF3F7F7);
 
-  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
   final passwordController = TextEditingController();
 
   bool hidePassword = true;
@@ -68,36 +48,54 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   void dispose() {
-    emailController.dispose();
+    phoneController.dispose();
     passwordController.dispose();
     _animationController.dispose();
     super.dispose();
   }
 
   void login() {
-    if (emailController.text.trim().isEmpty ||
+    if (phoneController.text.trim().isEmpty ||
         passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter your email and password.'),
+          content: Text(
+            'Please enter your phone number and password.',
+          ),
         ),
       );
+
       return;
     }
 
-    // Add login authentication later.
+    // Prototype login only.
+    // Real authentication will be connected later.
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MainNavigation(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7FBFB),
+
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24,
+            ),
+
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
+              constraints: const BoxConstraints(
+                maxWidth: 420,
+              ),
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -113,14 +111,20 @@ class _LoginScreenState extends State<LoginScreen>
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.8,
                         ),
+
                         children: [
                           TextSpan(
                             text: 'Triage',
-                            style: TextStyle(color: darkTeal),
+                            style: TextStyle(
+                              color: darkTeal,
+                            ),
                           ),
+
                           TextSpan(
                             text: 'MY',
-                            style: TextStyle(color: teal),
+                            style: TextStyle(
+                              color: teal,
+                            ),
                           ),
                         ],
                       ),
@@ -129,24 +133,30 @@ class _LoginScreenState extends State<LoginScreen>
 
                   const SizedBox(height: 38),
 
-                  // SIMPLE ANIMATED HEALTH ICON
+                  // ANIMATED ICON
                   Center(
                     child: ScaleTransition(
                       scale: _pulseAnimation,
+
                       child: Container(
                         width: 104,
                         height: 104,
+
                         decoration: BoxDecoration(
                           color: const Color(0xFFE4F7F6),
                           shape: BoxShape.circle,
+
                           boxShadow: [
                             BoxShadow(
-                              color: teal.withValues(alpha: 0.10),
+                              color: teal.withValues(
+                                alpha: 0.10,
+                              ),
                               blurRadius: 35,
                               spreadRadius: 4,
                             ),
                           ],
                         ),
+
                         child: const Center(
                           child: Icon(
                             Icons.favorite_rounded,
@@ -186,18 +196,19 @@ class _LoginScreenState extends State<LoginScreen>
 
                   const SizedBox(height: 32),
 
-                  // EMAIL
-                  _buildLabel('Email'),
+                  // PHONE NUMBER
+                  _buildLabel('Phone Number'),
 
                   const SizedBox(height: 8),
 
                   TextField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
+                    controller: phoneController,
+                    keyboardType: TextInputType.phone,
                     textInputAction: TextInputAction.next,
+
                     decoration: _inputDecoration(
-                      hint: 'name@email.com',
-                      icon: Icons.mail_outline_rounded,
+                      hint: 'e.g. 0123456789',
+                      icon: Icons.phone_outlined,
                     ),
                   ),
 
@@ -213,15 +224,19 @@ class _LoginScreenState extends State<LoginScreen>
                     obscureText: hidePassword,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => login(),
+
                     decoration: _inputDecoration(
                       hint: 'Enter your password',
                       icon: Icons.lock_outline_rounded,
+
                       suffix: IconButton(
                         onPressed: () {
                           setState(() {
-                            hidePassword = !hidePassword;
+                            hidePassword =
+                                !hidePassword;
                           });
                         },
+
                         icon: Icon(
                           hidePassword
                               ? Icons.visibility_off_outlined
@@ -235,16 +250,28 @@ class _LoginScreenState extends State<LoginScreen>
 
                   const SizedBox(height: 6),
 
+                  // FORGOT PASSWORD
                   Align(
                     alignment: Alignment.centerRight,
+
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const ForgotPasswordPage(),
+                          ),
+                        );
+                      },
+
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 4,
                           vertical: 8,
                         ),
                       ),
+
                       child: const Text(
                         'Forgot password?',
                         style: TextStyle(
@@ -263,28 +290,38 @@ class _LoginScreenState extends State<LoginScreen>
                   SizedBox(
                     width: double.infinity,
                     height: 58,
+
                     child: ElevatedButton(
                       onPressed: login,
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: teal,
                         foregroundColor: Colors.white,
                         elevation: 0,
+
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius:
+                              BorderRadius.circular(16),
                         ),
                       ),
+
                       child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment:
+                            MainAxisAlignment.center,
+
                         children: [
                           Text(
                             'Log in',
                             style: TextStyle(
                               fontFamily: 'Helvetica',
                               fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                              fontWeight:
+                                  FontWeight.w600,
                             ),
                           ),
+
                           SizedBox(width: 8),
+
                           Icon(
                             Icons.arrow_forward_rounded,
                             size: 20,
@@ -296,10 +333,11 @@ class _LoginScreenState extends State<LoginScreen>
 
                   const SizedBox(height: 22),
 
-                  // CREATE ACCOUNT
+                  // SIGN UP
                   Center(
                     child: Wrap(
                       alignment: WrapAlignment.center,
+
                       children: [
                         const Text(
                           'Don\'t have an account? ',
@@ -309,17 +347,26 @@ class _LoginScreenState extends State<LoginScreen>
                             color: grey,
                           ),
                         ),
+
                         GestureDetector(
                           onTap: () {
-                            // Add sign-up page later.
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const SignUpPage(),
+                              ),
+                            );
                           },
+
                           child: const Text(
                             'Create account',
                             style: TextStyle(
                               fontFamily: 'Helvetica',
                               fontSize: 14,
                               color: darkTeal,
-                              fontWeight: FontWeight.w600,
+                              fontWeight:
+                                  FontWeight.w600,
                             ),
                           ),
                         ),
@@ -332,23 +379,34 @@ class _LoginScreenState extends State<LoginScreen>
                   // EMERGENCY AREA
                   Container(
                     width: double.infinity,
+
                     padding: const EdgeInsets.symmetric(
                       horizontal: 18,
                       vertical: 14,
                     ),
+
                     decoration: BoxDecoration(
-                      color: red.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(16),
+                      color: red.withValues(
+                        alpha: 0.06,
+                      ),
+
+                      borderRadius:
+                          BorderRadius.circular(16),
                     ),
+
                     child: Row(
                       children: [
                         Container(
                           width: 38,
                           height: 38,
+
                           decoration: BoxDecoration(
-                            color: red.withValues(alpha: 0.10),
+                            color: red.withValues(
+                              alpha: 0.10,
+                            ),
                             shape: BoxShape.circle,
                           ),
+
                           child: const Icon(
                             Icons.phone_rounded,
                             color: red,
@@ -362,22 +420,28 @@ class _LoginScreenState extends State<LoginScreen>
                           child: Column(
                             crossAxisAlignment:
                                 CrossAxisAlignment.start,
+
                             children: [
                               Text(
                                 'Need immediate help?',
                                 style: TextStyle(
-                                  fontFamily: 'Helvetica',
+                                  fontFamily:
+                                      'Helvetica',
                                   fontSize: 13,
                                   color: grey,
                                 ),
                               ),
+
                               SizedBox(height: 2),
+
                               Text(
                                 'Call emergency services',
                                 style: TextStyle(
-                                  fontFamily: 'Helvetica',
+                                  fontFamily:
+                                      'Helvetica',
                                   fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight:
+                                      FontWeight.w600,
                                   color: darkTeal,
                                 ),
                               ),
@@ -387,14 +451,16 @@ class _LoginScreenState extends State<LoginScreen>
 
                         TextButton(
                           onPressed: () {
-                            // Add call functionality later.
+                            // Add phone-call function later.
                           },
+
                           child: const Text(
                             '999',
                             style: TextStyle(
                               fontFamily: 'Helvetica',
                               fontSize: 17,
-                              fontWeight: FontWeight.w700,
+                              fontWeight:
+                                  FontWeight.w700,
                               color: red,
                             ),
                           ),
@@ -416,6 +482,7 @@ class _LoginScreenState extends State<LoginScreen>
   Widget _buildLabel(String text) {
     return Text(
       text,
+
       style: const TextStyle(
         fontFamily: 'Helvetica',
         fontSize: 13,
@@ -432,33 +499,42 @@ class _LoginScreenState extends State<LoginScreen>
   }) {
     return InputDecoration(
       hintText: hint,
+
       hintStyle: const TextStyle(
         fontFamily: 'Helvetica',
         fontSize: 14,
         color: Color(0xFFA5B2B2),
       ),
+
       prefixIcon: Icon(
         icon,
         size: 21,
         color: grey,
       ),
+
       suffixIcon: suffix,
+
       filled: true,
       fillColor: fieldBackground,
+
       contentPadding: const EdgeInsets.symmetric(
         horizontal: 18,
         vertical: 19,
       ),
+
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
       ),
+
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
       ),
+
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
+
         borderSide: const BorderSide(
           color: teal,
           width: 1.5,
