@@ -1,5 +1,23 @@
 import 'package:flutter/material.dart';
 
+import '../theme.dart';
+
+/// Shared flag: becomes true once the user has saved a complete profile.
+/// The home page listens to this to hide the "Complete your medical profile" card.
+final ValueNotifier<bool> profileCompleted = ValueNotifier<bool>(false);
+
+/// Latest saved profile details, read by the triage report.
+final ValueNotifier<Map<String, String>> profileData =
+    ValueNotifier<Map<String, String>>({
+  'name': 'Aisyah Binti Ahmad',
+  'age': '24',
+  'sex': 'Female',
+  'blood': 'O+',
+  'allergies': 'Penicillin',
+  'medication': 'None',
+  'chronic': 'Asthma',
+});
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -8,53 +26,24 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  static const Color teal = Color(0xFF3BB8C1);
-  static const Color darkTeal = Color(0xFF0D5C63);
-  static const Color grey = Color(0xFF7A8C8D);
-  static const Color background = Color(0xFFF7FBFB);
-  static const Color lightTeal = Color(0xFFE4F7F6);
-  static const Color border = Color(0xFFE3ECEC);
-
   bool isEditing = false;
 
-  final fullNameController =
-      TextEditingController(text: 'Aisyah Binti Ahmad');
-
-  final icController =
-      TextEditingController(text: '000101-00-0000');
-
-  final ageController =
-      TextEditingController(text: '24');
-
-  final bloodTypeController =
-      TextEditingController(text: 'O+');
-
-  final allergiesController =
-      TextEditingController(text: 'Penicillin');
-
-  final medicationController =
-      TextEditingController(text: 'None');
-
-  final chronicConditionController =
-      TextEditingController(text: 'Asthma');
-
+  final fullNameController = TextEditingController(text: 'Aisyah Binti Ahmad');
+  final icController = TextEditingController(text: '000101-00-0000');
+  final ageController = TextEditingController(text: '24');
+  final bloodTypeController = TextEditingController(text: 'O+');
+  final allergiesController = TextEditingController(text: 'Penicillin');
+  final medicationController = TextEditingController(text: 'None');
+  final chronicConditionController = TextEditingController(text: 'Asthma');
   final surgeriesController =
       TextEditingController(text: 'Appendectomy, 2020');
-
-  final pregnancyController =
-      TextEditingController(text: 'Not applicable');
-
-  final languageController =
-      TextEditingController(text: 'English');
-
+  final pregnancyController = TextEditingController(text: 'Not applicable');
+  final languageController = TextEditingController(text: 'English');
   final emergencyNameController =
       TextEditingController(text: 'Ahmad Bin Rahman');
-
   final emergencyNumberController =
       TextEditingController(text: '+60 12-345 6789');
-
-  final relationshipController =
-      TextEditingController(text: 'Father');
+  final relationshipController = TextEditingController(text: 'Father');
 
   String selectedSex = 'Female';
 
@@ -80,300 +69,207 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: background,
+      body: GradientBackground(
+        child: SafeArea(
+          bottom: false,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // HEADER
+                    FadeSlideIn(
+                      index: 0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const BrandWordmark(),
+                          _editButton(),
+                        ],
+                      ),
+                    ),
 
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 30),
+                    const SizedBox(height: 28),
 
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 600,
-              ),
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // HEADER
-                  Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
-                    children: [
-                      RichText(
-                        text: const TextSpan(
-                          style: TextStyle(
-                            fontFamily: 'Helvetica',
-                            fontSize: 23,
-                            fontWeight: FontWeight.w700,
-                          ),
+                    // PROFILE TOP
+                    FadeSlideIn(
+                      index: 1,
+                      child: Center(
+                        child: Column(
                           children: [
-                            TextSpan(
-                              text: 'Triage',
-                              style: TextStyle(
-                                color: darkTeal,
+                            Container(
+                              width: 96,
+                              height: 96,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.teal
+                                        .withValues(alpha: 0.20),
+                                    blurRadius: 30,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.person_rounded,
+                                size: 46,
+                                color: AppColors.darkTeal,
                               ),
                             ),
-                            TextSpan(
-                              text: 'MY',
-                              style: TextStyle(
-                                color: teal,
-                              ),
+                            const SizedBox(height: 14),
+                            Text('User Profile', style: AppText.display),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Personal and medical information',
+                              style: AppText.body,
                             ),
                           ],
                         ),
                       ),
-
-                      TextButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            isEditing = !isEditing;
-                          });
-
-                          if (!isEditing) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Profile updated.',
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                        icon: Icon(
-                          isEditing
-                              ? Icons.check_rounded
-                              : Icons.edit_outlined,
-                          color: darkTeal,
-                          size: 20,
-                        ),
-                        label: Text(
-                          isEditing ? 'Save' : 'Edit',
-                          style: const TextStyle(
-                            fontFamily: 'Helvetica',
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: darkTeal,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // PROFILE TOP
-                  const Center(
-                    child: Column(
-                      children: [
-                        CircleAvatar(
-                          radius: 42,
-                          backgroundColor: lightTeal,
-                          child: Icon(
-                            Icons.person_rounded,
-                            size: 46,
-                            color: darkTeal,
-                          ),
-                        ),
-
-                        SizedBox(height: 12),
-
-                        Text(
-                          'User Profile',
-                          style: TextStyle(
-                            fontFamily: 'Helvetica',
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            color: darkTeal,
-                          ),
-                        ),
-
-                        SizedBox(height: 5),
-
-                        Text(
-                          'Personal and medical information',
-                          style: TextStyle(
-                            fontFamily: 'Helvetica',
-                            fontSize: 13,
-                            color: grey,
-                          ),
-                        ),
-                      ],
                     ),
-                  ),
 
-                  const SizedBox(height: 32),
+                    const SizedBox(height: 30),
 
-                  // PERSONAL
-                  _sectionTitle(
-                    icon: Icons.person_outline_rounded,
-                    title: 'Personal Information',
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  _sectionCard(
-                    children: [
-                      _editableRow(
-                        label: 'Full Name',
-                        controller: fullNameController,
+                    // PERSONAL
+                    FadeSlideIn(
+                      index: 2,
+                      child: _section(
+                        icon: Icons.person_outline_rounded,
+                        title: 'Personal Information',
+                        children: [
+                          _editableRow(
+                            label: 'Full Name',
+                            controller: fullNameController,
+                          ),
+                          _divider(),
+                          _editableRow(
+                            label: 'IC Number',
+                            controller: icController,
+                          ),
+                          _divider(),
+                          _sexRow(),
+                          _divider(),
+                          _editableRow(
+                            label: 'Age',
+                            controller: ageController,
+                            keyboardType: TextInputType.number,
+                            suffix: 'years old',
+                          ),
+                          _divider(),
+                          _editableRow(
+                            label: 'Blood Type',
+                            controller: bloodTypeController,
+                          ),
+                          _divider(),
+                          _editableRow(
+                            label: 'Preferred Language',
+                            controller: languageController,
+                          ),
+                        ],
                       ),
-
-                      _divider(),
-
-                      _editableRow(
-                        label: 'IC Number',
-                        controller: icController,
-                      ),
-
-                      _divider(),
-
-                      _sexRow(),
-
-                      _divider(),
-
-                      _editableRow(
-                        label: 'Age',
-                        controller: ageController,
-                        keyboardType: TextInputType.number,
-                        suffix: 'years old',
-                      ),
-
-                      _divider(),
-
-                      _editableRow(
-                        label: 'Blood Type',
-                        controller: bloodTypeController,
-                      ),
-
-                      _divider(),
-
-                      _editableRow(
-                        label: 'Preferred Language',
-                        controller: languageController,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // MEDICAL
-                  _sectionTitle(
-                    icon: Icons.medical_information_outlined,
-                    title: 'Medical Information',
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  _sectionCard(
-                    children: [
-                      _editableRow(
-                        label: 'Allergies',
-                        controller: allergiesController,
-                      ),
-
-                      _divider(),
-
-                      _editableRow(
-                        label: 'Current Medication',
-                        controller: medicationController,
-                      ),
-
-                      _divider(),
-
-                      _editableRow(
-                        label: 'Chronic Medical Conditions',
-                        controller: chronicConditionController,
-                      ),
-
-                      _divider(),
-
-                      _editableRow(
-                        label: 'Previous Major Surgeries',
-                        controller: surgeriesController,
-                      ),
-
-                      _divider(),
-
-                      _editableRow(
-                        label: 'Pregnancy Status',
-                        controller: pregnancyController,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // EMERGENCY CONTACT
-                  _sectionTitle(
-                    icon: Icons.contact_phone_outlined,
-                    title: 'Emergency Contact',
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  _sectionCard(
-                    children: [
-                      _editableRow(
-                        label: 'Contact Name',
-                        controller: emergencyNameController,
-                      ),
-
-                      _divider(),
-
-                      _editableRow(
-                        label: 'Relationship',
-                        controller: relationshipController,
-                      ),
-
-                      _divider(),
-
-                      _editableRow(
-                        label: 'Contact Number',
-                        controller: emergencyNumberController,
-                        keyboardType: TextInputType.phone,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 26),
-
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: lightTeal,
-                      borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Row(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.lock_outline_rounded,
-                          size: 20,
-                          color: darkTeal,
-                        ),
 
-                        SizedBox(width: 10),
+                    const SizedBox(height: 26),
 
-                        Expanded(
-                          child: Text(
-                            'Your medical information is sensitive. '
-                            'Only information necessary for screening and care should be stored and used.',
-                            style: TextStyle(
-                              fontFamily: 'Helvetica',
-                              fontSize: 12,
-                              height: 1.4,
-                              color: darkTeal,
+                    // MEDICAL
+                    FadeSlideIn(
+                      index: 3,
+                      child: _section(
+                        icon: Icons.medical_information_outlined,
+                        title: 'Medical Information',
+                        children: [
+                          _editableRow(
+                            label: 'Allergies',
+                            controller: allergiesController,
+                          ),
+                          _divider(),
+                          _editableRow(
+                            label: 'Current Medication',
+                            controller: medicationController,
+                          ),
+                          _divider(),
+                          _editableRow(
+                            label: 'Chronic Medical Conditions',
+                            controller: chronicConditionController,
+                          ),
+                          _divider(),
+                          _editableRow(
+                            label: 'Previous Major Surgeries',
+                            controller: surgeriesController,
+                          ),
+                          _divider(),
+                          _editableRow(
+                            label: 'Pregnancy Status',
+                            controller: pregnancyController,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 26),
+
+                    // EMERGENCY CONTACT
+                    FadeSlideIn(
+                      index: 4,
+                      child: _section(
+                        icon: Icons.contact_phone_outlined,
+                        title: 'Emergency Contact',
+                        children: [
+                          _editableRow(
+                            label: 'Contact Name',
+                            controller: emergencyNameController,
+                          ),
+                          _divider(),
+                          _editableRow(
+                            label: 'Relationship',
+                            controller: relationshipController,
+                          ),
+                          _divider(),
+                          _editableRow(
+                            label: 'Contact Number',
+                            controller: emergencyNumberController,
+                            keyboardType: TextInputType.phone,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.lock_outline_rounded,
+                            size: 20,
+                            color: AppColors.teal,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Your medical information is sensitive. '
+                              'Only information necessary for screening and care should be stored and used.',
+                              style: AppText.caption,
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -381,6 +277,95 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+
+  // ============================================================
+  // EDIT / SAVE BUTTON
+  // ============================================================
+
+  Widget _editButton() {
+    return Pressable(
+      onTap: () {
+        setState(() {
+          isEditing = !isEditing;
+        });
+
+        if (!isEditing) {
+          final complete = [
+            fullNameController,
+            icController,
+            ageController,
+            bloodTypeController,
+            allergiesController,
+            medicationController,
+            chronicConditionController,
+            surgeriesController,
+            pregnancyController,
+            languageController,
+            emergencyNameController,
+            emergencyNumberController,
+            relationshipController,
+          ].every((c) => c.text.trim().isNotEmpty);
+
+          profileCompleted.value = complete;
+          profileData.value = {
+            'name': fullNameController.text.trim(),
+            'age': ageController.text.trim(),
+            'sex': selectedSex,
+            'blood': bloodTypeController.text.trim(),
+            'allergies': allergiesController.text.trim(),
+            'medication': medicationController.text.trim(),
+            'chronic': chronicConditionController.text.trim(),
+          };
+
+          showAppSnack(
+            context,
+            complete
+                ? 'Profile updated.'
+                : 'Profile saved. Some fields are still empty.',
+          );
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 42,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: isEditing ? AppColors.darkTeal : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isEditing ? Icons.check_rounded : Icons.edit_outlined,
+              color: isEditing ? Colors.white : AppColors.darkTeal,
+              size: 18,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              isEditing ? 'Save' : 'Edit',
+              style: AppText.style(
+                14,
+                FontWeight.w700,
+                isEditing ? Colors.white : AppColors.darkTeal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // ROWS
+  // ============================================================
 
   Widget _editableRow({
     required String label,
@@ -390,27 +375,15 @@ class _ProfilePageState extends State<ProfilePage> {
   }) {
     if (!isEditing) {
       return Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 14,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               flex: 4,
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontFamily: 'Helvetica',
-                  fontSize: 12,
-                  color: grey,
-                ),
-              ),
+              child: Text(label, style: AppText.caption),
             ),
-
             const SizedBox(width: 12),
-
             Expanded(
               flex: 5,
               child: Text(
@@ -418,12 +391,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ? controller.text
                     : '${controller.text} $suffix',
                 textAlign: TextAlign.right,
-                style: const TextStyle(
-                  fontFamily: 'Helvetica',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: darkTeal,
-                ),
+                style: AppText.bodyStrong,
               ),
             ),
           ],
@@ -432,59 +400,17 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 10,
-      ),
-
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'Helvetica',
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: darkTeal,
-            ),
-          ),
-
+          Text(label, style: AppText.label),
           const SizedBox(height: 7),
-
           TextField(
             controller: controller,
             keyboardType: keyboardType,
-
-            decoration: InputDecoration(
-              suffixText: suffix,
-              filled: true,
-              fillColor:
-                  const Color(0xFFF3F7F7),
-
-              contentPadding:
-                  const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 13,
-              ),
-
-              border: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(13),
-                borderSide: BorderSide.none,
-              ),
-
-              focusedBorder:
-                  OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(13),
-                borderSide:
-                    const BorderSide(
-                  color: teal,
-                  width: 1.3,
-                ),
-              ),
-            ),
+            style: AppText.input,
+            decoration: _fieldDecoration(suffix: suffix),
           ),
         ],
       ),
@@ -494,37 +420,17 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _sexRow() {
     if (!isEditing) {
       return Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 14,
-        ),
-
+        padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
           children: [
-            const Expanded(
-              flex: 4,
-              child: Text(
-                'Sex',
-                style: TextStyle(
-                  fontFamily: 'Helvetica',
-                  fontSize: 12,
-                  color: grey,
-                ),
-              ),
-            ),
-
+            Expanded(flex: 4, child: Text('Sex', style: AppText.caption)),
             const SizedBox(width: 12),
-
             Expanded(
               flex: 5,
               child: Text(
                 selectedSex,
                 textAlign: TextAlign.right,
-                style: const TextStyle(
-                  fontFamily: 'Helvetica',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: darkTeal,
-                ),
+                style: AppText.bodyStrong,
               ),
             ),
           ],
@@ -533,40 +439,20 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 10,
-      ),
-
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Sex',
-            style: TextStyle(
-              fontFamily: 'Helvetica',
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: darkTeal,
-            ),
-          ),
-
+          Text('Sex', style: AppText.label),
           const SizedBox(height: 7),
-
           DropdownButtonFormField<String>(
             initialValue: selectedSex,
-
+            style: AppText.input,
+            borderRadius: BorderRadius.circular(16),
             items: const [
-              DropdownMenuItem(
-                value: 'Female',
-                child: Text('Female'),
-              ),
-              DropdownMenuItem(
-                value: 'Male',
-                child: Text('Male'),
-              ),
+              DropdownMenuItem(value: 'Female', child: Text('Female')),
+              DropdownMenuItem(value: 'Male', child: Text('Male')),
             ],
-
             onChanged: (value) {
               if (value != null) {
                 setState(() {
@@ -574,90 +460,74 @@ class _ProfilePageState extends State<ProfilePage> {
                 });
               }
             },
-
-            decoration: InputDecoration(
-              filled: true,
-              fillColor:
-                  const Color(0xFFF3F7F7),
-
-              border: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(13),
-                borderSide: BorderSide.none,
-              ),
-
-              focusedBorder:
-                  OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(13),
-                borderSide:
-                    const BorderSide(
-                  color: teal,
-                  width: 1.3,
-                ),
-              ),
-            ),
+            decoration: _fieldDecoration(),
           ),
         ],
       ),
     );
   }
 
-  Widget _sectionTitle({
+  InputDecoration _fieldDecoration({String? suffix}) {
+    return InputDecoration(
+      suffixText: suffix,
+      suffixStyle: AppText.caption,
+      filled: true,
+      fillColor: AppColors.field,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.teal, width: 1.5),
+      ),
+    );
+  }
+
+  // ============================================================
+  // SECTIONS
+  // ============================================================
+
+  Widget _section({
     required IconData icon,
     required String title,
+    required List<Widget> children,
   }) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 20,
-          color: darkTeal,
+        Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: AppColors.paleTeal,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Icon(icon, size: 18, color: AppColors.teal),
+            ),
+            const SizedBox(width: 10),
+            Text(title, style: AppText.heading),
+          ],
         ),
-
-        const SizedBox(width: 8),
-
-        Text(
-          title,
-          style: const TextStyle(
-            fontFamily: 'Helvetica',
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: darkTeal,
-          ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+          decoration: cardDecoration(radius: 24),
+          child: Column(children: children),
         ),
       ],
     );
   }
 
-  Widget _sectionCard({
-    required List<Widget> children,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 18,
-        vertical: 6,
-      ),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: border,
-        ),
-      ),
-
-      child: Column(
-        children: children,
-      ),
-    );
-  }
-
   Widget _divider() {
-    return const Divider(
-      height: 1,
-      color: border,
-    );
+    return const Divider(height: 1, color: AppColors.border);
   }
 }

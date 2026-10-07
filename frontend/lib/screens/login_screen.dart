@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'signup_page.dart';
-import 'forgot_password.dart';
+
 import '../pages/home_page.dart';
+import '../theme.dart';
+import 'forgot_password.dart';
+import 'signup_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,12 +14,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
-  static const Color teal = Color(0xFF3BB8C1);
-  static const Color darkTeal = Color(0xFF0D5C63);
-  static const Color red = Color(0xFFED254E);
-  static const Color grey = Color(0xFF7A8C8D);
-  static const Color fieldBackground = Color(0xFFF3F7F7);
-
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -57,12 +53,9 @@ class _LoginScreenState extends State<LoginScreen>
   void login() {
     if (phoneController.text.trim().isEmpty ||
         passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Please enter your phone number and password.',
-          ),
-        ),
+      showAppSnack(
+        context,
+        'Please enter your phone number and password.',
       );
 
       return;
@@ -82,395 +75,205 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FBFB),
+      body: GradientBackground(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 28),
 
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-            ),
-
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 420,
-              ),
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 28),
-
-                  // BRAND
-                  Center(
-                    child: RichText(
-                      text: const TextSpan(
-                        style: TextStyle(
-                          fontFamily: 'Helvetica',
-                          fontSize: 29,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.8,
-                        ),
-
-                        children: [
-                          TextSpan(
-                            text: 'Triage',
-                            style: TextStyle(
-                              color: darkTeal,
-                            ),
-                          ),
-
-                          TextSpan(
-                            text: 'MY',
-                            style: TextStyle(
-                              color: teal,
-                            ),
-                          ),
-                        ],
-                      ),
+                    // BRAND
+                    const FadeSlideIn(
+                      index: 0,
+                      child: Center(child: BrandWordmark()),
                     ),
-                  ),
 
-                  const SizedBox(height: 38),
+                    const SizedBox(height: 28),
 
-                  // ANIMATED ICON
-                  Center(
-                    child: ScaleTransition(
-                      scale: _pulseAnimation,
+                    // ANIMATED ICON
+                    FadeSlideIn(
+                      index: 1,
+                      child: Center(child: _buildPulsingHeart()),
+                    ),
 
-                      child: Container(
-                        width: 104,
-                        height: 104,
+                    const SizedBox(height: 28),
 
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE4F7F6),
-                          shape: BoxShape.circle,
-
-                          boxShadow: [
-                            BoxShadow(
-                              color: teal.withValues(
-                                alpha: 0.10,
-                              ),
-                              blurRadius: 35,
-                              spreadRadius: 4,
+                    // TITLE
+                    FadeSlideIn(
+                      index: 2,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Welcome back',
+                              textAlign: TextAlign.center,
+                              style: AppText.display,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Log in to continue your screening.',
+                              textAlign: TextAlign.center,
+                              style: AppText.body,
                             ),
                           ],
                         ),
-
-                        child: const Center(
-                          child: Icon(
-                            Icons.favorite_rounded,
-                            size: 42,
-                            color: teal,
-                          ),
-                        ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 38),
+                    const SizedBox(height: 24),
 
-                  // TITLE
-                  const Text(
-                    'Welcome back',
-                    style: TextStyle(
-                      fontFamily: 'Helvetica',
-                      fontSize: 30,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.8,
-                      color: darkTeal,
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  const Text(
-                    'Log in to continue your screening.',
-                    style: TextStyle(
-                      fontFamily: 'Helvetica',
-                      fontSize: 15,
-                      height: 1.4,
-                      color: grey,
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // PHONE NUMBER
-                  _buildLabel('Phone Number'),
-
-                  const SizedBox(height: 8),
-
-                  TextField(
-                    controller: phoneController,
-                    keyboardType: TextInputType.phone,
-                    textInputAction: TextInputAction.next,
-
-                    decoration: _inputDecoration(
-                      hint: 'e.g. 0123456789',
-                      icon: Icons.phone_outlined,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // PASSWORD
-                  _buildLabel('Password'),
-
-                  const SizedBox(height: 8),
-
-                  TextField(
-                    controller: passwordController,
-                    obscureText: hidePassword,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => login(),
-
-                    decoration: _inputDecoration(
-                      hint: 'Enter your password',
-                      icon: Icons.lock_outline_rounded,
-
-                      suffix: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            hidePassword =
-                                !hidePassword;
-                          });
-                        },
-
-                        icon: Icon(
-                          hidePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          size: 21,
-                          color: grey,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  // FORGOT PASSWORD
-                  Align(
-                    alignment: Alignment.centerRight,
-
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const ForgotPasswordPage(),
-                          ),
-                        );
-                      },
-
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 8,
-                        ),
-                      ),
-
-                      child: const Text(
-                        'Forgot password?',
-                        style: TextStyle(
-                          fontFamily: 'Helvetica',
-                          fontSize: 13,
-                          color: darkTeal,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // LOGIN BUTTON
-                  SizedBox(
-                    width: double.infinity,
-                    height: 58,
-
-                    child: ElevatedButton(
-                      onPressed: login,
-
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: teal,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(16),
-                        ),
-                      ),
-
-                      child: const Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.center,
-
-                        children: [
-                          Text(
-                            'Log in',
-                            style: TextStyle(
-                              fontFamily: 'Helvetica',
-                              fontSize: 16,
-                              fontWeight:
-                                  FontWeight.w600,
-                            ),
-                          ),
-
-                          SizedBox(width: 8),
-
-                          Icon(
-                            Icons.arrow_forward_rounded,
-                            size: 20,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 22),
-
-                  // SIGN UP
-                  Center(
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-
-                      children: [
-                        const Text(
-                          'Don\'t have an account? ',
-                          style: TextStyle(
-                            fontFamily: 'Helvetica',
-                            fontSize: 14,
-                            color: grey,
-                          ),
-                        ),
-
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const SignUpPage(),
+                    // FORM CARD
+                    FadeSlideIn(
+                      index: 3,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: cardDecoration(radius: 26),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // PHONE NUMBER
+                            fieldLabel('Phone Number'),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: phoneController,
+                              keyboardType: TextInputType.phone,
+                              textInputAction: TextInputAction.next,
+                              style: AppText.input,
+                              decoration: appInputDecoration(
+                                hint: 'e.g. 0123456789',
+                                icon: Icons.phone_outlined,
                               ),
-                            );
-                          },
-
-                          child: const Text(
-                            'Create account',
-                            style: TextStyle(
-                              fontFamily: 'Helvetica',
-                              fontSize: 14,
-                              color: darkTeal,
-                              fontWeight:
-                                  FontWeight.w600,
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
 
-                  const SizedBox(height: 42),
+                            const SizedBox(height: 18),
 
-                  // EMERGENCY AREA
-                  Container(
-                    width: double.infinity,
-
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 14,
-                    ),
-
-                    decoration: BoxDecoration(
-                      color: red.withValues(
-                        alpha: 0.06,
-                      ),
-
-                      borderRadius:
-                          BorderRadius.circular(16),
-                    ),
-
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 38,
-                          height: 38,
-
-                          decoration: BoxDecoration(
-                            color: red.withValues(
-                              alpha: 0.10,
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-
-                          child: const Icon(
-                            Icons.phone_rounded,
-                            color: red,
-                            size: 19,
-                          ),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-
-                            children: [
-                              Text(
-                                'Need immediate help?',
-                                style: TextStyle(
-                                  fontFamily:
-                                      'Helvetica',
-                                  fontSize: 13,
-                                  color: grey,
+                            // PASSWORD
+                            fieldLabel('Password'),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: passwordController,
+                              obscureText: hidePassword,
+                              textInputAction: TextInputAction.done,
+                              onSubmitted: (_) => login(),
+                              style: AppText.input,
+                              decoration: appInputDecoration(
+                                hint: 'Enter your password',
+                                icon: Icons.lock_outline_rounded,
+                                suffix: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      hidePassword = !hidePassword;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    hidePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    size: 20,
+                                    color: AppColors.grey,
+                                  ),
                                 ),
                               ),
+                            ),
 
-                              SizedBox(height: 2),
+                            const SizedBox(height: 4),
 
-                              Text(
-                                'Call emergency services',
-                                style: TextStyle(
-                                  fontFamily:
-                                      'Helvetica',
-                                  fontSize: 14,
-                                  fontWeight:
-                                      FontWeight.w600,
-                                  color: darkTeal,
+                            // FORGOT PASSWORD
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ForgotPasswordPage(),
+                                    ),
+                                  );
+                                },
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 8,
+                                  ),
+                                ),
+                                child: Text(
+                                  'Forgot password?',
+                                  style: AppText.style(
+                                    12,
+                                    FontWeight.w600,
+                                    AppColors.darkTeal,
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            // LOGIN BUTTON
+                            PrimaryButton(
+                              label: 'Log in',
+                              icon: Icons.arrow_forward_rounded,
+                              onPressed: login,
+                            ),
+                          ],
                         ),
+                      ),
+                    ),
 
-                        TextButton(
-                          onPressed: () {
-                            // Add phone-call function later.
-                          },
+                    const SizedBox(height: 22),
 
-                          child: const Text(
-                            '999',
-                            style: TextStyle(
-                              fontFamily: 'Helvetica',
-                              fontSize: 17,
-                              fontWeight:
+                    // SIGN UP
+                    FadeSlideIn(
+                      index: 4,
+                      child: Center(
+                        child: Wrap(
+                          alignment: WrapAlignment.center,
+                          children: [
+                            Text(
+                              'Don\'t have an account? ',
+                              style: AppText.body,
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const SignUpPage(),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                'Create account',
+                                style: AppText.style(
+                                  14,
                                   FontWeight.w700,
-                              color: red,
+                                  AppColors.darkTeal,
+                                  height: 1.5,
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 28),
-                ],
+                    const SizedBox(height: 32),
+
+                    // EMERGENCY AREA
+                    FadeSlideIn(index: 5, child: _buildEmergencyCard()),
+
+                    const SizedBox(height: 28),
+                  ],
+                ),
               ),
             ),
           ),
@@ -479,66 +282,89 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
+  // ============================================================
+  // PIECES
+  // ============================================================
 
-      style: const TextStyle(
-        fontFamily: 'Helvetica',
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: darkTeal,
+  Widget _buildPulsingHeart() {
+    return ScaleTransition(
+      scale: _pulseAnimation,
+      child: Container(
+        width: 96,
+        height: 96,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.teal.withValues(alpha: 0.20),
+              blurRadius: 32,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.favorite_rounded,
+            size: 42,
+            color: AppColors.teal,
+          ),
+        ),
       ),
     );
   }
 
-  InputDecoration _inputDecoration({
-    required String hint,
-    required IconData icon,
-    Widget? suffix,
-  }) {
-    return InputDecoration(
-      hintText: hint,
-
-      hintStyle: const TextStyle(
-        fontFamily: 'Helvetica',
-        fontSize: 14,
-        color: Color(0xFFA5B2B2),
+  Widget _buildEmergencyCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.red.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.red.withValues(alpha: 0.12)),
       ),
-
-      prefixIcon: Icon(
-        icon,
-        size: 21,
-        color: grey,
-      ),
-
-      suffixIcon: suffix,
-
-      filled: true,
-      fillColor: fieldBackground,
-
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 18,
-        vertical: 19,
-      ),
-
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-
-        borderSide: const BorderSide(
-          color: teal,
-          width: 1.5,
-        ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.red.withValues(alpha: 0.10),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.phone_rounded,
+              color: AppColors.red,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Need immediate help?', style: AppText.caption),
+                Text('Call emergency services', style: AppText.bodyStrong),
+              ],
+            ),
+          ),
+          Pressable(
+            onTap: () {
+              // Add phone-call function later.
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.red,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '999',
+                style: AppText.style(14, FontWeight.w700, Colors.white),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme.dart';
+
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -8,13 +10,6 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  static const Color teal = Color(0xFF3BB8C1);
-  static const Color darkTeal = Color(0xFF0D5C63);
-  static const Color grey = Color(0xFF7A8C8D);
-  static const Color background = Color(0xFFF7FBFB);
-  static const Color lightTeal = Color(0xFFE4F7F6);
-  static const Color fieldBackground = Color(0xFFF3F7F7);
-
   final icController = TextEditingController();
   final phoneController = TextEditingController();
   final tacController = TextEditingController();
@@ -58,8 +53,7 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
-    if (passwordController.text !=
-        confirmPasswordController.text) {
+    if (passwordController.text != confirmPasswordController.text) {
       _showMessage(
         'Passwords do not match.',
       );
@@ -125,276 +119,300 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
+    showAppSnack(context, message);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: background,
-
-      appBar: AppBar(
-        backgroundColor: background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: darkTeal,
-            size: 20,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            24,
-            10,
-            24,
-            32,
-          ),
-
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 430,
-              ),
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // BRAND
-                  Center(
-                    child: RichText(
-                      text: const TextSpan(
-                        style: TextStyle(
-                          fontFamily: 'Helvetica',
-                          fontSize: 28,
-                          fontWeight: FontWeight.w700,
-                        ),
+      body: GradientBackground(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 430),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // BACK + BRAND
+                    FadeSlideIn(
+                      index: 0,
+                      child: Row(
                         children: [
-                          TextSpan(
-                            text: 'Triage',
-                            style: TextStyle(
-                              color: darkTeal,
-                            ),
+                          CircleBackButton(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
                           ),
-                          TextSpan(
-                            text: 'MY',
-                            style: TextStyle(
-                              color: teal,
-                            ),
+                          const Expanded(
+                            child: Center(child: BrandWordmark()),
+                          ),
+                          // Keeps the brand centred next to the back button.
+                          const SizedBox(width: 42),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // TITLE
+                    FadeSlideIn(
+                      index: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Create your account', style: AppText.display),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Set up your account to start using TriageMY.',
+                            style: AppText.body,
+                          ),
+                          const SizedBox(height: 20),
+                          StepProgress(
+                            current: tacSent ? 1 : 0,
+                            labels: const ['Your details', 'Verify phone'],
                           ),
                         ],
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 36),
+                    const SizedBox(height: 24),
 
-                  // TITLE
-                  const Text(
-                    'Create your account',
-                    style: TextStyle(
-                      fontFamily: 'Helvetica',
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.6,
-                      color: darkTeal,
-                    ),
-                  ),
+                    // DETAILS CARD
+                    FadeSlideIn(
+                      index: 2,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: cardDecoration(radius: 26),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // IC NUMBER
+                            fieldLabel('IC Number'),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: icController,
+                              keyboardType: TextInputType.number,
+                              style: AppText.input,
+                              decoration: appInputDecoration(
+                                hint: 'e.g. 010101-01-1234',
+                                icon: Icons.badge_outlined,
+                              ),
+                            ),
 
-                  const SizedBox(height: 7),
+                            const SizedBox(height: 18),
 
-                  const Text(
-                    'Set up your account to start using TriageMY.',
-                    style: TextStyle(
-                      fontFamily: 'Helvetica',
-                      fontSize: 14,
-                      height: 1.4,
-                      color: grey,
-                    ),
-                  ),
+                            // PHONE NUMBER
+                            fieldLabel('Phone Number'),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: phoneController,
+                              keyboardType: TextInputType.phone,
+                              style: AppText.input,
+                              decoration: appInputDecoration(
+                                hint: 'e.g. 0123456789',
+                                icon: Icons.phone_outlined,
+                              ),
+                            ),
 
-                  const SizedBox(height: 30),
+                            const SizedBox(height: 18),
 
-                  // IC NUMBER
-                  _label('IC Number'),
+                            // PASSWORD
+                            fieldLabel('Password'),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: passwordController,
+                              obscureText: hidePassword,
+                              style: AppText.input,
+                              decoration: appInputDecoration(
+                                hint: 'Create a password',
+                                icon: Icons.lock_outline_rounded,
+                                suffix: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      hidePassword = !hidePassword;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    hidePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    size: 20,
+                                    color: AppColors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
 
-                  const SizedBox(height: 8),
+                            const SizedBox(height: 6),
 
-                  TextField(
-                    controller: icController,
-                    keyboardType: TextInputType.number,
-                    decoration: _inputDecoration(
-                      hint: 'e.g. 010101-01-1234',
-                      icon: Icons.badge_outlined,
-                    ),
-                  ),
+                            Text(
+                              'Use at least 8 characters.',
+                              style: AppText.caption,
+                            ),
 
-                  const SizedBox(height: 20),
+                            const SizedBox(height: 18),
 
-                  // PHONE NUMBER
-                  _label('Phone Number'),
+                            // CONFIRM PASSWORD
+                            fieldLabel('Confirm Password'),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: confirmPasswordController,
+                              obscureText: hideConfirmPassword,
+                              style: AppText.input,
+                              decoration: appInputDecoration(
+                                hint: 'Re-enter your password',
+                                icon: Icons.lock_outline_rounded,
+                                suffix: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      hideConfirmPassword =
+                                          !hideConfirmPassword;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    hideConfirmPassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    size: 20,
+                                    color: AppColors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
 
-                  const SizedBox(height: 8),
-
-                  TextField(
-                    controller: phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: _inputDecoration(
-                      hint: 'e.g. 0123456789',
-                      icon: Icons.phone_outlined,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // PASSWORD
-                  _label('Password'),
-
-                  const SizedBox(height: 8),
-
-                  TextField(
-                    controller: passwordController,
-                    obscureText: hidePassword,
-
-                    decoration: _inputDecoration(
-                      hint: 'Create a password',
-                      icon: Icons.lock_outline_rounded,
-                      suffix: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            hidePassword = !hidePassword;
-                          });
-                        },
-                        icon: Icon(
-                          hidePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          size: 20,
-                          color: grey,
+                            // CREATE ACCOUNT BUTTON
+                            if (!tacSent) ...[
+                              const SizedBox(height: 24),
+                              PrimaryButton(
+                                label: 'Create Account',
+                                onPressed: _createAccount,
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 7),
+                    // TAC SECTION
+                    if (tacSent) ...[
+                      const SizedBox(height: 16),
+                      FadeSlideIn(
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(20),
+                          decoration: cardDecoration(radius: 26),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: AppColors.paleTeal,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Icon(
+                                      Icons.sms_outlined,
+                                      color: AppColors.darkTeal,
+                                      size: 21,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        'A 6-digit TAC has been sent to '
+                                        '${phoneController.text}.',
+                                        style: AppText.style(
+                                          12,
+                                          FontWeight.w500,
+                                          AppColors.darkTeal,
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
 
-                  const Text(
-                    'Use at least 8 characters.',
-                    style: TextStyle(
-                      fontFamily: 'Helvetica',
-                      fontSize: 11,
-                      color: grey,
-                    ),
-                  ),
+                              const SizedBox(height: 18),
 
-                  const SizedBox(height: 20),
+                              fieldLabel('Enter TAC'),
+                              const SizedBox(height: 8),
+                              TextField(
+                                controller: tacController,
+                                keyboardType: TextInputType.number,
+                                maxLength: 6,
+                                style: AppText.input,
+                                decoration: appInputDecoration(
+                                  hint: 'Enter 6-digit TAC',
+                                  icon: Icons.password_rounded,
+                                ).copyWith(
+                                  counterText: '',
+                                ),
+                              ),
 
-                  // CONFIRM PASSWORD
-                  _label('Confirm Password'),
+                              const SizedBox(height: 4),
 
-                  const SizedBox(height: 8),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: _resendTac,
+                                  child: Text(
+                                    'Resend TAC',
+                                    style: AppText.style(
+                                      12,
+                                      FontWeight.w600,
+                                      AppColors.darkTeal,
+                                    ),
+                                  ),
+                                ),
+                              ),
 
-                  TextField(
-                    controller: confirmPasswordController,
-                    obscureText: hideConfirmPassword,
+                              const SizedBox(height: 8),
 
-                    decoration: _inputDecoration(
-                      hint: 'Re-enter your password',
-                      icon: Icons.lock_outline_rounded,
-                      suffix: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            hideConfirmPassword =
-                                !hideConfirmPassword;
-                          });
-                        },
-                        icon: Icon(
-                          hideConfirmPassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          size: 20,
-                          color: grey,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // CREATE ACCOUNT BUTTON
-                  if (!tacSent)
-                    SizedBox(
-                      width: double.infinity,
-                      height: 58,
-
-                      child: ElevatedButton(
-                        onPressed: _createAccount,
-
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: teal,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                              PrimaryButton(
+                                label: tacVerified
+                                    ? 'Verified'
+                                    : 'Verify TAC & Create Account',
+                                icon: tacVerified ? Icons.check_rounded : null,
+                                color: tacVerified
+                                    ? AppColors.green
+                                    : AppColors.darkTeal,
+                                onPressed: _verifyTac,
+                              ),
+                            ],
                           ),
                         ),
-
-                        child: const Text(
-                          'Create Account',
-                          style: TextStyle(
-                            fontFamily: 'Helvetica',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                       ),
-                    ),
+                    ],
 
-                  // TAC SECTION
-                  if (tacSent) ...[
-                    Container(
-                      width: double.infinity,
+                    const SizedBox(height: 22),
 
-                      padding: const EdgeInsets.all(16),
-
-                      decoration: BoxDecoration(
-                        color: lightTeal,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    // LOGIN LINK
+                    Center(
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
                         children: [
-                          const Icon(
-                            Icons.sms_outlined,
-                            color: darkTeal,
-                            size: 21,
+                          Text(
+                            'Already have an account? ',
+                            style: AppText.body,
                           ),
-
-                          const SizedBox(width: 10),
-
-                          Expanded(
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
                             child: Text(
-                              'A 6-digit TAC has been sent to '
-                              '${phoneController.text}.',
-                              style: const TextStyle(
-                                fontFamily: 'Helvetica',
-                                fontSize: 12,
-                                height: 1.4,
-                                color: darkTeal,
+                              'Log in',
+                              style: AppText.style(
+                                14,
+                                FontWeight.w700,
+                                AppColors.darkTeal,
+                                height: 1.5,
                               ),
                             ),
                           ),
@@ -402,218 +420,39 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
-                    _label('Enter TAC'),
-
-                    const SizedBox(height: 8),
-
-                    TextField(
-                      controller: tacController,
-                      keyboardType: TextInputType.number,
-                      maxLength: 6,
-
-                      decoration: _inputDecoration(
-                        hint: 'Enter 6-digit TAC',
-                        icon: Icons.password_rounded,
-                      ).copyWith(
-                        counterText: '',
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    Align(
-                      alignment: Alignment.centerRight,
-
-                      child: TextButton(
-                        onPressed: _resendTac,
-
-                        child: const Text(
-                          'Resend TAC',
-                          style: TextStyle(
-                            fontFamily: 'Helvetica',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: darkTeal,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    SizedBox(
+                    // INFO
+                    Container(
                       width: double.infinity,
-                      height: 58,
-
-                      child: ElevatedButton(
-                        onPressed: _verifyTac,
-
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              tacVerified ? const Color(0xFF2E9E70) : teal,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.verified_user_outlined,
+                            size: 20,
+                            color: AppColors.teal,
                           ),
-                        ),
-
-                        child: Text(
-                          tacVerified
-                              ? 'Verified'
-                              : 'Verify TAC & Create Account',
-                          style: const TextStyle(
-                            fontFamily: 'Helvetica',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Your phone number is verified using TAC before your account is activated.',
+                              style: AppText.caption,
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ],
-
-                  const SizedBox(height: 22),
-
-                  // LOGIN LINK
-                  Center(
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-                      children: [
-                        const Text(
-                          'Already have an account? ',
-                          style: TextStyle(
-                            fontFamily: 'Helvetica',
-                            fontSize: 13,
-                            color: grey,
-                          ),
-                        ),
-
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-
-                          child: const Text(
-                            'Log in',
-                            style: TextStyle(
-                              fontFamily: 'Helvetica',
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: darkTeal,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // INFO
-                  Container(
-                    width: double.infinity,
-
-                    padding: const EdgeInsets.all(15),
-
-                    decoration: BoxDecoration(
-                      color: lightTeal,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-
-                    child: const Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.verified_user_outlined,
-                          size: 19,
-                          color: darkTeal,
-                        ),
-
-                        SizedBox(width: 9),
-
-                        Expanded(
-                          child: Text(
-                            'Your phone number is verified using TAC before your account is activated.',
-                            style: TextStyle(
-                              fontFamily: 'Helvetica',
-                              fontSize: 11,
-                              height: 1.4,
-                              color: darkTeal,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _label(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontFamily: 'Helvetica',
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: darkTeal,
-      ),
-    );
-  }
-
-  InputDecoration _inputDecoration({
-    required String hint,
-    required IconData icon,
-    Widget? suffix,
-  }) {
-    return InputDecoration(
-      hintText: hint,
-
-      hintStyle: const TextStyle(
-        fontFamily: 'Helvetica',
-        fontSize: 14,
-        color: Color(0xFFA5B2B2),
-      ),
-
-      prefixIcon: Icon(
-        icon,
-        size: 21,
-        color: grey,
-      ),
-
-      suffixIcon: suffix,
-
-      filled: true,
-      fillColor: fieldBackground,
-
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 18,
-        vertical: 19,
-      ),
-
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(
-          color: teal,
-          width: 1.5,
         ),
       ),
     );

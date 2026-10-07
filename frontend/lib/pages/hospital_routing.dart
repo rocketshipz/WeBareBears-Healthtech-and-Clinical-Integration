@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class RecommendedHospitalsPage extends StatelessWidget {
-  const RecommendedHospitalsPage({super.key});
+import '../theme.dart';
+import 'home_page.dart';
+import 'triage_report.dart';
 
-  static const Color teal = Color(0xFF3BB8C1);
-  static const Color darkTeal = Color(0xFF0D5C63);
-  static const Color grey = Color(0xFF7A8C8D);
-  static const Color background = Color(0xFFF7FBFB);
-  static const Color lightTeal = Color(0xFFE4F7F6);
-  static const Color border = Color(0xFFE3ECEC);
-  static const Color green = Color(0xFF2E9E70);
+class RecommendedHospitalsPage extends StatelessWidget {
+  final TriageReportData? report;
+
+  const RecommendedHospitalsPage({super.key, this.report});
 
   Future<void> _openGoogleMaps(
     String hospitalName,
@@ -55,97 +53,43 @@ class RecommendedHospitalsPage extends StatelessWidget {
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(22),
+          top: Radius.circular(28),
         ),
       ),
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            18,
-            20,
-            30,
-          ),
+          padding: const EdgeInsets.fromLTRB(24, 14, 24, 30),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(
-                  bottom: 20,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD7E1E1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-
-              const Text(
-                'Open route with',
-                style: TextStyle(
-                  fontFamily: 'Helvetica',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: darkTeal,
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const CircleAvatar(
-                  backgroundColor: lightTeal,
-                  child: Icon(
-                    Icons.map_outlined,
-                    color: darkTeal,
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                title: const Text(
-                  'Google Maps',
-                  style: TextStyle(
-                    fontFamily: 'Helvetica',
-                    fontWeight: FontWeight.w600,
-                    color: darkTeal,
-                  ),
-                ),
-                trailing: const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 16,
-                  color: grey,
-                ),
+              ),
+              Text('Open route with', style: AppText.heading),
+              const SizedBox(height: 4),
+              Text(hospitalName, style: AppText.caption),
+              const SizedBox(height: 14),
+              _routeTile(
+                icon: Icons.map_outlined,
+                title: 'Google Maps',
                 onTap: () {
                   Navigator.pop(context);
                   _openGoogleMaps(hospitalName);
                 },
               ),
-
-              const Divider(),
-
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const CircleAvatar(
-                  backgroundColor: lightTeal,
-                  child: Icon(
-                    Icons.navigation_outlined,
-                    color: darkTeal,
-                  ),
-                ),
-                title: const Text(
-                  'Waze',
-                  style: TextStyle(
-                    fontFamily: 'Helvetica',
-                    fontWeight: FontWeight.w600,
-                    color: darkTeal,
-                  ),
-                ),
-                trailing: const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 16,
-                  color: grey,
-                ),
+              const SizedBox(height: 10),
+              _routeTile(
+                icon: Icons.navigation_outlined,
+                title: 'Waze',
                 onTap: () {
                   Navigator.pop(context);
                   _openWaze(hospitalName);
@@ -158,285 +102,262 @@ class RecommendedHospitalsPage extends StatelessWidget {
     );
   }
 
+  Widget _routeTile({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return Pressable(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.field,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: const BoxDecoration(
+                color: AppColors.paleTeal,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: AppColors.darkTeal, size: 21),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(title, style: AppText.bodyStrong)),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: AppColors.grey,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final Color outcomeColor = report?.color ?? AppColors.green;
+    final IconData outcomeIcon = (report?.level ?? 4) <= 3
+        ? Icons.priority_high_rounded
+        : Icons.check_rounded;
+
     return Scaffold(
-      backgroundColor: background,
-
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            20,
-            20,
-            30,
-          ),
-
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 600,
-              ),
-
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                children: [
-                  // TOP BAR
-                  Row(
-                    children: [
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        alignment: Alignment.centerLeft,
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: darkTeal,
-                          size: 20,
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-
-                      const SizedBox(width: 4),
-
-                      RichText(
-                        text: const TextSpan(
-                          style: TextStyle(
-                            fontFamily: 'Helvetica',
-                            fontSize: 21,
-                            fontWeight: FontWeight.w700,
+      bottomNavigationBar: AppBottomNav(
+        selectedIndex: 1,
+        onSelected: (index) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => MainNavigation(initialIndex: index),
+            ),
+            (route) => false,
+          );
+        },
+      ),
+      body: GradientBackground(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // TOP BAR
+                    FadeSlideIn(
+                      index: 0,
+                      child: Row(
+                        children: [
+                          CircleBackButton(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
                           ),
+                          const SizedBox(width: 14),
+                          const BrandWordmark(),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // PAGE TITLE
+                    FadeSlideIn(
+                      index: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Recommended Hospitals',
+                              style: AppText.display),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Based on your triage result and available care information.',
+                            style: AppText.body,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    // TRIAGE RESULT
+                    FadeSlideIn(
+                      index: 2,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: outcomeColor.withValues(alpha: 0.25),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: outcomeColor.withValues(alpha: 0.08),
+                              blurRadius: 20,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            TextSpan(
-                              text: 'Triage',
-                              style: TextStyle(
-                                color: darkTeal,
+                            Container(
+                              width: 46,
+                              height: 46,
+                              decoration: BoxDecoration(
+                                color: outcomeColor.withValues(alpha: 0.14),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                outcomeIcon,
+                                color: outcomeColor,
                               ),
                             ),
-                            TextSpan(
-                              text: 'MY',
-                              style: TextStyle(
-                                color: teal,
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Triage outcome',
+                                      style: AppText.caption),
+                                  Text(
+                                    report?.zoneLabel ?? 'Green Zone · Level 4',
+                                    style: AppText.style(
+                                      18,
+                                      FontWeight.w700,
+                                      outcomeColor,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    report?.recommendation ??
+                                        'Your screening indicates a non-critical case. '
+                                            'You may consider facilities with a shorter waiting time.',
+                                    style: AppText.body,
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // PAGE TITLE
-                  const Text(
-                    'Recommended Hospitals',
-                    style: TextStyle(
-                      fontFamily: 'Helvetica',
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.6,
-                      color: darkTeal,
                     ),
-                  ),
 
-                  const SizedBox(height: 7),
+                    const SizedBox(height: 28),
 
-                  const Text(
-                    'Based on your triage result and available care information.',
-                    style: TextStyle(
-                      fontFamily: 'Helvetica',
-                      fontSize: 14,
-                      height: 1.4,
-                      color: grey,
+                    Text('Suggested care options', style: AppText.heading),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Sample data is shown for the prototype.',
+                      style: AppText.caption,
                     ),
-                  ),
 
-                  const SizedBox(height: 22),
+                    const SizedBox(height: 14),
 
-                  // TRIAGE RESULT
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(18),
-
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0FAF6),
-                      borderRadius:
-                          BorderRadius.circular(18),
-                      border: Border.all(
-                        color: const Color(0xFFD8EEE4),
+                    FadeSlideIn(
+                      index: 3,
+                      child: _hospitalCard(
+                        context: context,
+                        badge: 'Best match',
+                        hospitalName: 'Central General Hospital',
+                        distance: '2.3 km',
+                        travelTime: '8 min',
+                        waitingTime: '30 min',
+                        emptyBeds: '12',
+                        registeredPatients: '36',
                       ),
                     ),
 
-                    child: const Row(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          radius: 22,
-                          backgroundColor:
-                              Color(0xFFDDF4E8),
-                          child: Icon(
-                            Icons.check_rounded,
-                            color: green,
-                          ),
-                        ),
+                    const SizedBox(height: 14),
 
-                        SizedBox(width: 14),
-
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Triage outcome',
-                                style: TextStyle(
-                                  fontFamily: 'Helvetica',
-                                  fontSize: 12,
-                                  color: grey,
-                                ),
-                              ),
-
-                              SizedBox(height: 3),
-
-                              Text(
-                                'Green Zone · Level 4',
-                                style: TextStyle(
-                                  fontFamily: 'Helvetica',
-                                  fontSize: 18,
-                                  fontWeight:
-                                      FontWeight.w700,
-                                  color: green,
-                                ),
-                              ),
-
-                              SizedBox(height: 5),
-
-                              Text(
-                                'Your screening indicates a non-critical case. '
-                                'You may consider facilities with a shorter waiting time.',
-                                style: TextStyle(
-                                  fontFamily: 'Helvetica',
-                                  fontSize: 13,
-                                  height: 1.4,
-                                  color: darkTeal,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 26),
-
-                  const Text(
-                    'Suggested care options',
-                    style: TextStyle(
-                      fontFamily: 'Helvetica',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: darkTeal,
-                    ),
-                  ),
-
-                  const SizedBox(height: 5),
-
-                  const Text(
-                    'Sample data is shown for the prototype.',
-                    style: TextStyle(
-                      fontFamily: 'Helvetica',
-                      fontSize: 12,
-                      color: grey,
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  _hospitalCard(
-                    context: context,
-                    badge: 'Best match',
-                    hospitalName:
-                        'Central General Hospital',
-                    distance: '2.3 km',
-                    travelTime: '8 min',
-                    waitingTime: '30 min',
-                    emptyBeds: '12',
-                    registeredPatients: '36',
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  _hospitalCard(
-                    context: context,
-                    badge: 'Shortest wait',
-                    hospitalName:
-                        'Riverside Medical Centre',
-                    distance: '5.1 km',
-                    travelTime: '15 min',
-                    waitingTime: '15 min',
-                    emptyBeds: '8',
-                    registeredPatients: '28',
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  _hospitalCard(
-                    context: context,
-                    badge: 'Closest',
-                    hospitalName:
-                        'Maple Community Hospital',
-                    distance: '1.2 km',
-                    travelTime: '5 min',
-                    waitingTime: '45 min',
-                    emptyBeds: '6',
-                    registeredPatients: '42',
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // DISCLAIMER
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius:
-                          BorderRadius.circular(16),
-                      border: Border.all(
-                        color: border,
+                    FadeSlideIn(
+                      index: 4,
+                      child: _hospitalCard(
+                        context: context,
+                        badge: 'Shortest wait',
+                        hospitalName: 'Riverside Medical Centre',
+                        distance: '5.1 km',
+                        travelTime: '15 min',
+                        waitingTime: '15 min',
+                        emptyBeds: '8',
+                        registeredPatients: '28',
                       ),
                     ),
-                    child: const Row(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.info_outline_rounded,
-                          color: grey,
-                          size: 20,
-                        ),
 
-                        SizedBox(width: 10),
+                    const SizedBox(height: 14),
 
-                        Expanded(
-                          child: Text(
-                            'If your symptoms become severe or you develop '
-                            'emergency warning signs, seek emergency care immediately.',
-                            style: TextStyle(
-                              fontFamily: 'Helvetica',
-                              fontSize: 12,
-                              height: 1.4,
-                              color: grey,
+                    FadeSlideIn(
+                      index: 5,
+                      child: _hospitalCard(
+                        context: context,
+                        badge: 'Closest',
+                        hospitalName: 'Maple Community Hospital',
+                        distance: '1.2 km',
+                        travelTime: '5 min',
+                        waitingTime: '45 min',
+                        emptyBeds: '6',
+                        registeredPatients: '42',
+                      ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    // DISCLAIMER
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            color: AppColors.teal,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'If your symptoms become severe or you develop '
+                              'emergency warning signs, seek emergency care immediately.',
+                              style: AppText.caption,
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -458,54 +379,26 @@ class RecommendedHospitalsPage extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: border,
-        ),
-      ),
-
+      decoration: cardDecoration(radius: 24),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // BADGE
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 6,
-            ),
-
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: lightTeal,
-              borderRadius:
-                  BorderRadius.circular(20),
+              color: AppColors.paleTeal,
+              borderRadius: BorderRadius.circular(20),
             ),
-
             child: Text(
               badge,
-              style: const TextStyle(
-                fontFamily: 'Helvetica',
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: darkTeal,
-              ),
+              style: AppText.style(12, FontWeight.w700, AppColors.darkTeal),
             ),
           ),
 
-          const SizedBox(height: 13),
+          const SizedBox(height: 12),
 
-          Text(
-            hospitalName,
-            style: const TextStyle(
-              fontFamily: 'Helvetica',
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: darkTeal,
-            ),
-          ),
+          Text(hospitalName, style: AppText.heading),
 
           const SizedBox(height: 6),
 
@@ -513,123 +406,72 @@ class RecommendedHospitalsPage extends StatelessWidget {
             children: [
               const Icon(
                 Icons.location_on_outlined,
-                size: 17,
-                color: grey,
+                size: 16,
+                color: AppColors.grey,
               ),
-
               const SizedBox(width: 4),
-
-              Text(
-                '$distance away',
-                style: const TextStyle(
-                  fontFamily: 'Helvetica',
-                  fontSize: 12,
-                  color: grey,
-                ),
-              ),
-
+              Text('$distance away', style: AppText.caption),
               const SizedBox(width: 8),
-
               Container(
                 width: 3,
                 height: 3,
                 decoration: const BoxDecoration(
-                  color: grey,
+                  color: AppColors.grey,
                   shape: BoxShape.circle,
                 ),
               ),
-
               const SizedBox(width: 8),
-
-              Text(
-                travelTime,
-                style: const TextStyle(
-                  fontFamily: 'Helvetica',
-                  fontSize: 12,
-                  color: grey,
-                ),
-              ),
+              Text(travelTime, style: AppText.caption),
             ],
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
           // INFORMATION
-          Row(
-            children: [
-              Expanded(
-                child: _infoItem(
-                  icon: Icons.schedule_rounded,
-                  value: waitingTime,
-                  label: 'Est. wait',
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.field,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _infoItem(
+                    icon: Icons.schedule_rounded,
+                    value: waitingTime,
+                    label: 'Est. wait',
+                  ),
                 ),
-              ),
-
-              Expanded(
-                child: _infoItem(
-                  icon: Icons.bed_outlined,
-                  value: emptyBeds,
-                  label: 'Empty beds',
+                Expanded(
+                  child: _infoItem(
+                    icon: Icons.bed_outlined,
+                    value: emptyBeds,
+                    label: 'Empty beds',
+                  ),
                 ),
-              ),
-
-              Expanded(
-                child: _infoItem(
-                  icon: Icons.people_outline_rounded,
-                  value: registeredPatients,
-                  label: 'Patients',
+                Expanded(
+                  child: _infoItem(
+                    icon: Icons.people_outline_rounded,
+                    value: registeredPatients,
+                    label: 'Patients',
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-
-            child: ElevatedButton(
-              onPressed: () {
-                _showRouteOptions(
-                  context,
-                  hospitalName,
-                );
-              },
-
-              style: ElevatedButton.styleFrom(
-                backgroundColor: teal,
-                foregroundColor: Colors.white,
-                elevation: 0,
-
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(14),
-                ),
-              ),
-
-              child: const Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.navigation_outlined,
-                    size: 19,
-                  ),
-
-                  SizedBox(width: 8),
-
-                  Text(
-                    'View Route',
-                    style: TextStyle(
-                      fontFamily: 'Helvetica',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          PrimaryButton(
+            label: 'View Route',
+            icon: Icons.navigation_outlined,
+            onPressed: () {
+              _showRouteOptions(
+                context,
+                hospitalName,
+              );
+            },
           ),
         ],
       ),
@@ -643,35 +485,17 @@ class RecommendedHospitalsPage extends StatelessWidget {
   }) {
     return Column(
       children: [
-        Icon(
-          icon,
-          size: 21,
-          color: darkTeal,
-        ),
-
-        const SizedBox(height: 5),
-
+        Icon(icon, size: 21, color: AppColors.teal),
+        const SizedBox(height: 6),
         Text(
           value,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontFamily: 'Helvetica',
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: darkTeal,
-          ),
+          style: AppText.bodyStrong,
         ),
-
-        const SizedBox(height: 2),
-
         Text(
           label,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontFamily: 'Helvetica',
-            fontSize: 10,
-            color: grey,
-          ),
+          style: AppText.caption,
         ),
       ],
     );
