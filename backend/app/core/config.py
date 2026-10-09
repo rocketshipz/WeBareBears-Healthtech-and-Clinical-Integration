@@ -51,18 +51,48 @@ class Settings(BaseSettings):
     )
 
     def get_database_uri(self) -> str:
-        """Returns the PostgreSQL connection string."""
+        """Returns the PostgreSQL connection string.
+        
+        Supports both PostgreSQL and Supabase. On networks without IPv6 connectivity,
+        automatically translates direct Supabase hosts (db.<ref>.supabase.co) to the
+        IPv4 connection pooler to prevent DNS resolution errors.
+        """
         if self.DATABASE_URL:
-            return self.DATABASE_URL
-        if self.POSTGRES_DB_USER and self.POSTGRES_DB_PASSWORD:
+            uri = self.DATABASE_URL
+        elif self.POSTGRES_DB_USER and self.POSTGRES_DB_PASSWORD:
             import urllib.parse
             encoded_password = urllib.parse.quote_plus(self.POSTGRES_DB_PASSWORD)
-            return (
+            uri = (
                 f"postgresql://{self.POSTGRES_DB_USER}:{encoded_password}@"
                 f"{self.POSTGRES_DB_HOST}:{self.POSTGRES_DB_PORT}/{self.POSTGRES_DB_NAME}"
             )
-        # Default fallback SQLite memory or dummy URI for testing without DB
-        return "sqlite:///./local_placeholder.db"
+        else:
+            return "sqlite:///./local_placeholder.db"
+
+        # Check if URI uses a Supabase direct domain (db.<project_ref>.supabase.co)
+        # On IPv4-only networks, direct host fails DNS resolution because Supabase direct host is IPv6-only.
+        # Fall back gracefully to Supabase IPv4 connection pooler.
+        if "@db." in uri and ".supabase.co" in uri:
+            import re
+            import socket
+            match = re.search(r"@db\.([a-z0-9]+)\.supabase\.co(?::(\d+))?", uri)
+            if match:
+                ref = match.group(1)
+                direct_host = f"db.{ref}.supabase.co"
+                try:
+                    socket.getaddrinfo(direct_host, 5432)
+                except socket.gaierror:
+                    prefix, rest = uri.split("://", 1)
+                    creds, host_part = rest.split("@", 1)
+                    user_pwd = creds.split(":", 1)
+                    user = user_pwd[0]
+                    pwd = user_pwd[1] if len(user_pwd) > 1 else ""
+                    if not user.endswith(f".{ref}"):
+                        user = f"{user}.{ref}"
+                    path_part = host_part.split("/", 1)[1] if "/" in host_part else "postgres"
+                    uri = f"{prefix}://{user}:{pwd}@aws-0-ap-southeast-1.pooler.supabase.com:5432/{path_part}"
+
+        return uri
 
     def get_groq_api_key(self) -> Optional[str]:
         """Returns the configured Groq API key."""
@@ -85,6 +115,14 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Returns cached settings instance and ensures os.environ is populated."""
     s = Settings()
+
+    # Synchronize and ensure database URI is evaluated and stored in environment/settings
+    db_uri = s.get_database_uri()
+    if db_uri:
+        if not os.environ.get("DATABASE_URL"):
+            os.environ["DATABASE_URL"] = db_uri
+        s.DATABASE_URL = db_uri
+
     groq_key = s.get_groq_api_key()
     if groq_key and not groq_key.startswith("your_"):
         if not os.environ.get("GROQ_API_KEY"):
@@ -97,3 +135,8 @@ def get_settings() -> Settings:
         if not os.environ.get("GOOGLE_API_KEY"):
             os.environ["GOOGLE_API_KEY"] = gemini_key
     return s
+
+
+def get_database_uri() -> str:
+    """Convenience function to retrieve the configured database URI from cached settings."""
+    return get_settings().get_database_uri()

@@ -23,6 +23,9 @@ venv.bak/
 *.sqlite3
 nopims.db
 
+# AI agents utility files
+.agents/
+
 # Flask & Web application
 instance/
 .webassets-cache
