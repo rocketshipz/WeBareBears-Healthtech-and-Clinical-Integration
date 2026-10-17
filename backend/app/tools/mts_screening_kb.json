@@ -123,6 +123,9 @@
               "condition_ids": [
                 "RULE_CRIT_L3_01.C1",
                 "RULE_CRIT_L3_01.C4"
+              ],
+              "covers": [
+                "RULE_RESP_L2_01.C2"
               ]
             },
             {
@@ -131,56 +134,143 @@
                 "RULE_CRIT_L2_01.C9"
               ]
             }
+          ],
+          "none_answers": [
+            "Yes - conscious, breathing normally and responding"
+          ],
+          "multi_select": true
+        },
+        {
+          "question_id": "Q_CRIT_02A",
+          "population": "all",
+          "text": "Do any of these apply right now? Tick all that apply.",
+          "multi_select": true,
+          "answers": [
+            "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+            "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+            "Pale or bluish skin with cold hands and feet",
+            "None of these"
+          ],
+          "none_answers": [
+            "None of these"
+          ],
+          "maps_to": [
+            {
+              "when": "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "condition_ids": [],
+              "opens": [
+                "Q_CRIT_02",
+                "Q_CRIT_06"
+              ],
+              "covers": [
+                "RULE_CRIT_L1_01.C4",
+                "RULE_CRIT_L1_01.C5",
+                "RULE_CRIT_L1_01.C6",
+                "RULE_CRIT_L1_01.C7",
+                "RULE_CRIT_L2_01.C6",
+                "RULE_CRIT_L2_01.C5",
+                "RULE_CRIT_L2_01.C7",
+                "RULE_CRIT_L3_01.C6",
+                "RULE_CRIT_L1_01.C8",
+                "RULE_RESP_L2_01.C1",
+                "RULE_RESP_L2_01.C3",
+                "RULE_RESP_L2_01.C4",
+                "RULE_RESP_L2_01.C5",
+                "RULE_RESP_L2_01.C6",
+                "RULE_RESP_L2_01.C7",
+                "RULE_RESP_L2_01.C8",
+                "RULE_RESP_L2_01.C10",
+                "RULE_RESP_L3_01.C1",
+                "RULE_RESP_L3_01.C2",
+                "RULE_RESP_L3_01.C3",
+                "RULE_RESP_L3_01.C4",
+                "RULE_RESP_L4_01.C1",
+                "RULE_RESP_PAED_L1_01.C1",
+                "RULE_PAED_L1_01.C9",
+                "RULE_PAED_L2_01.C7",
+                "RULE_PAED_L2_01.C12"
+              ]
+            },
+            {
+              "when": "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "condition_ids": [],
+              "opens": [
+                "Q_CRIT_03"
+              ],
+              "covers": [
+                "RULE_CRIT_L1_01.C11",
+                "RULE_CRIT_L1_01.C12",
+                "RULE_CRIT_L1_01.C13",
+                "RULE_CRIT_L1_01.C14",
+                "RULE_CRIT_L1_01.C15",
+                "RULE_CRIT_L1_01.C3",
+                "RULE_CRIT_L2_01.C10",
+                "RULE_CRIT_L3_01.C8",
+                "RULE_CRIT_L3_01.C9",
+                "RULE_CRIT_L3_01.C10",
+                "RULE_CRIT_L3_01.C11",
+                "RULE_CRIT_L3_01.C12"
+              ]
+            },
+            {
+              "when": "Pale or bluish skin with cold hands and feet",
+              "condition_ids": [
+                "RULE_CRIT_L1_01.C9"
+              ]
+            }
           ]
         },
         {
           "question_id": "Q_CRIT_02",
           "population": "all",
-          "text": "How is the breathing?",
+          "text": "Which of these describe the breathing right now? Tick all that apply.",
           "answers": [
-            "Breathing normally",
-            "Severe respiratory distress",
-            "Abnormal breathing sounds",
-            "Excessive work of breathing with sweating",
-            "Cannot speak / one-word replies only",
-            "Short phrases only",
-            "Difficulty to breathe",
+            "Struggling badly to breathe (severe breathing distress)",
+            "Harsh, high-pitched, gurgling or snoring noise with every breath (not just a cough, phlegm or blocked nose)",
+            "Working very hard to breathe and sweating",
+            "Too breathless to speak, or only one word at a time",
+            "Can only speak in short phrases because of breathlessness",
+            "Difficulty breathing, but can speak in sentences",
             "Agitated or anxious because of breathing difficulty",
-            "Wheeze or expiratory rhonchi with airway intact"
+            "Whistling or wheezy breathing, but can still talk normally",
+            "Breathing normally"
+          ],
+          "none_answers": [
+            "Breathing normally"
           ],
           "maps_to": [
             {
-              "when": "Severe respiratory distress",
+              "when": "Struggling badly to breathe (severe breathing distress)",
               "condition_ids": [
                 "RULE_CRIT_L1_01.C4"
               ]
             },
             {
-              "when": "Abnormal breathing sounds",
+              "when": "Harsh, high-pitched, gurgling or snoring noise with every breath (not just a cough, phlegm or blocked nose)",
               "condition_ids": [
                 "RULE_CRIT_L1_01.C5"
               ]
             },
             {
-              "when": "Excessive work of breathing with sweating",
+              "when": "Working very hard to breathe and sweating",
               "condition_ids": [
                 "RULE_CRIT_L1_01.C6"
               ]
             },
             {
-              "when": "Cannot speak / one-word replies only",
+              "when": "Too breathless to speak, or only one word at a time",
               "condition_ids": [
                 "RULE_CRIT_L1_01.C7"
               ]
             },
             {
-              "when": "Short phrases only",
+              "when": "Can only speak in short phrases because of breathlessness",
               "condition_ids": [
                 "RULE_CRIT_L2_01.C6"
               ]
             },
             {
-              "when": "Difficulty to breathe",
+              "when": "Difficulty breathing, but can speak in sentences",
               "condition_ids": [
                 "RULE_CRIT_L2_01.C5"
               ]
@@ -192,84 +282,81 @@
               ]
             },
             {
-              "when": "Wheeze or expiratory rhonchi with airway intact",
+              "when": "Whistling or wheezy breathing, but can still talk normally",
               "condition_ids": [
                 "RULE_CRIT_L3_01.C6"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         },
         {
           "question_id": "Q_CRIT_03",
           "population": "all",
-          "text": "Is there any bleeding, major trauma, or severe injury?",
+          "text": "Which of these describe the bleeding or injury? Tick all that apply.",
           "answers": [
-            "No bleeding or minimal bleeding",
-            "Arterial limb bleeding",
-            "Active uncontrolled bleeding",
-            "Massive vaginal bleeding",
-            "Severe facial injury",
-            "Severe pelvic injury",
-            "Major trauma with shock",
-            "Pale, bluish (cyanosed) skin with cold hands/feet",
-            "Active vomiting or coughing of blood",
-            "Bleeding from fractures, dislocations, joints or wounds",
+            "Spurting bleeding from an arm or leg",
+            "Bleeding that will not stop with firm pressure",
+            "Very heavy vaginal bleeding",
+            "Severe injury to the face",
+            "Severe injury to the hips / pelvis",
+            "Major injury and now pale, cold, clammy or faint (shock)",
+            "Actively vomiting or coughing up blood",
+            "Bleeding from a broken bone, dislocated joint or wound",
             "Heavy periods (menorrhagia)",
-            "ENT (nose/ear/throat) bleeding",
-            "Expanding haematoma (swelling with bleeding under the skin)",
-            "Known bleeding disorder"
+            "Bleeding from the nose, ear or throat",
+            "Swelling under the skin that keeps getting bigger (expanding haematoma)",
+            "Known bleeding disorder",
+            "No bleeding or only minor bleeding"
+          ],
+          "none_answers": [
+            "No bleeding or only minor bleeding"
           ],
           "maps_to": [
             {
-              "when": "Arterial limb bleeding",
+              "when": "Spurting bleeding from an arm or leg",
               "condition_ids": [
                 "RULE_CRIT_L1_01.C11"
               ]
             },
             {
-              "when": "Active uncontrolled bleeding",
+              "when": "Bleeding that will not stop with firm pressure",
               "condition_ids": [
                 "RULE_CRIT_L1_01.C12"
               ]
             },
             {
-              "when": "Massive vaginal bleeding",
+              "when": "Very heavy vaginal bleeding",
               "condition_ids": [
                 "RULE_CRIT_L1_01.C13"
               ]
             },
             {
-              "when": "Severe facial injury",
+              "when": "Severe injury to the face",
               "condition_ids": [
                 "RULE_CRIT_L1_01.C14"
               ]
             },
             {
-              "when": "Severe pelvic injury",
+              "when": "Severe injury to the hips / pelvis",
               "condition_ids": [
                 "RULE_CRIT_L1_01.C15"
               ]
             },
             {
-              "when": "Major trauma with shock",
+              "when": "Major injury and now pale, cold, clammy or faint (shock)",
               "condition_ids": [
                 "RULE_CRIT_L1_01.C3"
               ]
             },
             {
-              "when": "Pale, bluish (cyanosed) skin with cold hands/feet",
-              "condition_ids": [
-                "RULE_CRIT_L1_01.C9"
-              ]
-            },
-            {
-              "when": "Active vomiting or coughing of blood",
+              "when": "Actively vomiting or coughing up blood",
               "condition_ids": [
                 "RULE_CRIT_L2_01.C10"
               ]
             },
             {
-              "when": "Bleeding from fractures, dislocations, joints or wounds",
+              "when": "Bleeding from a broken bone, dislocated joint or wound",
               "condition_ids": [
                 "RULE_CRIT_L3_01.C8"
               ]
@@ -281,13 +368,13 @@
               ]
             },
             {
-              "when": "ENT (nose/ear/throat) bleeding",
+              "when": "Bleeding from the nose, ear or throat",
               "condition_ids": [
                 "RULE_CRIT_L3_01.C10"
               ]
             },
             {
-              "when": "Expanding haematoma",
+              "when": "Swelling under the skin that keeps getting bigger (expanding haematoma)",
               "condition_ids": [
                 "RULE_CRIT_L3_01.C11"
               ]
@@ -298,7 +385,8 @@
                 "RULE_CRIT_L3_01.C12"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         },
         {
           "question_id": "Q_CRIT_04",
@@ -336,7 +424,11 @@
                 "RULE_CRIT_L3_01.C2"
               ]
             }
-          ]
+          ],
+          "none_answers": [
+            "Alert, walking and talking normally"
+          ],
+          "multi_select": true
         },
         {
           "question_id": "Q_CRIT_05",
@@ -368,6 +460,10 @@
                 "RULE_CRIT_L3_01.C7"
               ]
             }
+          ],
+          "none_answers": [
+            "Mild pain (1-3)",
+            "No pain (0)"
           ]
         },
         {
@@ -674,7 +770,8 @@
                 "RULE_CP_PAED_L1_01.C4"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         },
         {
           "question_id": "Q_CP_04",
@@ -719,7 +816,8 @@
                 "RULE_CP_PAED_L3_01.C3"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         }
       ],
       "rules": [
@@ -887,13 +985,13 @@
           "population": "adult",
           "text": "Which of these describe the breathing problem?",
           "answers": [
-            "Stridor (harsh high-pitched breathing sound)",
+            "Stridor - harsh, high-pitched noise when breathing in",
             "Increased work of breathing and feeling tired",
             "Agitation or anxiety with breathing difficulty",
             "Slow breaths or poor respiratory effort",
             "Breathless with change of voice",
             "Rapid breaths",
-            "Wheeze with airway intact",
+            "Wheezing, but able to talk in sentences",
             "Wheezing in a known asthmatic",
             "Hyperventilation",
             "Mild or minimal breathlessness",
@@ -937,7 +1035,7 @@
               ]
             },
             {
-              "when": "Wheeze with airway intact",
+              "when": "Wheezing, but able to talk in sentences",
               "condition_ids": [
                 "RULE_RESP_L3_01.C2"
               ]
@@ -967,54 +1065,64 @@
                 "RULE_RESP_L5_01.C2"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         },
         {
           "question_id": "Q_RESP_02",
           "population": "adult",
-          "text": "Is there incessant cough, cyanotic (blue) spells, inability to swallow, a tripod sitting position, a foreign body in the airway, or previous intubation / ICU care?",
+          "text": "Do any of these apply?",
           "answers": [
-            "Yes",
-            "No"
+            "Non-stop coughing fits, unable to catch breath between them",
+            "Blue lips or skin (cyanotic spells)",
+            "Unable to swallow",
+            "Has to sit leaning forward on the hands to breathe (tripod position)",
+            "Something stuck in the airway",
+            "Has needed a breathing tube or ICU care for breathing before",
+            "None of these"
+          ],
+          "none_answers": [
+            "None of these"
           ],
           "maps_to": [
             {
-              "when": "Incessant cough",
+              "when": "Non-stop coughing fits, unable to catch breath between them",
               "condition_ids": [
                 "RULE_RESP_L2_01.C11"
               ]
             },
             {
-              "when": "Cyanotic (blue) spells",
+              "when": "Blue lips or skin (cyanotic spells)",
               "condition_ids": [
                 "RULE_RESP_L2_01.C12"
               ]
             },
             {
-              "when": "Inability to swallow",
+              "when": "Unable to swallow",
               "condition_ids": [
                 "RULE_RESP_L2_01.C13"
               ]
             },
             {
-              "when": "Tripod sitting position",
+              "when": "Has to sit leaning forward on the hands to breathe (tripod position)",
               "condition_ids": [
                 "RULE_RESP_L2_01.C14"
               ]
             },
             {
-              "when": "Foreign body in the airway",
+              "when": "Something stuck in the airway",
               "condition_ids": [
                 "RULE_RESP_L2_01.C9"
               ]
             },
             {
-              "when": "Previous intubation / ICU care",
+              "when": "Has needed a breathing tube or ICU care for breathing before",
               "condition_ids": [
                 "RULE_RESP_L2_01.C15"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         },
         {
           "question_id": "Q_RESP_03",
@@ -1089,49 +1197,58 @@
         {
           "question_id": "Q_RESP_06",
           "population": "paediatric",
-          "text": "Does the child have abnormal breathing sounds, incessant cough, cyanotic spells, inability to swallow, a foreign body in the airway, or a tripod position?",
+          "text": "Do any of these apply to the child?",
           "answers": [
-            "Yes",
-            "No"
+            "Harsh, high-pitched, gurgling or snoring noise with every breath (not just a cough or blocked nose)",
+            "Non-stop coughing fits, unable to catch breath between them",
+            "Blue lips or skin (cyanotic spells)",
+            "Unable to swallow",
+            "Something stuck in the airway",
+            "Has to sit leaning forward on the hands to breathe (tripod position)",
+            "None of these"
+          ],
+          "none_answers": [
+            "None of these"
           ],
           "maps_to": [
             {
-              "when": "Abnormal breathing sounds",
+              "when": "Harsh, high-pitched, gurgling or snoring noise with every breath (not just a cough or blocked nose)",
               "condition_ids": [
                 "RULE_RESP_PAED_L1_01.C1"
               ]
             },
             {
-              "when": "Incessant cough",
+              "when": "Non-stop coughing fits, unable to catch breath between them",
               "condition_ids": [
                 "RULE_RESP_PAED_L1_01.C2"
               ]
             },
             {
-              "when": "Cyanotic spells",
+              "when": "Blue lips or skin (cyanotic spells)",
               "condition_ids": [
                 "RULE_RESP_PAED_L1_01.C3"
               ]
             },
             {
-              "when": "Inability to swallow",
+              "when": "Unable to swallow",
               "condition_ids": [
                 "RULE_RESP_PAED_L1_01.C4"
               ]
             },
             {
-              "when": "Foreign body in the airway",
+              "when": "Something stuck in the airway",
               "condition_ids": [
                 "RULE_RESP_PAED_L1_01.C5"
               ]
             },
             {
-              "when": "Tripod position",
+              "when": "Has to sit leaning forward on the hands to breathe (tripod position)",
               "condition_ids": [
                 "RULE_RESP_PAED_L1_01.C6"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         },
         {
           "question_id": "Q_RESP_07",
@@ -1200,7 +1317,7 @@
         {
           "question_id": "Q_RESP_10",
           "population": "adult",
-          "text": "Is there any abnormal sound when the person breathes?",
+          "text": "Is there an abnormal noise with every breath, such as a harsh high-pitched sound, gurgling or snoring? (A cough, phlegm you can cough up, or a blocked nose does not count.)",
           "answers": [
             "Yes",
             "No"
@@ -1953,7 +2070,8 @@
                 "RULE_NEURO_PAED_L4_01.C3"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         },
         {
           "question_id": "Q_NEURO_04",
@@ -3444,162 +3562,237 @@
       "category": "Trauma & Physical Injuries",
       "questions": [
         {
-          "question_id": "Q_TRAUMA_01",
+          "question_id": "Q_TRAUMA_00",
           "population": "all",
-          "text": "Was the injury caused by a high-velocity accident, a penetrating wound (knife/gunshot), or is there active bleeding, visual/hearing impact or altered mental state after a head injury?",
+          "text": "Where or how was the person hurt? Tick all that apply.",
+          "multi_select": true,
           "answers": [
-            "Yes",
-            "No"
+            "Head, face or neck",
+            "Chest, abdomen or pelvis (hips)",
+            "Arm, leg, hand or foot",
+            "A fall",
+            "A cut, wound, burn or other skin injury"
           ],
           "maps_to": [
             {
-              "when": "High-velocity accident",
+              "when": "Head, face or neck",
+              "condition_ids": [],
+              "covers": [
+                "RULE_TRAUMA_L2_01.C1",
+                "RULE_TRAUMA_PAED_L1_01.C1",
+                "RULE_TRAUMA_L2_01.C2",
+                "RULE_TRAUMA_PAED_L1_01.C2",
+                "RULE_TRAUMA_L2_01.C4",
+                "RULE_TRAUMA_PAED_L1_01.C4",
+                "RULE_TRAUMA_L2_01.C5",
+                "RULE_TRAUMA_PAED_L1_01.C5",
+                "RULE_TRAUMA_L2_01.C6",
+                "RULE_TRAUMA_PAED_L1_01.C6",
+                "RULE_TRAUMA_L3_01.C5",
+                "RULE_TRAUMA_PAED_L2_01.C5",
+                "RULE_TRAUMA_L3_01.C6",
+                "RULE_TRAUMA_PAED_L2_01.C6",
+                "RULE_TRAUMA_L3_01.C7",
+                "RULE_TRAUMA_PAED_L2_01.C7",
+                "RULE_TRAUMA_PAED_L2_01.C8",
+                "RULE_TRAUMA_L4_01.C5",
+                "RULE_TRAUMA_PAED_L3_01.C4",
+                "RULE_TRAUMA_L4_01.C6"
+              ],
+              "opens": [
+                "Q_TRAUMA_01",
+                "Q_TRAUMA_04"
+              ]
+            },
+            {
+              "when": "Chest, abdomen or pelvis (hips)",
+              "condition_ids": [],
+              "covers": [
+                "RULE_TRAUMA_L2_01.C1",
+                "RULE_TRAUMA_PAED_L1_01.C1",
+                "RULE_TRAUMA_L2_01.C2",
+                "RULE_TRAUMA_PAED_L1_01.C2",
+                "RULE_TRAUMA_L2_01.C3",
+                "RULE_TRAUMA_PAED_L1_01.C3",
+                "RULE_TRAUMA_L3_01.C1",
+                "RULE_TRAUMA_PAED_L2_01.C1",
+                "RULE_TRAUMA_L3_01.C2",
+                "RULE_TRAUMA_PAED_L2_01.C2",
+                "RULE_TRAUMA_L3_01.C3",
+                "RULE_TRAUMA_PAED_L2_01.C3",
+                "RULE_TRAUMA_L3_01.C4",
+                "RULE_TRAUMA_PAED_L2_01.C4",
+                "RULE_TRAUMA_L4_01.C1",
+                "RULE_TRAUMA_PAED_L3_01.C1",
+                "RULE_TRAUMA_L4_01.C2",
+                "RULE_TRAUMA_L4_01.C3",
+                "RULE_TRAUMA_L4_01.C4",
+                "RULE_TRAUMA_PAED_L3_01.C2",
+                "RULE_TRAUMA_PAED_L3_01.C3"
+              ],
+              "opens": [
+                "Q_TRAUMA_05",
+                "Q_TRAUMA_11",
+                "Q_TRAUMA_12",
+                "Q_TRAUMA_14"
+              ]
+            },
+            {
+              "when": "Arm, leg, hand or foot",
+              "condition_ids": [],
+              "covers": [
+                "RULE_TRAUMA_L2_01.C7",
+                "RULE_TRAUMA_PAED_L1_01.C7",
+                "RULE_TRAUMA_L2_01.C8",
+                "RULE_TRAUMA_PAED_L1_01.C8",
+                "RULE_TRAUMA_L2_01.C9",
+                "RULE_TRAUMA_PAED_L1_01.C9",
+                "RULE_TRAUMA_L2_01.C10",
+                "RULE_TRAUMA_PAED_L1_01.C10",
+                "RULE_TRAUMA_L3_01.C8",
+                "RULE_TRAUMA_PAED_L2_01.C9",
+                "RULE_TRAUMA_L3_01.C9",
+                "RULE_TRAUMA_PAED_L2_01.C10",
+                "RULE_TRAUMA_L3_01.C10",
+                "RULE_TRAUMA_PAED_L2_01.C11",
+                "RULE_TRAUMA_L3_01.C11",
+                "RULE_TRAUMA_PAED_L2_01.C12",
+                "RULE_TRAUMA_L3_01.C12",
+                "RULE_TRAUMA_PAED_L2_01.C13",
+                "RULE_TRAUMA_L3_01.C13",
+                "RULE_TRAUMA_PAED_L2_01.C14",
+                "RULE_TRAUMA_L4_01.C7",
+                "RULE_TRAUMA_PAED_L3_01.C5"
+              ],
+              "opens": [
+                "Q_TRAUMA_02",
+                "Q_TRAUMA_07"
+              ]
+            },
+            {
+              "when": "A fall",
+              "condition_ids": [],
+              "covers": [
+                "RULE_TRAUMA_L2_01.C11",
+                "RULE_TRAUMA_PAED_L1_01.C11",
+                "RULE_TRAUMA_L2_01.C12",
+                "RULE_TRAUMA_PAED_L1_01.C12",
+                "RULE_TRAUMA_L3_01.C14",
+                "RULE_TRAUMA_PAED_L2_01.C15",
+                "RULE_TRAUMA_L3_01.C15",
+                "RULE_TRAUMA_L3_01.C16",
+                "RULE_TRAUMA_L3_01.C17",
+                "RULE_TRAUMA_PAED_L2_01.C16",
+                "RULE_TRAUMA_PAED_L2_01.C17",
+                "RULE_TRAUMA_L4_01.C8",
+                "RULE_TRAUMA_PAED_L3_01.C6",
+                "RULE_TRAUMA_PAED_L3_01.C7"
+              ],
+              "opens": [
+                "Q_TRAUMA_03",
+                "Q_TRAUMA_13"
+              ]
+            },
+            {
+              "when": "A cut, wound, burn or other skin injury",
+              "condition_ids": [],
+              "covers": [
+                "RULE_TRAUMA_L2_01.C13",
+                "RULE_TRAUMA_PAED_L1_01.C13",
+                "RULE_TRAUMA_L2_01.C14",
+                "RULE_TRAUMA_PAED_L1_01.C14",
+                "RULE_TRAUMA_L2_01.C15",
+                "RULE_TRAUMA_PAED_L1_01.C15",
+                "RULE_TRAUMA_L2_01.C16",
+                "RULE_TRAUMA_PAED_L1_01.C16",
+                "RULE_TRAUMA_L3_01.C18",
+                "RULE_TRAUMA_PAED_L2_01.C18",
+                "RULE_TRAUMA_L3_01.C19",
+                "RULE_TRAUMA_PAED_L2_01.C19",
+                "RULE_TRAUMA_L4_01.C9",
+                "RULE_TRAUMA_PAED_L3_01.C8",
+                "RULE_TRAUMA_L4_01.C10",
+                "RULE_TRAUMA_PAED_L3_01.C9",
+                "RULE_TRAUMA_L4_01.C11",
+                "RULE_TRAUMA_PAED_L3_01.C10"
+              ],
+              "opens": [
+                "Q_TRAUMA_06"
+              ]
+            }
+          ]
+        },
+        {
+          "question_id": "Q_TRAUMA_01",
+          "population": "all",
+          "text": "How did the injury happen? Tick all that apply.",
+          "answers": [
+            "High-speed accident (e.g. a road crash at speed)",
+            "Stabbed, shot, or something went into the body",
+            "None of these"
+          ],
+          "none_answers": [
+            "None of these"
+          ],
+          "maps_to": [
+            {
+              "when": "High-speed accident (e.g. a road crash at speed)",
               "condition_ids": [
                 "RULE_TRAUMA_L2_01.C2",
                 "RULE_TRAUMA_PAED_L1_01.C2"
               ]
             },
             {
-              "when": "Penetrating wound (knife / gunshot)",
+              "when": "Stabbed, shot, or something went into the body",
               "condition_ids": [
                 "RULE_TRAUMA_L2_01.C1",
                 "RULE_TRAUMA_PAED_L1_01.C1"
               ]
-            },
+            }
+          ],
+          "multi_select": true
+        },
+        {
+          "question_id": "Q_TRAUMA_04",
+          "population": "all",
+          "text": "About the head or neck injury: tick all that apply.",
+          "answers": [
+            "Bleeding from the head or neck that has not stopped",
+            "Problems seeing or hearing since the injury",
+            "Confused, drowsy or behaving differently since the injury",
+            "Cannot remember what happened (memory loss)",
+            "Neck pain",
+            "A wound on the scalp only",
+            "Blacked out briefly, but now fully awake",
+            "None of these - only mild symptoms"
+          ],
+          "none_answers": [
+            "None of these - only mild symptoms"
+          ],
+          "maps_to": [
             {
-              "when": "Active bleeding after a head / neck injury",
+              "when": "Bleeding from the head or neck that has not stopped",
               "condition_ids": [
                 "RULE_TRAUMA_L2_01.C4",
                 "RULE_TRAUMA_PAED_L1_01.C4"
               ]
             },
             {
-              "when": "Visual / hearing impact",
+              "when": "Problems seeing or hearing since the injury",
               "condition_ids": [
                 "RULE_TRAUMA_L2_01.C5",
                 "RULE_TRAUMA_PAED_L1_01.C5"
               ]
             },
             {
-              "when": "Altered mental state after a head injury",
+              "when": "Confused, drowsy or behaving differently since the injury",
               "condition_ids": [
                 "RULE_TRAUMA_L2_01.C6",
                 "RULE_TRAUMA_PAED_L1_01.C6"
               ]
-            }
-          ]
-        },
-        {
-          "question_id": "Q_TRAUMA_02",
-          "population": "all",
-          "text": "Is there a mangled limb, amputation, ongoing haemorrhage, a fracture of a long bone, an open fracture, a dislocation, or a hand injury?",
-          "answers": [
-            "Yes",
-            "No"
-          ],
-          "maps_to": [
-            {
-              "when": "Mangled limb",
-              "condition_ids": [
-                "RULE_TRAUMA_L2_01.C7",
-                "RULE_TRAUMA_PAED_L1_01.C7"
-              ]
             },
             {
-              "when": "Amputation",
-              "condition_ids": [
-                "RULE_TRAUMA_L2_01.C8",
-                "RULE_TRAUMA_PAED_L1_01.C8",
-                "RULE_TRAUMA_L3_01.C8",
-                "RULE_TRAUMA_PAED_L2_01.C9"
-              ]
-            },
-            {
-              "when": "Ongoing haemorrhage",
-              "condition_ids": [
-                "RULE_TRAUMA_L2_01.C9",
-                "RULE_TRAUMA_PAED_L1_01.C9"
-              ]
-            },
-            {
-              "when": "Fracture of a long bone",
-              "condition_ids": [
-                "RULE_TRAUMA_L2_01.C10",
-                "RULE_TRAUMA_PAED_L1_01.C10"
-              ]
-            },
-            {
-              "when": "Open fracture",
-              "condition_ids": [
-                "RULE_TRAUMA_L3_01.C10",
-                "RULE_TRAUMA_PAED_L2_01.C11"
-              ]
-            },
-            {
-              "when": "Dislocation",
-              "condition_ids": [
-                "RULE_TRAUMA_L3_01.C9",
-                "RULE_TRAUMA_PAED_L2_01.C10"
-              ]
-            },
-            {
-              "when": "Hand injury",
-              "condition_ids": [
-                "RULE_TRAUMA_L3_01.C13",
-                "RULE_TRAUMA_PAED_L2_01.C14"
-              ]
-            }
-          ]
-        },
-        {
-          "question_id": "Q_TRAUMA_03",
-          "population": "all",
-          "text": "Was there a fall? From what height, and is there altered consciousness, neurological deficit, or limb injury / deformity?",
-          "answers": [
-            "Fall greater than 6 m (adult) or greater than 3 m / twice the child's height",
-            "Limb injury or deformity",
-            "Altered consciousness or neurological deficit",
-            "Minor fall, mobilizing well"
-          ],
-          "maps_to": [
-            {
-              "when": "Fall greater than 6 m (adult) or greater than 3 m / twice the child's height",
-              "condition_ids": [
-                "RULE_TRAUMA_L3_01.C16",
-                "RULE_TRAUMA_L3_01.C17",
-                "RULE_TRAUMA_PAED_L2_01.C16"
-              ]
-            },
-            {
-              "when": "Limb injury or deformity",
-              "condition_ids": [
-                "RULE_TRAUMA_L3_01.C14",
-                "RULE_TRAUMA_PAED_L2_01.C15"
-              ]
-            },
-            {
-              "when": "Altered consciousness or neurological deficit",
-              "condition_ids": [
-                "RULE_TRAUMA_L2_01.C11",
-                "RULE_TRAUMA_PAED_L1_01.C11",
-                "RULE_TRAUMA_L2_01.C12",
-                "RULE_TRAUMA_PAED_L1_01.C12",
-                "RULE_TRAUMA_L3_01.C15"
-              ]
-            }
-          ]
-        },
-        {
-          "question_id": "Q_TRAUMA_04",
-          "population": "all",
-          "text": "For a head or neck injury: is there retrograde amnesia (cannot remember the injury), neck pain, a scalp wound only, or a brief loss of consciousness?",
-          "answers": [
-            "Yes",
-            "No"
-          ],
-          "maps_to": [
-            {
-              "when": "Retrograde amnesia (cannot remember the injury)",
+              "when": "Cannot remember what happened (memory loss)",
               "condition_ids": [
                 "RULE_TRAUMA_L3_01.C6",
                 "RULE_TRAUMA_PAED_L2_01.C6"
@@ -3613,193 +3806,97 @@
               ]
             },
             {
-              "when": "Scalp wound only",
+              "when": "A wound on the scalp only",
               "condition_ids": [
                 "RULE_TRAUMA_L3_01.C5",
                 "RULE_TRAUMA_PAED_L2_01.C5"
               ]
             },
             {
-              "when": "Brief loss of consciousness",
+              "when": "Blacked out briefly, but now fully awake",
               "condition_ids": [
                 "RULE_TRAUMA_L4_01.C5",
                 "RULE_TRAUMA_PAED_L3_01.C4"
               ]
+            },
+            {
+              "when": "None of these - only mild symptoms",
+              "condition_ids": [
+                "RULE_TRAUMA_L5_01.C1",
+                "RULE_TRAUMA_PAED_L4_01.C1"
+              ]
             }
-          ]
+          ],
+          "multi_select": true
         },
         {
           "question_id": "Q_TRAUMA_05",
           "population": "all",
-          "text": "For a chest or abdominal injury: is there increased work of breathing, likely rib fractures, possible pelvic injury, or significant bruising?",
+          "text": "About the chest, abdomen or pelvis injury: tick all that apply.",
           "answers": [
-            "Yes",
-            "No"
+            "Struggling to breathe since the injury",
+            "Working harder than normal to breathe",
+            "Possible broken ribs",
+            "Possible injury to the hips / pelvis",
+            "Large or spreading bruises",
+            "Hurt in a high-risk way (e.g. hit by a vehicle, crushed or thrown)",
+            "None of these - only mild symptoms"
+          ],
+          "none_answers": [
+            "None of these - only mild symptoms"
           ],
           "maps_to": [
             {
-              "when": "Increased work of breathing",
+              "when": "Struggling to breathe since the injury",
+              "condition_ids": [
+                "RULE_TRAUMA_L2_01.C3",
+                "RULE_TRAUMA_PAED_L1_01.C3"
+              ]
+            },
+            {
+              "when": "Working harder than normal to breathe",
               "condition_ids": [
                 "RULE_TRAUMA_L3_01.C1",
                 "RULE_TRAUMA_PAED_L2_01.C1"
               ]
             },
             {
-              "when": "Likely rib fractures",
+              "when": "Possible broken ribs",
               "condition_ids": [
                 "RULE_TRAUMA_L3_01.C2",
                 "RULE_TRAUMA_PAED_L2_01.C2"
               ]
             },
             {
-              "when": "Possible pelvic injury",
+              "when": "Possible injury to the hips / pelvis",
               "condition_ids": [
                 "RULE_TRAUMA_L3_01.C3",
                 "RULE_TRAUMA_PAED_L2_01.C3"
               ]
             },
             {
-              "when": "Significant bruising",
+              "when": "Large or spreading bruises",
               "condition_ids": [
                 "RULE_TRAUMA_L3_01.C4",
                 "RULE_TRAUMA_PAED_L2_01.C4"
               ]
+            },
+            {
+              "when": "Hurt in a high-risk way (e.g. hit by a vehicle, crushed or thrown)",
+              "condition_ids": [
+                "RULE_TRAUMA_L4_01.C1",
+                "RULE_TRAUMA_PAED_L3_01.C1"
+              ]
+            },
+            {
+              "when": "None of these - only mild symptoms",
+              "condition_ids": [
+                "RULE_TRAUMA_L5_01.C1",
+                "RULE_TRAUMA_PAED_L4_01.C1"
+              ]
             }
-          ]
-        },
-        {
-          "question_id": "Q_TRAUMA_06",
-          "population": "all",
-          "text": "Is it a wound / skin injury? Is there arterial bleeding, degloving, multiple penetrating wounds, nerve/tendon injury, or continuing venous bleeding?",
-          "answers": [
-            "Yes",
-            "No"
           ],
-          "maps_to": [
-            {
-              "when": "Arterial bleeding",
-              "condition_ids": [
-                "RULE_TRAUMA_L2_01.C13",
-                "RULE_TRAUMA_PAED_L1_01.C13"
-              ]
-            },
-            {
-              "when": "Degloving",
-              "condition_ids": [
-                "RULE_TRAUMA_L2_01.C14",
-                "RULE_TRAUMA_PAED_L1_01.C14"
-              ]
-            },
-            {
-              "when": "Multiple penetrating wounds",
-              "condition_ids": [
-                "RULE_TRAUMA_L2_01.C15",
-                "RULE_TRAUMA_PAED_L1_01.C15"
-              ]
-            },
-            {
-              "when": "Nerve / tendon injury",
-              "condition_ids": [
-                "RULE_TRAUMA_L3_01.C11",
-                "RULE_TRAUMA_PAED_L2_01.C12",
-                "RULE_TRAUMA_L3_01.C18",
-                "RULE_TRAUMA_PAED_L2_01.C18"
-              ]
-            },
-            {
-              "when": "Continuing venous bleeding",
-              "condition_ids": [
-                "RULE_TRAUMA_L3_01.C19",
-                "RULE_TRAUMA_PAED_L2_01.C19"
-              ]
-            }
-          ]
-        },
-        {
-          "question_id": "Q_TRAUMA_07",
-          "population": "all",
-          "text": "Is the injury mild (pain is the main symptom, small fracture likely, moving fingers/toes, mobilizing well)?",
-          "answers": [
-            "Yes",
-            "No"
-          ],
-          "maps_to": [
-            {
-              "when": "Pain is the main symptom",
-              "condition_ids": [
-                "RULE_TRAUMA_L4_01.C8",
-                "RULE_TRAUMA_PAED_L3_01.C6"
-              ]
-            },
-            {
-              "when": "Small fracture likely, moving fingers/toes",
-              "condition_ids": [
-                "RULE_TRAUMA_L4_01.C7",
-                "RULE_TRAUMA_PAED_L3_01.C5"
-              ]
-            },
-            {
-              "when": "Mobilizing well",
-              "condition_ids": [
-                "RULE_TRAUMA_L5_01.C3",
-                "RULE_TRAUMA_PAED_L4_01.C5"
-              ]
-            }
-          ]
-        },
-        {
-          "question_id": "Q_TRAUMA_08",
-          "population": "all",
-          "text": "After a chest or abdominal injury, is there respiratory distress?",
-          "answers": [
-            "Yes",
-            "No"
-          ],
-          "maps_to": [
-            {
-              "when": "Respiratory distress after a chest or abdominal injury",
-              "condition_ids": [
-                "RULE_TRAUMA_L2_01.C3",
-                "RULE_TRAUMA_PAED_L1_01.C3"
-              ]
-            }
-          ]
-        },
-        {
-          "question_id": "Q_TRAUMA_09",
-          "population": "all",
-          "text": "Is the wound a burn or a chemical injury?",
-          "answers": [
-            "Yes",
-            "No"
-          ],
-          "maps_to": [
-            {
-              "when": "Burn or chemical wound",
-              "condition_ids": [
-                "RULE_TRAUMA_L2_01.C16",
-                "RULE_TRAUMA_PAED_L1_01.C16"
-              ]
-            }
-          ]
-        },
-        {
-          "question_id": "Q_TRAUMA_10",
-          "population": "all",
-          "text": "Is there a problem related to a cast, splint or other immobilisation?",
-          "answers": [
-            "Yes",
-            "No"
-          ],
-          "maps_to": [
-            {
-              "when": "Complication of immobilisation",
-              "condition_ids": [
-                "RULE_TRAUMA_L3_01.C12",
-                "RULE_TRAUMA_PAED_L2_01.C13"
-              ]
-            }
-          ]
+          "multi_select": true
         },
         {
           "question_id": "Q_TRAUMA_11",
@@ -3836,6 +3933,204 @@
           ]
         },
         {
+          "question_id": "Q_TRAUMA_14",
+          "population": "paediatric",
+          "text": "Does the child have a known bleeding disorder?",
+          "answers": [
+            "Yes",
+            "No"
+          ],
+          "maps_to": [
+            {
+              "when": "Known bleeding disorder",
+              "condition_ids": [
+                "RULE_TRAUMA_PAED_L3_01.C2"
+              ]
+            }
+          ]
+        },
+        {
+          "question_id": "Q_TRAUMA_02",
+          "population": "all",
+          "text": "About the arm, leg, hand or foot injury: tick all that apply.",
+          "answers": [
+            "Badly crushed or mangled",
+            "Arm or leg cut off (above the wrist or ankle)",
+            "Finger, toe or part of the hand / foot cut off",
+            "Bleeding that will not stop",
+            "Possible broken thigh bone or upper-arm bone",
+            "Bone showing through the skin",
+            "A joint looks out of place (dislocated)",
+            "Numbness, tingling, or cannot move a finger / toe properly",
+            "Problem with a cast or splint",
+            "The injury is to the hand",
+            "None of these"
+          ],
+          "none_answers": [
+            "None of these"
+          ],
+          "maps_to": [
+            {
+              "when": "Badly crushed or mangled",
+              "condition_ids": [
+                "RULE_TRAUMA_L2_01.C7",
+                "RULE_TRAUMA_PAED_L1_01.C7"
+              ]
+            },
+            {
+              "when": "Arm or leg cut off (above the wrist or ankle)",
+              "condition_ids": [
+                "RULE_TRAUMA_L2_01.C8",
+                "RULE_TRAUMA_PAED_L1_01.C8"
+              ]
+            },
+            {
+              "when": "Finger, toe or part of the hand / foot cut off",
+              "condition_ids": [
+                "RULE_TRAUMA_L3_01.C8",
+                "RULE_TRAUMA_PAED_L2_01.C9"
+              ]
+            },
+            {
+              "when": "Bleeding that will not stop",
+              "condition_ids": [
+                "RULE_TRAUMA_L2_01.C9",
+                "RULE_TRAUMA_PAED_L1_01.C9"
+              ]
+            },
+            {
+              "when": "Possible broken thigh bone or upper-arm bone",
+              "condition_ids": [
+                "RULE_TRAUMA_L2_01.C10",
+                "RULE_TRAUMA_PAED_L1_01.C10"
+              ]
+            },
+            {
+              "when": "Bone showing through the skin",
+              "condition_ids": [
+                "RULE_TRAUMA_L3_01.C10",
+                "RULE_TRAUMA_PAED_L2_01.C11"
+              ]
+            },
+            {
+              "when": "A joint looks out of place (dislocated)",
+              "condition_ids": [
+                "RULE_TRAUMA_L3_01.C9",
+                "RULE_TRAUMA_PAED_L2_01.C10"
+              ]
+            },
+            {
+              "when": "Numbness, tingling, or cannot move a finger / toe properly",
+              "condition_ids": [
+                "RULE_TRAUMA_L3_01.C11",
+                "RULE_TRAUMA_PAED_L2_01.C12"
+              ]
+            },
+            {
+              "when": "Problem with a cast or splint",
+              "condition_ids": [
+                "RULE_TRAUMA_L3_01.C12",
+                "RULE_TRAUMA_PAED_L2_01.C13"
+              ]
+            },
+            {
+              "when": "The injury is to the hand",
+              "condition_ids": [
+                "RULE_TRAUMA_L3_01.C13",
+                "RULE_TRAUMA_PAED_L2_01.C14"
+              ]
+            }
+          ],
+          "multi_select": true
+        },
+        {
+          "question_id": "Q_TRAUMA_07",
+          "population": "all",
+          "text": "Which best describes the arm, leg, hand or foot injury now?",
+          "answers": [
+            "Painful and might be a small broken bone (e.g. a finger or toe), but can still move the fingers / toes",
+            "Mild - can still use it or put weight on it, and it does not look broken"
+          ],
+          "maps_to": [
+            {
+              "when": "Painful and might be a small broken bone (e.g. a finger or toe), but can still move the fingers / toes",
+              "condition_ids": [
+                "RULE_TRAUMA_L4_01.C7",
+                "RULE_TRAUMA_PAED_L3_01.C5"
+              ]
+            },
+            {
+              "when": "Mild - can still use it or put weight on it, and it does not look broken",
+              "condition_ids": [
+                "RULE_TRAUMA_L5_01.C2",
+                "RULE_TRAUMA_PAED_L4_01.C4",
+                "RULE_TRAUMA_L5_01.C1",
+                "RULE_TRAUMA_PAED_L4_01.C1"
+              ]
+            }
+          ]
+        },
+        {
+          "question_id": "Q_TRAUMA_03",
+          "population": "all",
+          "text": "About the fall: tick all that apply.",
+          "answers": [
+            "Fell from higher than 3 m (about one storey), or more than twice a child's height",
+            "An arm or leg looks deformed (out of shape) or badly injured",
+            "Confused, drowsy, or new weakness or numbness since the fall",
+            "Pain is the main problem",
+            "Walking normally with only mild symptoms",
+            "None of these"
+          ],
+          "none_answers": [
+            "None of these"
+          ],
+          "maps_to": [
+            {
+              "when": "Fell from higher than 3 m (about one storey), or more than twice a child's height",
+              "condition_ids": [
+                "RULE_TRAUMA_L3_01.C16",
+                "RULE_TRAUMA_L3_01.C17",
+                "RULE_TRAUMA_PAED_L2_01.C16"
+              ]
+            },
+            {
+              "when": "An arm or leg looks deformed (out of shape) or badly injured",
+              "condition_ids": [
+                "RULE_TRAUMA_L3_01.C14",
+                "RULE_TRAUMA_PAED_L2_01.C15"
+              ]
+            },
+            {
+              "when": "Confused, drowsy, or new weakness or numbness since the fall",
+              "condition_ids": [
+                "RULE_TRAUMA_L2_01.C11",
+                "RULE_TRAUMA_PAED_L1_01.C11",
+                "RULE_TRAUMA_L2_01.C12",
+                "RULE_TRAUMA_PAED_L1_01.C12",
+                "RULE_TRAUMA_L3_01.C15"
+              ]
+            },
+            {
+              "when": "Pain is the main problem",
+              "condition_ids": [
+                "RULE_TRAUMA_L4_01.C8",
+                "RULE_TRAUMA_PAED_L3_01.C6"
+              ]
+            },
+            {
+              "when": "Walking normally with only mild symptoms",
+              "condition_ids": [
+                "RULE_TRAUMA_L5_01.C3",
+                "RULE_TRAUMA_PAED_L4_01.C5",
+                "RULE_TRAUMA_L5_01.C1",
+                "RULE_TRAUMA_PAED_L4_01.C1"
+              ]
+            }
+          ],
+          "multi_select": true
+        },
+        {
           "question_id": "Q_TRAUMA_13",
           "population": "paediatric",
           "text": "After the fall, how severe is the child's pain on a scale of 0 to 10?",
@@ -3860,21 +4155,97 @@
           ]
         },
         {
-          "question_id": "Q_TRAUMA_14",
-          "population": "paediatric",
-          "text": "Does the child have a known bleeding disorder?",
+          "question_id": "Q_TRAUMA_06",
+          "population": "all",
+          "text": "About the wound or skin injury: tick all that apply.",
           "answers": [
-            "Yes",
-            "No"
+            "Spurting bleeding",
+            "Skin torn or peeled off (degloving)",
+            "Several stab or puncture wounds",
+            "Burn or chemical injury",
+            "Numbness, cannot move a finger / toe properly, or bone visible in the wound",
+            "Bleeding that keeps oozing or coming back",
+            "Wound looks infected or is not healing",
+            "Problem with a surgical wound or after an operation",
+            "New symptoms from an existing wound",
+            "None of these - only mild symptoms"
+          ],
+          "none_answers": [
+            "None of these - only mild symptoms"
           ],
           "maps_to": [
             {
-              "when": "Known bleeding disorder",
+              "when": "Spurting bleeding",
               "condition_ids": [
-                "RULE_TRAUMA_PAED_L3_01.C2"
+                "RULE_TRAUMA_L2_01.C13",
+                "RULE_TRAUMA_PAED_L1_01.C13"
+              ]
+            },
+            {
+              "when": "Skin torn or peeled off (degloving)",
+              "condition_ids": [
+                "RULE_TRAUMA_L2_01.C14",
+                "RULE_TRAUMA_PAED_L1_01.C14"
+              ]
+            },
+            {
+              "when": "Several stab or puncture wounds",
+              "condition_ids": [
+                "RULE_TRAUMA_L2_01.C15",
+                "RULE_TRAUMA_PAED_L1_01.C15"
+              ]
+            },
+            {
+              "when": "Burn or chemical injury",
+              "condition_ids": [
+                "RULE_TRAUMA_L2_01.C16",
+                "RULE_TRAUMA_PAED_L1_01.C16"
+              ]
+            },
+            {
+              "when": "Numbness, cannot move a finger / toe properly, or bone visible in the wound",
+              "condition_ids": [
+                "RULE_TRAUMA_L3_01.C18",
+                "RULE_TRAUMA_PAED_L2_01.C18"
+              ]
+            },
+            {
+              "when": "Bleeding that keeps oozing or coming back",
+              "condition_ids": [
+                "RULE_TRAUMA_L3_01.C19",
+                "RULE_TRAUMA_PAED_L2_01.C19"
+              ]
+            },
+            {
+              "when": "Wound looks infected or is not healing",
+              "condition_ids": [
+                "RULE_TRAUMA_L4_01.C9",
+                "RULE_TRAUMA_PAED_L3_01.C8"
+              ]
+            },
+            {
+              "when": "Problem with a surgical wound or after an operation",
+              "condition_ids": [
+                "RULE_TRAUMA_L4_01.C10",
+                "RULE_TRAUMA_PAED_L3_01.C9"
+              ]
+            },
+            {
+              "when": "New symptoms from an existing wound",
+              "condition_ids": [
+                "RULE_TRAUMA_L4_01.C11",
+                "RULE_TRAUMA_PAED_L3_01.C10"
+              ]
+            },
+            {
+              "when": "None of these - only mild symptoms",
+              "condition_ids": [
+                "RULE_TRAUMA_L5_01.C1",
+                "RULE_TRAUMA_PAED_L4_01.C1"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         },
         {
           "question_id": "Q_TRAUMA_15",
@@ -4007,7 +4378,19 @@
               "condition": "Pulses felt",
               "reason": "Clinician/measured assessment excluded from self-screening workflow."
             }
-          ]
+          ],
+          "age_derived": {
+            "C2": {
+              "field": "age_years",
+              "op": ">",
+              "value": 65
+            },
+            "C6": {
+              "field": "age_years",
+              "op": ">",
+              "value": 65
+            }
+          }
         },
         {
           "rule_id": "RULE_TRAUMA_L5_01",
@@ -4107,7 +4490,14 @@
               "condition": "Distracting pain",
               "reason": "Clinician-judged or diagnostic criterion excluded from self-screening workflow."
             }
-          ]
+          ],
+          "age_derived": {
+            "C8": {
+              "field": "age_years",
+              "op": "<",
+              "value": 5
+            }
+          }
         },
         {
           "rule_id": "RULE_TRAUMA_PAED_L3_01",
@@ -4137,7 +4527,14 @@
               "condition": "Pulses felt",
               "reason": "Clinician/measured assessment excluded from self-screening workflow."
             }
-          ]
+          ],
+          "age_derived": {
+            "C3": {
+              "field": "age_years",
+              "op": "<",
+              "value": 5
+            }
+          }
         },
         {
           "rule_id": "RULE_TRAUMA_PAED_L4_01",
@@ -4427,6 +4824,9 @@
                 "RULE_PAED_L1_01.C7"
               ]
             }
+          ],
+          "none_answers": [
+            "No - alert, attentive, consolable"
           ]
         },
         {
@@ -4473,14 +4873,20 @@
         {
           "question_id": "Q_PAED_03",
           "population": "paediatric",
-          "text": "Is the child showing abnormal breathing (stridor, grunting, snoring or muffled voice, sniffing / tripod position, head bobbing)?",
+          "text": "Is the child showing any of these breathing signs?",
           "answers": [
-            "Yes - stridor, grunting, wheezing, snoring / muffled voice, tripod position or head bobbing",
-            "No"
+            "Stridor (harsh high-pitched noise), grunting or wheezing",
+            "Snoring or muffled voice",
+            "Sniffing / tripod position (leaning forward to breathe)",
+            "Head bobbing with each breath (infants)",
+            "None of these"
+          ],
+          "none_answers": [
+            "None of these"
           ],
           "maps_to": [
             {
-              "when": "Stridor, grunting or wheezing",
+              "when": "Stridor (harsh high-pitched noise), grunting or wheezing",
               "condition_ids": [
                 "RULE_PAED_L1_01.C9"
               ]
@@ -4492,18 +4898,19 @@
               ]
             },
             {
-              "when": "Sniffing / tripod position",
+              "when": "Sniffing / tripod position (leaning forward to breathe)",
               "condition_ids": [
                 "RULE_PAED_L1_01.C10"
               ]
             },
             {
-              "when": "Head bobbing",
+              "when": "Head bobbing with each breath (infants)",
               "condition_ids": [
                 "RULE_PAED_L1_01.C11"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         },
         {
           "question_id": "Q_PAED_04",
@@ -4569,6 +4976,9 @@
                 "RULE_PAED_L3_01.C1"
               ]
             }
+          ],
+          "none_answers": [
+            "No"
           ]
         },
         {
@@ -6179,7 +6589,8 @@
                 "RULE_FEVER_PAED_L3_01.C2"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         }
       ],
       "rules": [
@@ -6658,7 +7069,8 @@
                 "RULE_GU_PAED_L3_01.C1"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         },
         {
           "question_id": "Q_GU_04",
@@ -7263,50 +7675,58 @@
         {
           "question_id": "Q_LIMB_02",
           "population": "all",
-          "text": "Is there generalized oedema (swelling), or can the person not bear weight? (For a child: limited movement of a joint, an inflamed joint, or fever with it?)",
+          "text": "Do any of these apply? Tick all that apply.",
           "answers": [
-            "Yes",
-            "No"
+            "Swelling all over the body, not only the painful area (generalized oedema)",
+            "Cannot put any weight on the leg",
+            "Child: cannot move a joint fully",
+            "Child: a joint is red, hot or swollen (inflamed)",
+            "Child: fever with the limb problem",
+            "None of these"
           ],
           "maps_to": [
             {
-              "when": "Generalized oedema (swelling)",
+              "when": "Swelling all over the body, not only the painful area (generalized oedema)",
               "condition_ids": [
                 "RULE_LIMB_L3_01.C1",
                 "RULE_LIMB_PAED_L2_01.C1"
               ]
             },
             {
-              "when": "Cannot bear weight",
+              "when": "Cannot put any weight on the leg",
               "condition_ids": [
                 "RULE_LIMB_L3_01.C2",
                 "RULE_LIMB_PAED_L2_01.C2"
               ]
             },
             {
-              "when": "Limited movement of a joint (child)",
+              "when": "Child: cannot move a joint fully",
               "condition_ids": [
                 "RULE_LIMB_PAED_L2_01.C2"
               ]
             },
             {
-              "when": "Inflamed joint (child)",
+              "when": "Child: a joint is red, hot or swollen (inflamed)",
               "condition_ids": [
                 "RULE_LIMB_PAED_L2_01.C3"
               ]
             },
             {
-              "when": "Fever with it (child)",
+              "when": "Child: fever with the limb problem",
               "condition_ids": [
                 "RULE_LIMB_PAED_L2_01.C4"
               ]
             }
+          ],
+          "multi_select": true,
+          "none_answers": [
+            "None of these"
           ]
         },
         {
           "question_id": "Q_LIMB_03",
           "population": "all",
-          "text": "Is there swelling of both legs (bilateral lower limb oedema)? (For a child: a tender swelling?)",
+          "text": "Are both legs swollen (bilateral lower limb oedema)? (For a child: is the swelling tender to touch?)",
           "answers": [
             "Yes",
             "No"
@@ -7772,7 +8192,8 @@
                 "RULE_PALP_L5_01.C1"
               ]
             }
-          ]
+          ],
+          "multi_select": true
         }
       ],
       "rules": [
@@ -8872,6 +9293,8 @@
     "'Mild URTI symptoms' appears at Level 5 (p.9) and Level 4 (p.10) in the adult respiratory rows; the higher level (4) is used.",
     "Paediatric Assessment Triangle Level 3 cells (alert, good tone, consolable, looking around) describe normal findings and are treated as 'no danger sign' (proceed to secondary triage), not as Level 3 triggers.",
     "Criteria that a person cannot give by questionnaire or verbally are excluded: measurements (SpO2, BP, ECG, CRT, glucose, temperature), clinician-judged impressions ('Septic / Toxic', 'Toxic appearance', 'Septic appearance', 'Airway unprotected', 'Airway reflexes lost', 'Requires assisted breathing', 'Abnormal posturing', 'Appears unwell', 'Distracting pain', suspected / possible vascular injury, suspected intra-abdominal bleeding / ectopic / AAA, compartment syndrome, 'Airway threatened') and staff decisions ('Need for sedation', 'Need for restraint', 'Inter-facility transfers', 'Referred cases'). 'Likely / possible' impressions that a person can describe in plain words (e.g. likely rib fractures, possible pelvic injury) are kept.",
-    "Syncope Level 4 'Full recovery, no deficits' is qualified 'and no history of previous syncope' (product decision, approved). The source lists Level 5 as the same findings plus 'History of syncope' but never says Level 4 excludes it; without the qualifier a person with a previous syncope matches both and, because higher urgency wins, Level 5 could never be reached."
+    "Syncope Level 4 'Full recovery, no deficits' is qualified 'and no history of previous syncope' (product decision, approved). The source lists Level 5 as the same findings plus 'History of syncope' but never says Level 4 excludes it; without the qualifier a person with a previous syncope matches both and, because higher urgency wins, Level 5 could never be reached.",
+    "Patient-facing question wording (approved product decision, Oct 2026). Rule conditions and levels are unchanged; only how they are asked changed. Critical First Look starts with one tick-all-that-apply checklist (Q_CRIT_02A): trouble breathing, bleeding or injury, pale/bluish skin with cold peripheries, or none. An option that is not ticked rules out the items it `covers`; a ticked option `opens` its detailed list. Laypeople picking from long clinical lists over-selected Level 1 items (e.g. a cough read as 'abnormal breathing sounds'). 'No trouble breathing' also covers the breathing items repeated in the respiratory and paediatric lists (not observed-only signs such as retractions or nasal flaring). Clinical terms have lay descriptions: 'Abnormal breathing sounds' = harsh / high-pitched, gurgling or snoring noise with every breath, not a cough, phlegm or blocked nose; 'Incessant cough' = non-stop coughing fits without catching breath; 'airway intact' (wheeze) = able to talk normally. Questions whose options can co-exist are multi_select; options not ticked are absent. Multi-part yes/no questions became explicit option lists with none_answers so each answer maps to conditions without interpretation.",
+    "Trauma (approved product decision, Oct 2026): the PDF lists trauma as separate rows (Chest / Abdo Trauma, Trauma Head Neck, Trauma Limb, Fall, Wounds / Skin; p.7, 8, 10, 11 and paeds p.15-18). The KB keeps one rule per level, so questions now follow the rows: an injury-area checklist (Q_TRAUMA_00) opens each row's list, and a row not ticked rules out (covers) that row's items. E.g. pregnancy, anticoagulant use, high-risk mechanism and elderly come from the Chest / Abdo row only and are not asked for a limb injury. End-state items (Mild symptoms, Unlikely fractures, Mobilizing well, Low-risk mechanisms, No symptoms) are never ruled out by area. 'Elderly' (Chest / Abdo) is read as > 65 like elsewhere in this KB; it and the paediatric 'Child < 5' items are decided from age. Lay wording: 'Unlikely fractures' + 'Mild symptoms' = can still use it / bear weight and it does not look broken; 'Small bone fractures likely, moving fingers / toes' = might be a small broken bone (e.g. finger or toe) but can move fingers / toes; 'Proximal long bone fractures' = possible broken thigh or upper-arm bone; 'Amputation proximal to wrist' = arm or leg cut off above the wrist or ankle, 'Distal amputation' = finger, toe or part of the hand / foot; 'Limb injury / deformity' (Fall) = an arm or leg looks deformed or badly injured. Limb Pain / Swelling: 'Generalized oedema' = swelling all over the body, not only the painful area (a swollen injured ankle is not generalized oedema); 'Not able to bear weight' = cannot put any weight on the leg."
   ]
 }

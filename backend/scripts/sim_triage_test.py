@@ -47,8 +47,8 @@ SCENARIOS = [
      "35 years old. Gradual onset, no neck pain, no confusion or weakness, no vision/speech/walking problems. Pain 3/10. Vomited once. No fever. Alert, breathing normally, no bleeding, no other symptoms.", {4}),
     (6, "Headache, mild only", "I have a headache",
      "35 years old. Gradual onset, no neck pain, no confusion or weakness, no vision/speech/walking problems. Pain 3/10. No vomiting, no fever, no aura. Alert, breathing normally, no bleeding, no other symptoms.", {5}),
-    (7, "Sore throat, routine", "Sore throat and runny nose",
-     "25 years old. For 2 days. No choking, no breathing trouble, no nosebleed, no trouble swallowing, nothing stuck. Alert, no bleeding, no other symptoms.", {5}),
+    (7, "Sore throat, routine", "Sore throat",
+     "25 years old. For 2 days. Only a sore throat, no runny nose, no cough, no fever. No choking, no breathing trouble, no nosebleed, no trouble swallowing, nothing stuck. Alert, no bleeding, no other symptoms.", {5}),
     (8, "Sore throat, hard to swallow", "Sore throat",
      "25 years old. It is hard to swallow. No choking, no breathing trouble, no nosebleed, nothing stuck. Alert, no bleeding, no other symptoms.", {3}),
     (9, "Vomited once", "I vomited once",
@@ -64,9 +64,9 @@ SCENARIOS = [
     (14, "Fever gone", "I had a fever yesterday",
      "30 years old. The fever is gone now. Eating and walking normally. No other symptoms. Alert, breathing normally.", {5}),
     (15, "Leg swollen, no weight bearing", "My leg hurts",
-     "40 years old. Swollen and cannot put weight on it. Not cold, not discoloured. Alert, no bleeding, no injury, no other symptoms.", {3}),
+     "40 years old. Swollen and cannot put weight on it. Pain 5/10. Can sit up and move about with help, can talk normally, no neurological problems. Not cold, not discoloured. Alert, no bleeding, no injury, no other symptoms.", {3}),
     (16, "Leg mildly sore", "My leg is a bit sore",
-     "40 years old. Walking fine, mild symptoms only. No swelling, not cold or discoloured. Alert, no bleeding, no other symptoms.", {5}),
+     "40 years old. Walking fine, mild symptoms only. No injury or fall. No swelling, not cold or discoloured. Alert, no bleeding, no other symptoms.", {5}),
     (17, "Back pain + numbness", "I have back pain",
      "45 years old. Numbness in the leg. No abdominal pain, no loss of bladder or bowel control, no fall. Alert, no bleeding.", {3}),
     (18, "Back pain after fall", "I have back pain",
@@ -79,6 +79,23 @@ SCENARIOS = [
      "He is 40 years old. The seizure is still going on, he is not responding. He is breathing.", {1, 2}),
     (22, "SAFETY: not breathing", "My dad collapsed and isn't breathing",
      "He is 60 years old. Collapsed, not breathing, not responding.", {1}),
+    (23, "Cough with a cold", "I'm coughing",
+     "30 years old. Cough and runny nose for 3 days, a bit of phlegm that rattles when I cough. Fully conscious. "
+     "Breathing comfortably, no wheeze, can talk normally, no noise when breathing apart from the cough. Eating and "
+     "drinking fine. No chest pain, no bleeding, no other symptoms.", {4}),
+    (24, "SAFETY: stridor", "My son is struggling to breathe",
+     "He is 30 years old. There is a harsh high-pitched noise with every breath. He is awake but can only say a "
+     "word at a time. No bleeding, no injury.", {1}),
+    (25, "Sprained ankle", "sprained ankle, i am 21, male",
+     "21 years old, male. Twisted the ankle playing futsal yesterday, did not fall from a height. Swollen and "
+     "sore, pain 4/10, can walk on it with a slight limp, it does not look deformed or out of place, can move "
+     "the toes, no numbness. No wound, no bleeding, no head, chest or other injury. Fully conscious, breathing "
+     "normally, no other symptoms.", {3}),  # pain 4-7 is Level 3 (PDF p.6 vital signs)
+    (26, "Sprained ankle, minor fall", "sprained ankle, i am 21, male. i had a minor fall",
+     "21 years old, male. Slipped on a wet floor and fell from standing height, twisting the ankle. Swollen and "
+     "sore, pain 2/10, pain is the main problem. Can walk on it with a slight limp, it does not look deformed "
+     "or out of place, can move the toes, no numbness. Did not hit the head, no blackout, not confused. No "
+     "wound, no bleeding, no other injury. Fully conscious, breathing normally, no other symptoms.", {4, 5}),
 ]
 
 PATIENT_SYSTEM = """You are role-playing a patient (or a relative) talking to a medical triage chatbot.
@@ -88,7 +105,7 @@ Your fact sheet is the ONLY truth about the situation:
 Rules:
 - Answer ONLY what the bot just asked, in one or two short plain sentences, like a real worried person.
 - Use only facts from the sheet. If asked about something the sheet does not mention, say no / not that you've noticed.
-- If the bot offers answer options, pick the one that matches the sheet.
+- If the bot offers OPTIONS, reply with the exact text of the one that matches the sheet, copied character for character (like tapping a button). If the options say TICK ALL THAT APPLY, give every matching option separated by "; ". If none fits, use "None of these" or "Not sure" when offered.
 - Never mention levels, conditions IDs or that this is a test. Do not volunteer extra symptoms."""
 
 
@@ -113,14 +130,22 @@ def run_scenario(num, name, opening, facts, accepted, max_turns, quiet):
         if not quiet:
             print(f"  PATIENT: {msg}", flush=True)
         transcript.append(("patient", msg))
+        # Like the app: options picked from the last selection are sent as selected_options ("A; B" = ticked both).
+        offered = (session.last_output or {}).get("response", []) if session_id else []
+        picked = [p.strip() for p in msg.split(";")]
+        selected = picked if isinstance(offered, list) and all(p in offered for p in picked) else None
         try:
-            session = agent.run_session(msg, session_id=session_id)
+            session = agent.run_session(msg, session_id=session_id, selected_options=selected)
         except Exception as exc:  # keep the batch going
             error = f"{type(exc).__name__}: {exc}"
             print(f"  !! ERROR: {error}", flush=True)
             break
         session_id = session.session_id
-        bot = session.messages[-1].content
+        out = session.last_output or {}
+        # Show what the app shows: the question plus the final option list (incl. "None of these" / "Not sure").
+        bot = (f"{out['question']}\nOPTIONS{' (TICK ALL THAT APPLY)' if out.get('multi_select') else ''}: "
+               + " | ".join(out["response"])
+               if out.get("type") == "selection" else out.get("response") or session.messages[-1].content)
         result = session.triage_result or {}
         if not quiet:
             print(f"  BOT    : {bot}", flush=True)

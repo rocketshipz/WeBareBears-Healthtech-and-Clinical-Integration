@@ -1,0 +1,660 @@
+[
+  {
+    "scenario": 7,
+    "name": "Sore throat, routine",
+    "expected": [
+      5
+    ],
+    "got": 5,
+    "call_999": false,
+    "turns": 17,
+    "seconds": 313.1,
+    "matched_rules": [
+      "RULE_CP_L5_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "present_condition_ids": [
+      "RULE_CP_L5_01.C1 (No further pain)"
+    ],
+    "findings_by_turn": [
+      {
+        "turn": 1,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 2,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 15
+      },
+      {
+        "turn": 3,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 4,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 3
+      },
+      {
+        "turn": 5,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 6,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 7,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 5
+      },
+      {
+        "turn": 8,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 5
+      },
+      {
+        "turn": 9,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 3
+      },
+      {
+        "turn": 10,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 7
+      },
+      {
+        "turn": 11,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 12,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 13,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 14,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 15,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 16,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 7
+      },
+      {
+        "turn": 17,
+        "age_years": 25,
+        "newly_present": [
+          "RULE_CP_L5_01.C1 (No further pain)"
+        ],
+        "no_longer_present": [],
+        "newly_absent": 0
+      }
+    ],
+    "transcript": [
+      [
+        "patient",
+        "Sore throat"
+      ],
+      [
+        "bot",
+        "You said you have a sore throat — thank you. I need to ask a quick emergency check.\n\nIs the person conscious, breathing normally, and able to respond to call?\n- Yes — conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits\n\nPlease pick the one option that fits."
+      ],
+      [
+        "patient",
+        "Yes — conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — can I have your age in years, please?"
+      ],
+      [
+        "patient",
+        "I'm 25 years old."
+      ],
+      [
+        "bot",
+        "Thanks — quick question about breathing: which fits best?\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact\n\nPlease pick one option."
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — quick pain check.\n\nIs there chest pain or other pain? How severe is it on a scale of 0 to 10?\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)\n\nPlease pick one option."
+      ],
+      [
+        "patient",
+        "Mild pain (1-3)."
+      ],
+      [
+        "bot",
+        "Thanks — quick check about the throat: is there any possible airway blockage (choking, throat closing, or struggling to breathe)?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — not choking or struggling to breathe."
+      ],
+      [
+        "bot",
+        "Thanks — you said you’re conscious, breathing normally, 25 years old, mild pain, and not choking. \n\nIs the person having a seizure, or unable to sit, stand, walk or communicate?\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally\n\nPlease pick the one option that fits."
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — you said sore throat, conscious, breathing normally, mild pain, not choking, age 25, and walking/talking normally.\n\nIs there any bleeding, major trauma, or severe injury?\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder\n\nPlease pick the one option that fits."
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — you said sore throat, conscious, breathing normally, age 25, mild pain, not choking, and walking/talking normally.\n\nIs there an active nosebleed, difficulty swallowing, or a tracheostomy?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — you’ve said sore throat, conscious, breathing normally, mild pain, age 25, not choking, walking/talking normally.\n\nIs the person confused or unusually drowsy (lethargic) and having difficulty breathing?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No. Not confused or drowsy and breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — quick follow-up: Is there a foreign body in the ear / nose / throat? For a child: is the pain score above 4, or is the child under 5?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — nothing stuck."
+      ],
+      [
+        "bot",
+        "Thanks — one last question: Is it any other ear / nose / throat problem, not described above?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Do you have any other symptoms besides the sore throat? Please pick one option:\n- Fever\n- Cough or shortness of breath\n- Chest pain\n- Abdominal pain\n- Vomiting or diarrhoea\n- Headache or dizziness\n- Ear, eye or other ENT problem\n- Rash or allergic reaction\n- Recent injury / trauma\n- Palpitations (fast/irregular heartbeat)\n- Urinary symptoms\n- Pregnancy-related symptoms\n- None of the above"
+      ],
+      [
+        "patient",
+        "None of the above."
+      ],
+      [
+        "bot",
+        "Thanks — quick follow-up: when did the sore throat start?\n- Less than 24 hours\n- 1–7 days\n- More than 7 days"
+      ],
+      [
+        "patient",
+        "1–7 days. It started 2 days ago."
+      ],
+      [
+        "bot",
+        "Thanks — quick check to finish screening.\n\nAre you experiencing any of these now: fever, cough or shortness of breath, chest pain, abdominal pain, vomiting or diarrhoea, headache or dizziness, eye/ear problems, rash or allergic reaction, recent injury/trauma, palpitations, urinary symptoms, or pregnancy-related symptoms?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Quick check — any chest pain or palpitations (fast or irregular heartbeat)?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — I don't have chest pain or palpitations."
+      ],
+      [
+        "bot",
+        "You said no chest pain before — just to confirm: Is the chest pain still ongoing, and how strong is it (0 to 10)?\n- Ongoing and high (severe, 8-10)\n- Ongoing and moderate (4-7)\n- Persisting mild pain (1-3)\n- No longer in pain\n\nPlease pick one option."
+      ],
+      [
+        "patient",
+        "No longer in pain."
+      ],
+      [
+        "bot",
+        "Level 5 - Routine\n\nAdvice: Level 5 - Routine (target: under 90 minutes). Not an emergency: a clinic or outpatient visit is suitable.\n\nKey findings: sore throat; conscious and breathing normally; age 25; mild pain; not choking; walking and talking normally; no other symptoms; sore throat started 2 days ago; no chest pain now.\n\nRouting: I can recommend nearby outpatient clinics or primary care if you want — tell me your location (town or postcode) and I’ll find options.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 8,
+    "name": "Sore throat, hard to swallow",
+    "expected": [
+      3
+    ],
+    "got": 3,
+    "call_999": false,
+    "turns": 10,
+    "seconds": 140.4,
+    "matched_rules": [
+      "RULE_ENT_L3_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "present_condition_ids": [
+      "RULE_ENT_L3_01.C2 (Difficulty swallowing)"
+    ],
+    "findings_by_turn": [
+      {
+        "turn": 1,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 2,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 15
+      },
+      {
+        "turn": 3,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 4,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 3
+      },
+      {
+        "turn": 5,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 6,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 7,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 8,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 9,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 10,
+        "age_years": 25,
+        "newly_present": [
+          "RULE_ENT_L3_01.C2 (Difficulty swallowing)"
+        ],
+        "no_longer_present": [],
+        "newly_absent": 0
+      }
+    ],
+    "transcript": [
+      [
+        "patient",
+        "Sore throat"
+      ],
+      [
+        "bot",
+        "You said you have a sore throat — I’ll ask a few quick safety questions. Is the person conscious, breathing normally, and able to respond to call?\n\nPlease choose one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — and noted. How old is the person (age in years)?"
+      ],
+      [
+        "patient",
+        "25 years old."
+      ],
+      [
+        "bot",
+        "Noted — you have a sore throat and are conscious and breathing. How is the breathing? Please choose one:\n\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Any chest pain or other pain right now? If yes, how severe on a 0–10 scale?\n\nChoose one:\n- Severe chest pain\n- Severe pain (8–10)\n- Moderate pain (4–7)\n- Mild pain (1–3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Mild pain (1–3)"
+      ],
+      [
+        "bot",
+        "Thanks — quick check: is there any choking, throat feeling like it’s closing, or struggling to breathe?\n\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, not choking or struggling to breathe."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question: Is the person having a seizure, or unable to sit, stand, walk or communicate?\n\nChoose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Is the person confused or unusually drowsy (lethargic) and having difficulty breathing?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I'm not confused or drowsy and I'm breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — quick question: Is there any bleeding, major trauma, or severe injury?\n\nPlease choose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Is there an active nosebleed, difficulty swallowing, or a tracheostomy? Please answer Yes or No."
+      ],
+      [
+        "patient",
+        "Yes — I have difficulty swallowing."
+      ],
+      [
+        "bot",
+        "Level 3 - Urgent\n\nNeeds urgent medical assessment: go to an Emergency Department (target: under 30 minutes).\n\nKey finding: difficulty swallowing.\n\nWhat to do now:\n- Go to the nearest hospital emergency department now and tell the staff you have difficulty swallowing.\n- If swallowing gets worse, you drool, cannot swallow saliva, develop noisy or difficult breathing, or your throat feels like it is closing — call 999 (112 from mobile) immediately.\n- Bring any ID, a list of current medicines and any allergies if you can.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 9,
+    "name": "Vomited once",
+    "expected": [
+      5
+    ],
+    "got": 5,
+    "call_999": false,
+    "turns": 11,
+    "seconds": 173.7,
+    "matched_rules": [
+      "RULE_VD_L5_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "present_condition_ids": [
+      "RULE_VD_L5_01.C1 (Able to take orally)",
+      "RULE_VD_L5_01.C2 (Single episode)",
+      "RULE_VD_L5_01.C3 (Small quantity)",
+      "RULE_VD_L5_01.C4 (Stable)",
+      "RULE_VD_L5_01.C5 (Mild symptoms)",
+      "RULE_VD_L5_01.C6 (Tolerating orally)"
+    ],
+    "findings_by_turn": [
+      {
+        "turn": 1,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 2,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 15
+      },
+      {
+        "turn": 3,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 7
+      },
+      {
+        "turn": 4,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 5,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 6,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 7,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 8,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 13
+      },
+      {
+        "turn": 9,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 10,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 7
+      },
+      {
+        "turn": 11,
+        "age_years": 28,
+        "newly_present": [
+          "RULE_VD_L5_01.C1 (Able to take orally)",
+          "RULE_VD_L5_01.C2 (Single episode)",
+          "RULE_VD_L5_01.C3 (Small quantity)",
+          "RULE_VD_L5_01.C4 (Stable)",
+          "RULE_VD_L5_01.C5 (Mild symptoms)",
+          "RULE_VD_L5_01.C6 (Tolerating orally)"
+        ],
+        "no_longer_present": [],
+        "newly_absent": 0
+      }
+    ],
+    "transcript": [
+      [
+        "patient",
+        "I vomited once"
+      ],
+      [
+        "bot",
+        "Thanks — you said you vomited once. Quick question: Is the person conscious, breathing normally, and able to respond to call?\n\nChoose one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding"
+      ],
+      [
+        "bot",
+        "Thanks — noted you vomited once and are conscious and breathing normally.\n\nHow old are you (age in years)?"
+      ],
+      [
+        "patient",
+        "I'm 28 years old."
+      ],
+      [
+        "bot",
+        "Thanks — noted you vomited once.\n\nDid the vomit contain fresh blood or dark coffee-ground material, or are you passing black tarry stools or bloody diarrhoea?\n- Fresh blood in stool or vomit\n- Coffee-ground vomit, black stools or bloody diarrhoea\n- No"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted. You said you vomited once, are conscious and breathing normally, and are 28 years old.\n\nNext: Is there any chest pain or other pain now? How severe is it on 0–10?\n\nChoose one:\n- Severe chest pain\n- Severe pain (8–10)\n- Moderate pain (4–7)\n- Mild pain (1–3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No pain (0)."
+      ],
+      [
+        "bot",
+        "Thanks — noted no pain.\n\nNext question: Is the person having a seizure, or unable to sit, stand, walk or communicate?\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted.\n\nNext: Are you unable to tolerate any fluids orally, or showing severe dehydration (dry mouth, confusion or signs of shock)?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I'm drinking fine and feel stable."
+      ],
+      [
+        "bot",
+        "Thanks — noted you vomited once, are stable, and did not have blood in the vomit earlier.\n\nNext: Is there any bleeding, major trauma, or severe injury?\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Quick check: Are you on any anticoagulant (blood-thinning) medication, or is your consciousness altered (confused, very drowsy)?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I'm not on any blood thinners and I'm fully alert."
+      ],
+      [
+        "bot",
+        "Thanks — noted.\n\nHow is the breathing?\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted you vomited once, are stable, breathing normally, and tolerating fluids.\n\nWas this a single small episode and are you able to keep drinking (tolerating oral fluids) with only mild symptoms?\n- Yes — single small episode, stable and tolerating fluids\n- No — repeated vomiting, large amount, or not tolerating fluids"
+      ],
+      [
+        "patient",
+        "Yes — single small episode, stable and tolerating fluids."
+      ],
+      [
+        "bot",
+        "Level 5 - Routine\n\nAdvice: Level 5 - Routine (target: under 90 minutes). Not an emergency: a clinic or outpatient visit is suitable.\n\nKey findings used: single small vomiting episode, stable, tolerating oral fluids, mild symptoms, able to drink.\n\nWhat to do now (brief):\n- Stay hydrated with small sips of clear fluids.  \n- If vomiting recurs, becomes large or frequent, you cannot keep fluids down, you develop blood in vomit or black stools, severe pain, dizziness, fainting, confusion, or breathing problems — seek immediate care or call 999.  \n- If symptoms persist or you are worried, see a clinic or your usual doctor within the day.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  }
+]

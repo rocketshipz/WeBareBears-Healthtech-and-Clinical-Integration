@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'localization.dart';
 import 'screens/login_screen.dart';
+import 'pages/home_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +22,7 @@ class TriageMYApp extends StatelessWidget {
       locale: locale,
       supportedLocales: const [Locale('en'), Locale('ms')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: const LoginScreen(),
+      home: const MainNavigation(),
     ),
   );
 }

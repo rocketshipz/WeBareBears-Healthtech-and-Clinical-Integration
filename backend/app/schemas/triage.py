@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 from pydantic import BaseModel, Field
 from app.schemas.hospital import Coordinates, HospitalRecommendation
 
@@ -59,11 +59,19 @@ class TriageChatRequest(BaseModel):
     message: str = Field(..., description="User query or message")
     session_id: Optional[str] = Field(None, description="Conversation session ID")
     patient_id: Optional[str] = Field(None, description="Patient ID if available")
+    selected_options: Optional[List[str]] = Field(
+        None, description="Option(s) picked from the previous selection, exactly as offered (several if multi_select)")
 
 
 class TriageChatResponse(BaseModel):
     """Response from conversational triage interaction."""
-    reply: str
+    type: str = Field("text", description="'text' (free-text reply) or 'selection' (pick from the options)")
+    response: Union[str, List[str]] = Field("", description="Text message, or the list of options for a selection")
+    question: Optional[str] = Field(None, description="Question to show above the options when type is 'selection'")
+    multi_select: bool = Field(False, description="Selection allows ticking several options")
+    exclusive_options: List[str] = Field(
+        default_factory=list, description="Options that cannot be ticked together with any other (e.g. 'None of these')")
+    reply: str = Field(..., description="Plain text of the turn (the question for a selection); kept for compatibility")
     session_id: Optional[str] = None
     assessment: Optional[TriageAssessment] = None
     recommended_hospitals: List[HospitalRecommendation] = Field(default_factory=list)

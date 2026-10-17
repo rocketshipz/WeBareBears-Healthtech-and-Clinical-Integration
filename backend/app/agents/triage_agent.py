@@ -6,6 +6,7 @@ from typing import List, Optional, Any, Dict
 from langchain_core.messages import AIMessage, SystemMessage, HumanMessage, ToolMessage, BaseMessage
 from app.core.llm import get_llm
 from app.agents.prompts import TRIAGE_SYSTEM_PROMPT
+from app.services.triage_rules_engine import NONE_ANSWERS, get_triage_rules_engine
 from app.tools.triage_tool import evaluate_triage_rules
 from app.tools.patient_history_tool import get_patient_history
 from app.tools.hospital_data_tool import query_hospital_facilities
@@ -41,6 +42,84 @@ def _extract_text(content: Any) -> str:
     return str(content) if content is not None else ""
 
 
+def _strip_code_fence(text: str) -> str:
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.split("\n", 1)[1] if "\n" in text else ""
+        text = text.rsplit("```", 1)[0]
+    return text.strip()
+
+
+def parse_structured_reply(text: str, triage_result: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Turn the LLM's final reply into {type, question, response}.
+
+    type is "text" (response is a string) or "selection" (response is a list of options, question is the prompt).
+    Selection options must come from the KB answers of the latest triage result; anything else is dropped.
+    Falls back to plain text when the reply is not valid structured JSON.
+    """
+    fallback = {"type": "text", "question": None, "response": text}
+    try:
+        data = json.loads(_strip_code_fence(text))
+    except (ValueError, TypeError):
+        return fallback
+    if not isinstance(data, dict):
+        return fallback
+
+    reply_type, response = data.get("type"), data.get("response")
+    if reply_type == "text" and isinstance(response, str) and response.strip():
+        return {"type": "text", "question": None, "response": response.strip()}
+
+    if reply_type == "selection" and isinstance(response, list):
+        question = str(data.get("question") or "").strip()
+        suggested = (triage_result or {}).get("suggested_questions", [])
+        allowed = {a for q in suggested for a in q.get("answers", [])}
+        options = [o for o in response if isinstance(o, str) and o in allowed and o != NOT_SURE]
+        options = list(dict.fromkeys(options))
+        if question and options:
+            reply = {"type": "selection", "question": question, "response": options}
+            # The KB question these options came from (the one offering the most of them).
+            source = max(suggested, key=lambda q: len(set(options) & set(q.get("answers", []))))
+            if source.get("question_id") and set(options) & set(source.get("answers", [])):
+                reply["question_id"] = source["question_id"]
+                # The KB question has none_answers / multi_select; fall back to the suggestion if unknown.
+                source = get_triage_rules_engine().questions_by_id.get(source["question_id"], source)
+                answers = source.get("answers", [])
+                # The LLM sometimes sends only an acknowledgement: make sure the question itself is shown.
+                if "?" not in question and source.get("text") and source["text"].lower() not in question.lower():
+                    reply["question"] = f"{question} {source['text']}".strip()
+                # Options not picked are recorded as absent, so always offer the question's full KB list.
+                options[:] = list(answers)
+                # Always offer a way to say "none": the question's own none answers, else "None of these".
+                nones = source.get("none_answers") or [a for a in answers if a in NONE_ANSWERS or a == "No"]
+                if not nones and len(answers) > 2:
+                    nones = [NONE_ANSWERS[0]]
+                options.extend(a for a in nones if a not in options)
+                if source.get("multi_select"):
+                    reply["multi_select"] = True
+                    # Ticking one of these clears the others (and vice versa).
+                    reply["exclusive_options"] = [a for a in options if a in nones] + [NOT_SURE]
+            options.append(NOT_SURE)
+            return reply
+        if question:
+            return {"type": "text", "question": None, "response": question}
+
+    return fallback
+
+
+NOT_SURE = "Not sure"
+
+
+def selection_findings(last_output: Optional[Dict[str, Any]], message: str,
+                       selected: Optional[List[str]] = None) -> Optional[Dict[str, Any]]:
+    """Findings for the option(s) picked from the previous selection, decided by the KB, not by the LLM."""
+    if not last_output or last_output.get("type") != "selection" or not last_output.get("question_id"):
+        return None
+    picked = [s.strip() for s in selected] if selected else [message.strip()]
+    if not picked or any(p not in last_output["response"] for p in picked):
+        return None
+    return get_triage_rules_engine().apply_answers(last_output["question_id"], picked)
+
+
 @dataclass
 class TriageSession:
     """Conversation memory and accumulated triage findings for one chat session."""
@@ -48,6 +127,7 @@ class TriageSession:
     messages: List[BaseMessage] = field(default_factory=list)
     findings: Dict[str, Any] = field(default_factory=lambda: {k: [] for k in _FINDING_LISTS} | {"age_years": None})
     triage_result: Optional[Dict[str, Any]] = None
+    last_output: Optional[Dict[str, Any]] = None  # structured reply of the latest turn
 
     def merge_findings(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Merge new tool-call findings into the session; later answers correct earlier ones."""
@@ -134,6 +214,21 @@ class MedicalTriageAgent:
             if isinstance(m, ToolMessage) and m.tool_call_id in triage_call_ids:
                 m.content = _SUPERSEDED
 
+    def _record_selection(self, session: TriageSession, message: str, selected: Optional[List[str]] = None) -> None:
+        """If the user picked option(s) of the last selection, record them straight from the KB mapping.
+
+        Shown to the LLM as an evaluate_triage_rules call it already made, so it continues from the fresh result.
+        """
+        findings = selection_findings(session.last_output, message, selected)
+        if findings is None:
+            return
+        call_id = f"selection_{uuid.uuid4().hex[:8]}"
+        session.messages.append(AIMessage(
+            content="", tool_calls=[{"name": evaluate_triage_rules.name, "args": findings, "id": call_id}]
+        ))
+        result = self._invoke_tool(session, evaluate_triage_rules.name, findings)
+        session.messages.append(ToolMessage(content=result, tool_call_id=call_id))
+
     def _invoke_llm(self, runnable, messages: List[BaseMessage]):
         """Invoke the LLM, retrying once if the provider rejects a malformed tool call (e.g. JSON with comments)."""
         try:
@@ -158,14 +253,19 @@ class MedicalTriageAgent:
         message: str,
         context: Optional[Dict[str, Any]] = None,
         session_id: Optional[str] = None,
+        selected_options: Optional[List[str]] = None,
     ) -> TriageSession:
-        """Run one turn and return the session (reply is the last message; triage_result is set if evaluated)."""
+        """Run one turn and return the session (reply is the last message; triage_result is set if evaluated).
+
+        `selected_options`: the option(s) the user picked from the previous selection (several for multi_select).
+        """
         logger.info(f"[MedicalTriageAgent] Processing query: '{message[:60]}...'")
         session = self.get_session(session_id, context)
         messages = session.messages
         messages.append(HumanMessage(content=message))
 
         try:
+            self._record_selection(session, message, selected_options)
             runnable = self._get_runnable()
             final_reply = ""
 
@@ -197,13 +297,16 @@ class MedicalTriageAgent:
                     "mobile) or go to the nearest Emergency Department immediately."
                 )
                 messages.append(AIMessage(content=final_reply))
+            session.last_output = parse_structured_reply(final_reply, session.triage_result)
 
         except Exception as e:
             logger.error(f"[MedicalTriageAgent] Agent invocation error: {e}")
-            messages.append(AIMessage(content=(
+            error_reply = (
                 "Sorry, the screening assistant is temporarily unavailable. Please try again in a moment. "
                 "If you have any life-threatening symptoms, call 999 (or 112 from mobile) or go to the "
                 "nearest Emergency Department now."
-            )))
+            )
+            messages.append(AIMessage(content=error_reply))
+            session.last_output = {"type": "text", "question": None, "response": error_reply}
 
         return session

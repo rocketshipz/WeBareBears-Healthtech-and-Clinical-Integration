@@ -53,12 +53,19 @@ async def chat_triage(
     """Conversational interaction with the Medical Triage AI Agent."""
     logger.info(f"Incoming triage chat request: {request.message[:40]}")
     context = {"patient_id": request.patient_id} if request.patient_id else None
-    session = agent.run_session(request.message, context=context, session_id=request.session_id)
+    session = agent.run_session(request.message, context=context, session_id=request.session_id,
+                                selected_options=request.selected_options)
 
+    output = session.last_output or {"type": "text", "question": None, "response": session.messages[-1].content}
     return APIResponse(
         success=True,
         data=TriageChatResponse(
-            reply=session.messages[-1].content,
+            type=output["type"],
+            response=output["response"],
+            question=output["question"],
+            multi_select=output.get("multi_select", False),
+            exclusive_options=output.get("exclusive_options", []),
+            reply=output["question"] or output["response"],
             session_id=session.session_id,
             assessment=_assessment_from_result(session.triage_result),
         ),

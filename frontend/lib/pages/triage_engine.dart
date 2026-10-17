@@ -1,8 +1,15 @@
 import '../localization.dart';
 import 'package:flutter/material.dart';
 
+import '../services/triage_chat_service.dart';
 import '../theme.dart';
 import 'triage_report.dart';
+
+class _ChatMessage {
+  final String text;
+  final bool fromUser;
+  const _ChatMessage(this.text, {required this.fromUser});
+}
 
 class TriagePage extends StatefulWidget {
   const TriagePage({super.key});
@@ -12,11 +19,110 @@ class TriagePage extends StatefulWidget {
 }
 
 class _TriagePageState extends State<TriagePage> {
-  String? selectedSymptom;
-  String? selectedSeverity;
-  String? selectedDuration;
+  /// Selection lists up to this size render as buttons, longer ones as a dropdown.
+  static const int _maxButtonOptions = 4;
 
-  final Set<String> selectedDangerSigns = {};
+  final List<_ChatMessage> _messages = [
+    const _ChatMessage(
+      'Hi, I will ask a few questions to understand your condition. '
+      'What is the main problem you are experiencing?',
+      fromUser: false,
+    ),
+  ];
+  final TextEditingController _textController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  String? _sessionId;
+  String? _firstComplaint;
+  String? _lastSent;
+  List<String>? _lastSelected;
+  TriageChatReply? _current; // null until the first reply = free-text prompt
+  String? _dropdownValue;
+  final Set<String> _checked = {}; // ticked options of a multi-select question
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  bool get _isSelection => _current?.isSelection ?? false;
+
+  /// [selected]: the option(s) picked from the current selection, sent so the
+  /// backend can record them exactly.
+  Future<void> _send(String message, {List<String>? selected}) async {
+    final text = message.trim();
+    if (text.isEmpty || _loading) return;
+
+    setState(() {
+      _messages.add(_ChatMessage(text, fromUser: true));
+      _firstComplaint ??= text;
+      _lastSent = text;
+      _lastSelected = selected;
+      _textController.clear();
+      _dropdownValue = null;
+      _checked.clear();
+      _loading = true;
+      _error = null;
+    });
+    _scrollToEnd();
+
+    try {
+      final reply = await TriageChatService.sendMessage(
+        text,
+        sessionId: _sessionId,
+        selectedOptions: selected,
+      );
+      if (!mounted) return;
+      setState(() {
+        _sessionId = reply.sessionId ?? _sessionId;
+        _current = reply;
+        _loading = false;
+        _messages.add(_ChatMessage(reply.text, fromUser: false));
+      });
+      _scrollToEnd();
+      if (reply.assessment != null) _openReport(reply.assessment!);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = 'Could not reach the triage service. Please try again.';
+      });
+    }
+  }
+
+  void _openReport(TriageAssessmentData a) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TriageReportPage(
+          report: TriageReportData(
+            symptom: _firstComplaint,
+            severity: a.urgencyDescription,
+            duration: null,
+            dangerSigns: a.primaryConcerns,
+            levelOverride: a.level,
+            recommendationOverride:
+                a.immediateActions.isEmpty ? null : a.immediateActions.join(' '),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _scrollToEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,340 +130,41 @@ class _TriagePageState extends State<TriagePage> {
     return Scaffold(
       body: GradientBackground(
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 650),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // TOP BAR
-                    FadeSlideIn(
-                      index: 0,
-                      child: Row(
-                        children: [
-                          CircleBackButton(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                          ),
-                          const SizedBox(width: 14),
-                          const BrandWordmark(),
-                        ],
-                      ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 650),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                    child: Row(
+                      children: [
+                        CircleBackButton(onTap: () => Navigator.pop(context)),
+                        const SizedBox(width: 14),
+                        const BrandWordmark(),
+                      ],
                     ),
-
-                    const SizedBox(height: 28),
-
-                    // PAGE TITLE
-                    FadeSlideIn(
-                      index: 1,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          LocalizedText('AI Triage', style: AppText.display),
-                          const SizedBox(height: 8),
-                          LocalizedText(
-                            'Answer a few questions to help us understand your condition.',
-                            style: AppText.body,
-                          ),
-                          const SizedBox(height: 22),
-
-                          // PROGRESS
-                          Row(
-                            children: [
-                              LocalizedText(
-                                'Step 1',
-                                style: AppText.style(
-                                  12,
-                                  FontWeight.w700,
-                                  AppColors.darkTeal,
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: LinearProgressIndicator(
-                                    value: 0.5,
-                                    minHeight: 6,
-                                    backgroundColor:
-                                        AppColors.teal.withValues(alpha: 0.18),
-                                    valueColor:
-                                        const AlwaysStoppedAnimation<Color>(
-                                      AppColors.teal,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: LocalizedText('AI Triage', style: AppText.display),
                     ),
-
-                    const SizedBox(height: 24),
-
-                    // QUESTION 1
-                    FadeSlideIn(
-                      index: 2,
-                      child: _questionCard(
-                        number: '1',
-                        title: 'What are you feeling?',
-                        subtitle: 'Select the main symptom.',
-                        child: Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: [
-                            _option(
-                              text: 'Fever',
-                              icon: Icons.thermostat_rounded,
-                              selected: selectedSymptom == 'Fever',
-                              onTap: () {
-                                setState(() {
-                                  selectedSymptom = 'Fever';
-                                });
-                              },
-                            ),
-                            _option(
-                              text: 'Cough',
-                              icon: Icons.air_rounded,
-                              selected: selectedSymptom == 'Cough',
-                              onTap: () {
-                                setState(() {
-                                  selectedSymptom = 'Cough';
-                                });
-                              },
-                            ),
-                            _option(
-                              text: 'Stomach pain',
-                              icon: Icons.sick_outlined,
-                              selected: selectedSymptom == 'Stomach pain',
-                              onTap: () {
-                                setState(() {
-                                  selectedSymptom = 'Stomach pain';
-                                });
-                              },
-                            ),
-                            _option(
-                              text: 'Minor injury',
-                              icon: Icons.healing_rounded,
-                              selected: selectedSymptom == 'Minor injury',
-                              onTap: () {
-                                setState(() {
-                                  selectedSymptom = 'Minor injury';
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
+                  ),
+                  Expanded(
+                    child: ListView(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      children: [
+                        for (final m in _messages) _bubble(m),
+                        if (_loading) _typingIndicator(),
+                        if (_error != null) _errorBanner(),
+                      ],
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // QUESTION 2
-                    FadeSlideIn(
-                      index: 3,
-                      child: _questionCard(
-                        number: '2',
-                        title: 'How severe is it?',
-                        subtitle:
-                            'Choose the level that best describes your condition.',
-                        child: Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: [
-                            _option(
-                              text: 'Mild',
-                              icon: Icons.signal_cellular_alt_1_bar_rounded,
-                              selected: selectedSeverity == 'Mild',
-                              onTap: () {
-                                setState(() {
-                                  selectedSeverity = 'Mild';
-                                });
-                              },
-                            ),
-                            _option(
-                              text: 'Moderate',
-                              icon: Icons.signal_cellular_alt_2_bar_rounded,
-                              selected: selectedSeverity == 'Moderate',
-                              onTap: () {
-                                setState(() {
-                                  selectedSeverity = 'Moderate';
-                                });
-                              },
-                            ),
-                            _option(
-                              text: 'Severe',
-                              icon: Icons.signal_cellular_alt_rounded,
-                              selected: selectedSeverity == 'Severe',
-                              onTap: () {
-                                setState(() {
-                                  selectedSeverity = 'Severe';
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // QUESTION 3
-                    FadeSlideIn(
-                      index: 4,
-                      child: _questionCard(
-                        number: '3',
-                        title: 'How long have you had it?',
-                        subtitle: 'Select the duration.',
-                        child: Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: [
-                            _option(
-                              text: 'Less than\n24 hours',
-                              icon: Icons.schedule_rounded,
-                              selected:
-                                  selectedDuration == 'Less than 24 hours',
-                              onTap: () {
-                                setState(() {
-                                  selectedDuration = 'Less than 24 hours';
-                                });
-                              },
-                            ),
-                            _option(
-                              text: '1–3 days',
-                              icon: Icons.calendar_today_outlined,
-                              selected: selectedDuration == '1–3 days',
-                              onTap: () {
-                                setState(() {
-                                  selectedDuration = '1–3 days';
-                                });
-                              },
-                            ),
-                            _option(
-                              text: 'More than\n3 days',
-                              icon: Icons.date_range_outlined,
-                              selected:
-                                  selectedDuration == 'More than 3 days',
-                              onTap: () {
-                                setState(() {
-                                  selectedDuration = 'More than 3 days';
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // QUESTION 4
-                    FadeSlideIn(
-                      index: 5,
-                      child: _questionCard(
-                        number: '4',
-                        title: 'Any danger signs?',
-                        subtitle: 'Select all that apply.',
-                        child: Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: [
-                            _dangerOption(
-                              text: 'Difficulty\nbreathing',
-                              icon: Icons.air_rounded,
-                            ),
-                            _dangerOption(
-                              text: 'Heavy\nbleeding',
-                              icon: Icons.water_drop_outlined,
-                            ),
-                            _dangerOption(
-                              text: 'Chest pain',
-                              icon: Icons.favorite_border_rounded,
-                            ),
-                            _dangerOption(
-                              text: 'None of these',
-                              icon: Icons.block_rounded,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // EMERGENCY WARNING
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.red.withValues(alpha: 0.06),
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: AppColors.red.withValues(alpha: 0.12),
-                        ),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: AppColors.red.withValues(alpha: 0.10),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.warning_amber_rounded,
-                              color: AppColors.red,
-                              size: 21,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: LocalizedText(
-                              'If you are experiencing emergency warning signs, '
-                              'call 999 or seek emergency medical care immediately.',
-                              style: AppText.style(
-                                12,
-                                FontWeight.w600,
-                                AppColors.textDark,
-                                height: 1.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 22),
-
-                    // CONTINUE BUTTON
-                    PrimaryButton(
-                      label: 'Finish triage',
-                      icon: Icons.arrow_forward_rounded,
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TriageReportPage(
-                              report: TriageReportData(
-                                symptom: selectedSymptom,
-                                severity: selectedSeverity,
-                                duration: selectedDuration,
-                                dangerSigns: selectedDangerSigns,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                  ),
+                  _answerPanel(),
+                ],
               ),
             ),
           ),
@@ -367,186 +174,287 @@ class _TriagePageState extends State<TriagePage> {
   }
 
   // ============================================================
-  // QUESTION CONTAINER
+  // CHAT BUBBLES
   // ============================================================
 
-  Widget _questionCard({
-    required String number,
-    required String title,
-    required String subtitle,
-    required Widget child,
-  }) {
+  Widget _bubble(_ChatMessage m) {
+    return Align(
+      alignment: m.fromUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        constraints: const BoxConstraints(maxWidth: 520),
+        decoration: m.fromUser
+            ? BoxDecoration(
+                color: AppColors.darkTeal,
+                borderRadius: BorderRadius.circular(18),
+              )
+            : cardDecoration(radius: 18),
+        child: Text(
+          m.text,
+          style: m.fromUser
+              ? AppText.style(14, FontWeight.w500, Colors.white, height: 1.4)
+              : AppText.body,
+        ),
+      ),
+    );
+  }
+
+  Widget _typingIndicator() {
+    return const Padding(
+      padding: EdgeInsets.only(bottom: 10, left: 4),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2.5),
+        ),
+      ),
+    );
+  }
+
+  Widget _errorBanner() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: cardDecoration(radius: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.red.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.red.withValues(alpha: 0.12)),
+      ),
+      child: Row(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: const BoxDecoration(
-                  color: AppColors.darkTeal,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: LocalizedText(
-                    number,
-                    style: AppText.style(14, FontWeight.w700, Colors.white,
-                        height: 1),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    LocalizedText(title, style: AppText.heading),
-                    const SizedBox(height: 2),
-                    LocalizedText(subtitle, style: AppText.caption),
-                  ],
-                ),
-              ),
-            ],
+          Expanded(
+            child: Text(
+              _error!,
+              style: AppText.style(12, FontWeight.w600, AppColors.textDark),
+            ),
           ),
-          const SizedBox(height: 18),
-          child,
+          TextButton(
+            onPressed: _lastSent == null ? null : _retry,
+            child: const Text('Retry'),
+          ),
         ],
       ),
     );
   }
 
+  void _retry() {
+    // Drop the failed user bubble; _send adds it back.
+    final last = _lastSent;
+    if (last == null) return;
+    setState(() {
+      if (_messages.isNotEmpty && _messages.last.fromUser) {
+        _messages.removeLast();
+      }
+    });
+    _send(last, selected: _lastSelected);
+  }
+
   // ============================================================
-  // NORMAL SINGLE-SELECT OPTION
+  // ANSWER PANEL: checkboxes, option buttons, dropdown or text box
   // ============================================================
 
-  Widget _option({
-    required String text,
-    required IconData icon,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
+  Widget _answerPanel() {
+    final Widget content;
+    if (_isSelection) {
+      final options = _current!.options;
+      if (_current!.multiSelect) {
+        content = _checkboxList(options);
+      } else {
+        content = options.length <= _maxButtonOptions
+            ? _optionButtons(options)
+            : _optionDropdown(options);
+      }
+    } else {
+      content = _textBox();
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.85),
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: AbsorbPointer(absorbing: _loading, child: content),
+    );
+  }
+
+  Widget _optionButtons(List<String> options) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        for (final o in options)
+          _option(text: o, onTap: () => _send(o, selected: [o])),
+      ],
+    );
+  }
+
+  /// Tick-all-that-apply list. Exclusive options ("None of these", "Not sure")
+  /// clear every other tick, and ticking anything else clears them.
+  void _toggle(String option) {
+    final exclusive = _current?.exclusiveOptions ?? const <String>[];
+    setState(() {
+      if (_checked.contains(option)) {
+        _checked.remove(option);
+      } else if (exclusive.contains(option)) {
+        _checked
+          ..clear()
+          ..add(option);
+      } else {
+        _checked
+          ..removeAll(exclusive)
+          ..add(option);
+      }
+    });
+  }
+
+  Widget _checkboxList(List<String> options) {
+    // Keep the screen's option order, not the tap order.
+    final picked = [for (final o in options) if (_checked.contains(o)) o];
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 280),
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              for (final o in options)
+                CheckboxListTile(
+                  value: _checked.contains(o),
+                  onChanged: (_) => _toggle(o),
+                  dense: true,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  activeColor: AppColors.darkTeal,
+                  title: Text(
+                    o,
+                    style: AppText.style(
+                      14,
+                      FontWeight.w500,
+                      AppColors.darkTeal,
+                      height: 1.25,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        FilledButton(
+          onPressed: picked.isEmpty
+              ? null
+              : () => _send(picked.join('; '), selected: picked),
+          child: const Text('Continue'),
+        ),
+      ],
+    );
+  }
+
+  Widget _optionDropdown(List<String> options) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            initialValue: _dropdownValue,
+            isExpanded: true,
+            hint: const Text('Select an answer'),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppColors.field,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: AppColors.border),
+              ),
+            ),
+            items: [
+              for (final o in options)
+                DropdownMenuItem(
+                  value: o,
+                  child: Text(o, overflow: TextOverflow.ellipsis, maxLines: 2),
+                ),
+            ],
+            onChanged: (v) => setState(() => _dropdownValue = v),
+          ),
+        ),
+        const SizedBox(width: 10),
+        IconButton.filled(
+          onPressed:
+              _dropdownValue == null
+                  ? null
+                  : () => _send(_dropdownValue!, selected: [_dropdownValue!]),
+          icon: const Icon(Icons.arrow_forward_rounded),
+        ),
+      ],
+    );
+  }
+
+  Widget _textBox() {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _textController,
+            minLines: 1,
+            maxLines: 4,
+            textInputAction: TextInputAction.send,
+            onSubmitted: _send,
+            decoration: InputDecoration(
+              hintText: 'Type your answer',
+              filled: true,
+              fillColor: AppColors.field,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: AppColors.border),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        IconButton.filled(
+          onPressed: () => _send(_textController.text),
+          icon: const Icon(Icons.send_rounded),
+        ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // SINGLE-SELECT OPTION BUTTON (sized to its label)
+  // ============================================================
+
+  Widget _option({required String text, required VoidCallback onTap}) {
     return Pressable(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        width: 135,
-        height: 100,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-        decoration: _optionDecoration(selected),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 27,
-              color: selected ? AppColors.teal : AppColors.darkTeal,
-            ),
-            const SizedBox(height: 8),
-            LocalizedText(
-              text,
-              textAlign: TextAlign.center,
-              style: _optionTextStyle(selected),
-            ),
-          ],
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 120, maxWidth: 300),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.field,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: AppText.style(
+            14,
+            FontWeight.w500,
+            AppColors.darkTeal,
+            height: 1.15,
+          ),
         ),
       ),
-    );
-  }
-
-  // ============================================================
-  // MULTI-SELECT DANGER SIGN OPTION
-  // ============================================================
-
-  Widget _dangerOption({
-    required String text,
-    required IconData icon,
-  }) {
-    final bool selected = selectedDangerSigns.contains(text);
-
-    return Pressable(
-      onTap: () {
-        setState(() {
-          if (text == 'None of these') {
-            selectedDangerSigns.clear();
-            selectedDangerSigns.add(text);
-          } else {
-            selectedDangerSigns.remove('None of these');
-
-            if (selected) {
-              selectedDangerSigns.remove(text);
-            } else {
-              selectedDangerSigns.add(text);
-            }
-          }
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        width: 135,
-        height: 100,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-        decoration: _optionDecoration(selected),
-        child: Stack(
-          children: [
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    icon,
-                    size: 27,
-                    color: selected ? AppColors.teal : AppColors.darkTeal,
-                  ),
-                  const SizedBox(height: 8),
-                  LocalizedText(
-                    text,
-                    textAlign: TextAlign.center,
-                    style: _optionTextStyle(selected),
-                  ),
-                ],
-              ),
-            ),
-            if (selected)
-              const Positioned(
-                top: 0,
-                right: 0,
-                child: Icon(
-                  Icons.check_circle_rounded,
-                  color: AppColors.teal,
-                  size: 20,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  BoxDecoration _optionDecoration(bool selected) {
-    return BoxDecoration(
-      color: selected
-          ? AppColors.teal.withValues(alpha: 0.10)
-          : AppColors.field,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(
-        color: selected ? AppColors.teal : AppColors.border,
-        width: selected ? 1.5 : 1,
-      ),
-    );
-  }
-
-  TextStyle _optionTextStyle(bool selected) {
-    return AppText.style(
-      14,
-      selected ? FontWeight.w700 : FontWeight.w500,
-      AppColors.darkTeal,
-      height: 1.15,
     );
   }
 }

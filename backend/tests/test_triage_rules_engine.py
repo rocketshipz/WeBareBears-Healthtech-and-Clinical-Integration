@@ -54,7 +54,8 @@ def test_question_maps_point_at_real_conditions_of_the_same_category_and_populat
     for category in engine.categories:
         for q in engine.questions_by_category[category]:
             for part in q.get("maps_to", []):
-                assert part["when"] and part["condition_ids"], (q["question_id"], part)
+                # A checklist option may only open / rule out other items (`opens`, `covers`, any category).
+                assert part["when"] and (part["condition_ids"] or part.get("covers")), (q["question_id"], part)
                 for condition_id in part["condition_ids"]:
                     c = engine.conditions[condition_id]
                     assert c.category == category, (q["question_id"], condition_id)
@@ -84,12 +85,18 @@ def test_missing_information_and_questions_tell_the_agent_what_each_answer_sets(
     assert bleeding["ask_as"]
 
 
-def test_age_decided_conditions_say_so(engine):
+def test_age_decided_conditions_are_applied_from_the_age(engine):
     elderly = cid(engine, "RULE_ABD_L3_01", "Elderly > 65")
     screened = [CRITICAL_CATEGORY, "Abdominal Pain"]
-    res = engine.evaluate(categories=["Abdominal Pain"], age_years=30, absent_condition_ids=_ids_more_urgent_than(engine, screened, 3))
-    entry = next(m for m in res["missing_information"] if m.get("condition_id") == elderly)
-    assert "age_years > 65" in entry["from_age"]
+    absent = _ids_more_urgent_than(engine, screened, 3)
+    young = engine.evaluate(categories=["Abdominal Pain"], age_years=30, absent_condition_ids=absent)
+    assert elderly not in {m.get("condition_id") for m in young["missing_information"]}  # never asked
+    old = engine.evaluate(categories=["Abdominal Pain"], age_years=70, absent_condition_ids=absent)
+    assert old["status"] == "classified" and old["triage_level"] == 3
+    assert "Elderly > 65" in old["key_findings"]
+    # Only within the screened categories: age alone does not pull in another complaint's rule.
+    other = engine.evaluate(categories=["Headache"], age_years=70)
+    assert other["at_least_level"] is None
 
 
 def test_secondary_triage_pass_criteria_are_not_conditions(engine):
@@ -151,7 +158,8 @@ def test_lower_level_finding_waits_for_more_urgent_tiers_to_be_ruled_out(engine)
     assert res["at_least_level"] == 4
     # Asks about the most urgent unresolved tier first (Level 1, Critical First Look).
     assert {m["category"] for m in res["missing_information"]} == {CRITICAL_CATEGORY}
-    assert {q["question_id"] for q in res["suggested_questions"]} == {f"Q_CRIT_0{i}" for i in range(1, 7)}
+    # Only questions that can settle a Level 1 item; the breathing / bleeding lists wait behind the checklist.
+    assert {q["question_id"] for q in res["suggested_questions"]} == {"Q_CRIT_01", "Q_CRIT_02A"}
 
 
 def test_mild_chest_pain_classifies_once_higher_tiers_are_ruled_out(engine):
@@ -218,18 +226,29 @@ def test_adults_are_not_asked_paediatric_conditions_and_children_are_not_asked_a
     assert min(engine.conditions[m["condition_id"]].level for m in child["missing_information"]) == 1
 
 
-def test_child_under_8_is_never_level_5_and_gets_paediatric_screening(engine):
+def test_child_is_never_level_5_and_gets_paediatric_screening(engine):
     screened = [CRITICAL_CATEGORY, CHEST, PAEDIATRIC_CATEGORY]
-    res = engine.evaluate(
-        categories=[CHEST],
-        present_condition_ids=[cid(engine, "RULE_CP_L5_01", "No further pain")],
-        absent_condition_ids=_ids_more_urgent_than(engine, screened, 5),
-        age_years=5,
-    )
+    absent = _ids_more_urgent_than(engine, screened, 5)
+    # An adult Level 5 item reported for a child does not count: children are screened on the paediatric list.
+    res = engine.evaluate(categories=[CHEST], present_condition_ids=[cid(engine, "RULE_CP_L5_01", "No further pain")],
+                          absent_condition_ids=absent, age_years=5)
     assert PAEDIATRIC_CATEGORY in res["screened_categories"]
-    assert res["status"] == "classified"
-    assert res["triage_level"] == 4
-    assert "RULE_PAED_AGE_RESTRICT_01" in res["matched_rule_ids"]
+    assert res["triage_level"] is None and res["at_least_level"] is None
+    comfortable = engine.questions_by_id["Q_PAED_06"]["maps_to"][-1]["condition_ids"][0]  # active and comfortable
+    assert engine.conditions[comfortable].level == 4 and engine.conditions[comfortable].population == "paediatric"
+    res = engine.evaluate(categories=[CHEST], present_condition_ids=[comfortable], absent_condition_ids=absent,
+                          age_years=5)
+    assert res["status"] == "classified" and res["triage_level"] == 4
+
+
+def test_adult_answers_never_use_the_more_urgent_paediatric_rule(engine):
+    mangled_adult = cid(engine, "RULE_TRAUMA_L2_01", "Mangled limb")
+    mangled_child = cid(engine, "RULE_TRAUMA_PAED_L1_01", "Mangled limb")
+    res = engine.evaluate(categories=["Trauma & Physical Injuries"], age_years=30,
+                          present_condition_ids=[mangled_adult, mangled_child])
+    assert res["at_least_level"] == 2
+    # Unknown age: neither counts yet (age is asked first), so no Level 1 from a child-only rule.
+    assert engine.evaluate(categories=[], present_condition_ids=[mangled_child])["at_least_level"] is None
 
 
 def test_present_wins_over_absent_and_unknown_ids_are_reported(engine):

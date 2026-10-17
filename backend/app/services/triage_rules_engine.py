@@ -36,6 +36,9 @@ TRIAGE_CODES = {
 
 _LEVEL_PATTERN = re.compile(r"^Level ([1-5])$")
 
+# Answers that rule out every option of a question. "None of these" is also offered on every selection.
+NONE_ANSWERS = ("None of these", "Neither")
+
 
 @dataclass(frozen=True)
 class Condition:
@@ -72,6 +75,9 @@ class TriageRulesEngine:
         self.ask_as: Dict[str, str] = {}
         # condition_id -> {field, op, value} for conditions decided by age alone
         self.age_derived: Dict[str, dict] = {}
+        self.questions_by_id: Dict[str, dict] = {}
+        # gated question_id -> gate question_id: the gated question is only asked after the gate is answered
+        self.gated_by: Dict[str, str] = {}
 
         excluded_questions = {
             item["id"]
@@ -86,7 +92,10 @@ class TriageRulesEngine:
                 q for q in category.get("questions", []) if q["question_id"] not in excluded_questions
             ]
             for question in self.questions_by_category[name]:
+                self.questions_by_id[question["question_id"]] = question
                 for part in question.get("maps_to", []):
+                    for gated in part.get("opens", []):
+                        self.gated_by[gated] = question["question_id"]
                     for condition_id in part["condition_ids"]:
                         self.ask_as.setdefault(condition_id, part["when"])
             for rule in category.get("rules", []):
@@ -142,6 +151,60 @@ class TriageRulesEngine:
             resolved.append(PAEDIATRIC_CATEGORY)
         return resolved, unknown
 
+    def apply_answer(self, question_id: str, answer: str) -> Optional[dict]:
+        return self.apply_answers(question_id, [answer])
+
+    def apply_answers(self, question_id: str, answers: List[str]) -> Optional[dict]:
+        """Findings implied by picking `answers` (exact options) for a KB question, or None if not explicit.
+
+        - Options naming parts of the question: those parts' conditions present; every part NOT chosen has its
+          conditions and `covers` absent. Several options only for multi_select questions.
+        - A none answer ("None of these", "Neither", a listed none_answers entry, "No" to a yes/no question),
+          alone: every condition the question maps or covers absent.
+        - "Yes" to a yes/no question with a single part: that part present.
+        Anything else (e.g. "Yes" to a multi-part question) needs the person to say which, so returns None.
+        """
+        q = self.questions_by_id.get(question_id)
+        answers = list(dict.fromkeys(answers))
+        if q is None or not answers or any(a not in q["answers"] and a not in NONE_ANSWERS for a in answers):
+            return None
+        if len(answers) > 1 and not q.get("multi_select"):
+            return None
+        parts = q.get("maps_to", [])
+        yes_no = sorted(q["answers"]) == ["No", "Yes"]
+        found = {"present_condition_ids": [], "absent_condition_ids": [], "answered_question_ids": [question_id]}
+
+        def ruled_out(unchosen):
+            return list(dict.fromkeys(i for p in unchosen for i in p["condition_ids"] + p.get("covers", [])))
+
+        is_none = [a in NONE_ANSWERS or a in q.get("none_answers", []) or (yes_no and a == "No") for a in answers]
+        if any(is_none):
+            if len(answers) > 1:
+                return None  # "none" together with something else: contradictory
+            # A none answer may set an end state of its own (e.g. "None of these - only mild symptoms").
+            own = [p for p in parts if p["when"] == answers[0]]
+            found["present_condition_ids"] = list(dict.fromkeys(i for p in own for i in p["condition_ids"]))
+            found["absent_condition_ids"] = ruled_out([p for p in parts if p not in own])
+            return found
+        if yes_no:
+            if len(parts) != 1:
+                return None
+            found["present_condition_ids"] = list(parts[0]["condition_ids"])
+            return found
+
+        chosen = []
+        for a in answers:
+            match = [p for p in parts if a.lower().startswith(p["when"].lower())]
+            if not match:
+                return None
+            chosen += [p for p in match if p not in chosen]
+        present = list(dict.fromkeys(i for p in chosen for i in p["condition_ids"]))
+        still_open = set(present) | {i for p in chosen for i in p.get("covers", [])}
+        found["present_condition_ids"] = present
+        found["absent_condition_ids"] = [i for i in ruled_out([p for p in parts if p not in chosen])
+                                         if i not in still_open]
+        return found
+
     def _source_reference(self, rule_id: str) -> dict:
         rule = self.rules[rule_id]
         return {"rule_id": rule_id, **rule.get("source_basis", {})}
@@ -173,10 +236,22 @@ class TriageRulesEngine:
         present = _valid(present_condition_ids, "present") | history
         # Safety: if a condition is both present and absent, present wins.
         absent = _valid(absent_condition_ids, "absent") - present
+        # Age-only conditions in the screened categories are decided from the age, unless reported.
+        if age_years is not None:
+            for condition_id, spec in self.age_derived.items():
+                if condition_id in present or condition_id in absent:
+                    continue
+                if self.conditions[condition_id].category not in screened:
+                    continue
+                holds = age_years > spec["value"] if spec["op"] == ">" else age_years < spec["value"]
+                (present if holds else absent).add(condition_id)
         answered = set(answered_question_ids or [])
 
-        # Present conditions count even outside the screened categories (the user reported them).
-        present_conditions = [self.conditions[i] for i in present]
+        # Present conditions count even outside the screened categories (the user reported them), but only for
+        # the patient's population: answers map to the adult and the paediatric version of a condition, and
+        # the paediatric list is one level more urgent. With unknown age only population-neutral items count.
+        present_conditions = [self.conditions[i] for i in present
+                              if self.applies(self.conditions[i].population, age_years)]
         best_level = min((c.level for c in present_conditions), default=None)
 
         scope = self.conditions_in(screened, age_years, any_population=False)
@@ -227,21 +302,35 @@ class TriageRulesEngine:
             result["missing_information"].extend(self._missing_entry(c) for c in tier)
             tier_ids = {c.condition_id for c in tier}
             tier_categories = list(dict.fromkeys(c.category for c in tier))
-            result["suggested_questions"] = []
+            gates, others = [], []
             for cat in tier_categories:
                 for q in self.questions_by_category.get(cat, []):
-                    if q["question_id"] in answered or not self.applies(q.get("population", "all"), age_years):
+                    qid = q["question_id"]
+                    if qid in answered or not self.applies(q.get("population", "all"), age_years):
                         continue
-                    suggestion = {"question_id": q["question_id"], "text": q["text"], "answers": q["answers"], "category": cat}
+                    gate = self.gated_by.get(qid)
+                    if gate and gate not in answered and self.applies(
+                            self.questions_by_id[gate].get("population", "all"), age_years):
+                        continue  # asked only after the checklist option that opens it
+                    suggestion = {"question_id": qid, "text": q["text"], "answers": q["answers"], "category": cat}
+                    if q.get("multi_select"):
+                        suggestion["multi_select"] = True
                     # Every part is listed so any answer the person gives has an entry; parts that set none of
                     # the conditions still needed get an empty list (answering with one means those are absent).
-                    maps_to = [
-                        {"when": part["when"], "condition_ids": [i for i in part["condition_ids"] if i in tier_ids]}
-                        for part in q.get("maps_to", [])
-                    ]
-                    if any(part["condition_ids"] for part in maps_to):
+                    # `covers`: conditions ruled out when that option is NOT chosen.
+                    maps_to = []
+                    for part in q.get("maps_to", []):
+                        entry = {"when": part["when"], "condition_ids": [i for i in part["condition_ids"] if i in tier_ids]}
+                        if part.get("covers"):
+                            entry["covers"] = part["covers"]
+                        maps_to.append(entry)
+                    resolves = any(p["condition_ids"] or tier_ids & set(p.get("covers", [])) for p in maps_to)
+                    if maps_to and not resolves:
+                        continue  # nothing this question could still settle at this tier
+                    if resolves:
                         suggestion["maps_to"] = maps_to
-                    result["suggested_questions"].append(suggestion)
+                    (gates if any("covers" in p for p in maps_to) else others).append(suggestion)
+            result["suggested_questions"] = gates + others
         elif best_level is None:
             # Everything screened has been ruled out and nothing matched: look at other categories.
             result["unexplored_categories"] = [c for c in self.categories if c not in screened]

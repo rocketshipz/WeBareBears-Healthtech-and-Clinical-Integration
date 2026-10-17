@@ -21,12 +21,18 @@ class TriageReportData {
   final List<String> dangerSigns;
   final DateTime createdAt;
 
+  /// Set when the level comes from the backend rules engine (chat triage).
+  final int? levelOverride;
+  final String? recommendationOverride;
+
   TriageReportData({
     required this.symptom,
     required this.severity,
     required this.duration,
     required Iterable<String> dangerSigns,
     DateTime? createdAt,
+    this.levelOverride,
+    this.recommendationOverride,
   })  : dangerSigns = dangerSigns
             .where((s) => s != 'None of these')
             .map((s) => s.replaceAll('\n', ' '))
@@ -37,6 +43,7 @@ class TriageReportData {
 
   /// Simple prototype rules: NOT a clinical algorithm.
   int get level {
+    if (levelOverride != null) return levelOverride!;
     if (hasDangerSigns) return 1;
     if (severity == 'Severe') return 2;
     if (severity == 'Moderate') return 3;
@@ -66,6 +73,7 @@ class TriageReportData {
   }
 
   String get recommendation {
+    if (recommendationOverride != null) return recommendationOverride!;
     if (level == 1) {
       return 'You reported danger signs. Call 999 or go to the nearest '
           'emergency department immediately.';
