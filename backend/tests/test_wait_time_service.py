@@ -22,7 +22,18 @@ def test_update_wait_labels_end_to_end(monkeypatch, tmp_path):
                        "('c', 5, 0, 'keep'), ('d', NULL, 5, 'keep')"))
     monkeypatch.setattr(svc, "get_session_factory", lambda: sessionmaker(bind=engine))
 
+    settings = svc.get_settings().model_copy(update={
+        "WAIT_LABEL_TABLE": "hospitals",
+        "WAIT_LABEL_KEY_COL": "hospital_id",
+        "WAIT_LABEL_NUMERATOR_COL": "patients_waiting",
+        "WAIT_LABEL_DENOMINATOR_COL": "staff_on_duty",
+        "WAIT_LABEL_COL": "wait_time_label",
+    })
+    monkeypatch.setattr(svc, "get_settings", lambda: settings)
+
     assert svc.update_wait_labels() == 2
     with engine.connect() as c:
         labels = dict(c.execute(text("SELECT hospital_id, wait_time_label FROM hospitals")).all())
     assert labels == {"a": "low", "b": "very busy", "c": "keep", "d": "keep"}
+
+    engine.dispose()

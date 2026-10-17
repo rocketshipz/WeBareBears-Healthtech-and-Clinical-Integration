@@ -1,6 +1,7 @@
 import re
-from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field, field_validator
+from datetime import date
+from typing import Optional, Dict, Any, Literal
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 EMAIL_REGEX = re.compile(r"^[\w\.-]+@([\w-]+\.)+[\w-]{2,4}$")
 
@@ -56,8 +57,27 @@ class RegisterRequest(BaseModel):
     phone: str = Field(..., min_length=8, description="Phone number")
     email: str = Field(..., description="Verified email address")
     password: str = Field(..., min_length=8, description="Password (at least 8 characters)")
-    name: Optional[str] = Field(None, description="Full name (optional)")
+    name: str = Field(..., min_length=1, description="Full name")
+    sex_at_birth: Literal["male", "female", "intersex"]
+    nationality: str = Field(..., min_length=1)
+    date_of_birth: Optional[date] = None
     code: Optional[str] = Field(None, description="6-digit verification code if verifying during registration")
+
+    @model_validator(mode="after")
+    def validate_birth_date(self):
+        if self.nationality != "Malaysia" and self.date_of_birth is None:
+            raise ValueError("Date of birth is required for non-Malaysian registration")
+        if self.date_of_birth is not None and self.date_of_birth > date.today():
+            raise ValueError("Date of birth cannot be in the future")
+        return self
+
+    @field_validator("name", "nationality")
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("This field is required")
+        return value
 
     @field_validator("email")
     @classmethod

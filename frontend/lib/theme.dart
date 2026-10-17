@@ -148,8 +148,8 @@ Future<T?> pushPage<T>(BuildContext context, Widget page) {
     PageRouteBuilder<T>(
       transitionDuration: const Duration(milliseconds: 320),
       reverseTransitionDuration: const Duration(milliseconds: 260),
-      pageBuilder: (_, __, ___) => page,
-      transitionsBuilder: (_, animation, __, child) {
+      pageBuilder: (_, _, _) => page,
+      transitionsBuilder: (_, animation, _, child) {
         final curved = CurvedAnimation(
           parent: animation,
           curve: Curves.easeOutCubic,

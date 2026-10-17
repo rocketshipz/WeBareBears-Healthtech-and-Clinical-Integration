@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Optional
 from dotenv import load_dotenv
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Automatically load .env into os.environ so os.environ.get("GEMINI_API_KEY") works immediately
@@ -63,6 +64,18 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore"
     )
+
+    @field_validator("DEBUG", mode="before")
+    @classmethod
+    def parse_debug_mode(cls, value):
+        """Accept build-mode names used by development environments."""
+        if isinstance(value, str):
+            mode = value.strip().lower()
+            if mode == "release":
+                return False
+            if mode == "debug":
+                return True
+        return value
 
     def get_database_uri(self) -> str:
         """Returns the PostgreSQL connection string.

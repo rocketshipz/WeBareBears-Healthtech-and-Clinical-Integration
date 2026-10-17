@@ -2,6 +2,7 @@ import '../localization.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import '../services/auth_service.dart';
 
 /// Shared flag used by the home page.
 final ValueNotifier<bool> profileCompleted = ValueNotifier<bool>(false);
@@ -33,6 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
   // TEXT CONTROLLERS
   // ============================================================
 
+  final sexController = TextEditingController();
   final fullNameController =
       TextEditingController(text: 'Aisyah Binti Ahmad');
 
@@ -57,7 +59,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final emergencyNumberController =
       TextEditingController(text: '+60 12-345 6789');
 
-  final nationalityOtherController = TextEditingController();
+  final nationalityController = TextEditingController();
   final languageOtherController = TextEditingController();
   final relationshipOtherController = TextEditingController();
 
@@ -112,16 +114,7 @@ class _ProfilePageState extends State<ProfilePage> {
   // OPTIONS
   // ============================================================
 
-  final List<String> sexOptions = [
-    'Male',
-    'Female',
-    'Intersex',
-  ];
 
-  final List<String> nationalityOptions = [
-    'Malaysia',
-    'Other',
-  ];
 
   final List<String> languageOptions = [
     'English',
@@ -220,6 +213,19 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    final user = AuthService.currentUser;
+    if (user != null) {
+      fullNameController.text = user['name']?.toString() ?? '';
+      icController.text = user['ic']?.toString() ?? '';
+      selectedNationality = user['nationality']?.toString() ?? 'Not specified';
+      final birthDate = user['date_of_birth']?.toString();
+      if (birthDate != null) dateOfBirthController.text = birthDate;
+      final sex = user['sex_at_birth']?.toString() ?? '';
+      selectedSex = sex.isEmpty ? 'Not specified' : '${sex[0].toUpperCase()}${sex.substring(1)}';
+      profileData.value = {...profileData.value, 'name': fullNameController.text, 'sex': selectedSex};
+    }
+    sexController.text = selectedSex;
+    nationalityController.text = selectedNationality;
 
     icController.addListener(_updateDetailsFromIc);
 
@@ -233,6 +239,15 @@ class _ProfilePageState extends State<ProfilePage> {
   // ============================================================
 
   void _updateDetailsFromIc() {
+    if (selectedNationality != 'Malaysia') {
+      final dob = DateTime.tryParse(dateOfBirthController.text);
+      if (dob != null) {
+        final now = DateTime.now();
+        ageController.text = (now.year - dob.year -
+          ((now.month < dob.month || (now.month == dob.month && now.day < dob.day)) ? 1 : 0)).toString();
+      }
+      return;
+    }
     final cleanedIc =
         icController.text.replaceAll(RegExp(r'[^0-9]'), '');
 
@@ -323,6 +338,7 @@ class _ProfilePageState extends State<ProfilePage> {
     icController.removeListener(_updateDetailsFromIc);
 
     allergiesController.dispose();
+    sexController.dispose();
     fullNameController.dispose();
     icController.dispose();
     dateOfBirthController.dispose();
@@ -333,7 +349,7 @@ class _ProfilePageState extends State<ProfilePage> {
     emergencyNameController.dispose();
     emergencyNumberController.dispose();
 
-    nationalityOtherController.dispose();
+    nationalityController.dispose();
     languageOtherController.dispose();
     relationshipOtherController.dispose();
 
@@ -453,6 +469,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           _editableRow(
                             label: 'Full Name',
+                            readOnly: true,
                             controller:
                                 fullNameController,
                           ),
@@ -461,6 +478,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                           _editableRow(
                             label: 'IC Number',
+                            readOnly: true,
                             controller: icController,
                             keyboardType:
                                 TextInputType.number,
@@ -485,33 +503,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
                           _divider(),
 
-                          _dropdownRow(
+                          _editableRow(
                             label: 'Sex at Birth',
-                            value: selectedSex,
-                            options: sexOptions,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedSex = value;
-                              });
-                            },
+                            controller: sexController,
+                            readOnly: true,
                           ),
 
                           _divider(),
 
-                          _dropdownRow(
+                          _editableRow(
                             label: 'Nationality',
-                            value:
-                                selectedNationality,
-                            options:
-                                nationalityOptions,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedNationality =
-                                    value;
-                              });
-                            },
-                            otherController:
-                                nationalityOtherController,
+                            controller: nationalityController,
+                            readOnly: true,
                           ),
 
                           _divider(),
@@ -970,10 +973,7 @@ class _ProfilePageState extends State<ProfilePage> {
       'sex':
           selectedSex,
 
-      'nationality': _resolvedValue(
-        selectedNationality,
-        nationalityOtherController,
-      ),
+      'nationality': selectedNationality,
 
       'language': _resolvedValue(
         selectedLanguage,
@@ -1062,9 +1062,10 @@ class _ProfilePageState extends State<ProfilePage> {
     required TextEditingController controller,
     TextInputType keyboardType =
         TextInputType.text,
+    bool readOnly = false,
     String? suffix,
   }) {
-    if (!isEditing) {
+    if (!isEditing || readOnly) {
       return Padding(
         padding:
             const EdgeInsets.symmetric(
@@ -1214,7 +1215,7 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 5),
 
           LocalizedText(
-            'Calculated automatically from IC number.',
+            selectedNationality == 'Malaysia' ? 'Calculated automatically from IC number.' : 'Registered date of birth.',
             style: AppText.caption,
           ),
         ],

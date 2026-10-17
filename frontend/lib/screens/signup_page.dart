@@ -1,4 +1,5 @@
 import '../localization.dart';
+import '../countries.dart';
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
@@ -13,6 +14,10 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  final nameController = TextEditingController();
+  String? selectedSex;
+  String? selectedNationality;
+  DateTime? selectedBirthDate;
   final icController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
@@ -30,6 +35,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   void dispose() {
+    nameController.dispose();
     icController.dispose();
     phoneController.dispose();
     emailController.dispose();
@@ -52,11 +58,15 @@ class _SignUpPageState extends State<SignUpPage> {
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
 
-    if (ic.isEmpty || phone.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (nameController.text.trim().isEmpty || selectedSex == null || selectedNationality == null || ic.isEmpty || phone.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       _showMessage('Please complete all required fields.');
       return;
     }
 
+    if (selectedNationality != 'Malaysia' && selectedBirthDate == null) {
+      _showMessage('Please enter your date of birth.');
+      return;
+    }
     if (!_isValidEmail(email)) {
       _showMessage('Please enter a valid email address.');
       return;
@@ -105,6 +115,10 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<void> _verifyAndRegister() async {
     if (isRegistering) return;
 
+    if (nameController.text.trim().isEmpty || selectedSex == null || selectedNationality == null) {
+      _showMessage('Please complete all required fields.');
+      return;
+    }
     final code = codeController.text.trim();
     final email = emailController.text.trim();
     final ic = icController.text.trim();
@@ -126,6 +140,10 @@ class _SignUpPageState extends State<SignUpPage> {
 
       // Step 2: Register account
       await AuthService.register(
+        name: nameController.text.trim(),
+        sexAtBirth: selectedSex!,
+        nationality: selectedNationality!,
+        dateOfBirth: selectedNationality == 'Malaysia' ? null : selectedBirthDate,
         ic: ic,
         phone: phone,
         email: email,
@@ -248,8 +266,75 @@ class _SignUpPageState extends State<SignUpPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            fieldLabel('Full Name'),
+                            const SizedBox(height: 8),
+                            TextField(
+                              key: const ValueKey('signup-name'),
+                              controller: nameController,
+                              enabled: !codeSent,
+                              textCapitalization: TextCapitalization.words,
+                              style: AppText.input,
+                              decoration: appInputDecoration(
+                                hint: 'Enter your full name',
+                                icon: Icons.person_outline_rounded,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            fieldLabel('Sex at Birth'),
+                            const SizedBox(height: 8),
+                            DropdownButtonFormField<String>(
+                              key: const ValueKey('signup-sex'),
+                              initialValue: selectedSex,
+                              style: AppText.input,
+                              decoration: appInputDecoration(
+                                hint: 'Select sex at birth',
+                                icon: Icons.person_outline_rounded,
+                              ),
+                              items: const [
+                                DropdownMenuItem(value: 'male', child: LocalizedText('Male')),
+                                DropdownMenuItem(value: 'female', child: LocalizedText('Female')),
+                                DropdownMenuItem(value: 'intersex', child: LocalizedText('Intersex')),
+                              ],
+                              onChanged: codeSent ? null : (value) => setState(() => selectedSex = value),
+                            ),
+                            const SizedBox(height: 18),
+                            fieldLabel('Nationality'),
+                            const SizedBox(height: 8),
+                            DropdownMenu<String>(
+                              key: const ValueKey('signup-nationality'),
+                              expandedInsets: EdgeInsets.zero,
+                              enabled: !codeSent,
+                              enableFilter: true,
+                              requestFocusOnTap: true,
+                              menuHeight: 280,
+                              hintText: tr('Select a country'),
+                              textStyle: AppText.input,
+                              dropdownMenuEntries: registrationCountries.map((country) =>
+                                DropdownMenuEntry(value: country, label: tr(country))).toList(),
+                              onSelected: (value) => setState(() => selectedNationality = value),
+                            ),
+                            const SizedBox(height: 18),
+                            if (selectedNationality != null && selectedNationality != 'Malaysia') ...[
+                              fieldLabel('Date of Birth'),
+                              const SizedBox(height: 8),
+                              OutlinedButton.icon(
+                                onPressed: codeSent ? null : () async {
+                                  final date = await showDatePicker(
+                                    context: context,
+                                    initialDate: selectedBirthDate ?? DateTime(2000),
+                                    firstDate: DateTime(1900),
+                                    lastDate: DateTime.now(),
+                                  );
+                                  if (date != null && mounted) setState(() => selectedBirthDate = date);
+                                },
+                                icon: const Icon(Icons.calendar_today_outlined),
+                                label: LocalizedText(selectedBirthDate == null ? 'Select date of birth' :
+                                  selectedBirthDate!.toIso8601String().split('T').first),
+                              ),
+                              const SizedBox(height: 18),
+                            ],
                             // IC NUMBER
-                            fieldLabel('IC Number'),
+                            fieldLabel(selectedNationality != null && selectedNationality != 'Malaysia' ? 'IC / Passport Number' : 'IC Number'),
                             const SizedBox(height: 8),
                             TextField(
                               controller: icController,

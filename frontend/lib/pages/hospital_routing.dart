@@ -343,11 +343,6 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
 
                     const SizedBox(height: 28),
 
-                    LocalizedText('Suggested care options', style: AppText.heading),
-                    const SizedBox(height: 4),
-                    LocalizedText(
-                      'Sample data is shown for the prototype.',
-                      style: AppText.caption,
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -355,10 +350,10 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Suggested care options',
+                            LocalizedText('Suggested care options',
                                 style: AppText.heading),
                             const SizedBox(height: 4),
-                            Text(
+                            LocalizedText(
                               _isLoadingLocation
                                   ? 'Acquiring GPS location...'
                                   : _currentPosition != null
@@ -388,7 +383,7 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
                                     : AppColors.grey,
                               ),
                               const SizedBox(width: 4),
-                              Text(
+                              LocalizedText(
                                 _currentPosition != null ? 'GPS Active' : 'Default',
                                 style: AppText.style(
                                   11,

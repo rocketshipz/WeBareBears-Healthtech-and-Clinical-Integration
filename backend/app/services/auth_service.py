@@ -3,13 +3,14 @@ import logging
 import os
 import secrets
 from contextlib import contextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Dict, Generator, Optional
 
 from sqlalchemy.orm import Session
 
 from app.core.database import Base, get_engine, get_session_factory
 from app.models.user import User
+from app.models.user_information import UserInformation
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import (
     AuthTokenResponse,
@@ -38,6 +39,13 @@ def _verify_password(password: str, hashed: str) -> bool:
         return secrets.compare_digest(key.hex(), key_hex)
     except Exception:
         return False
+
+
+def _as_utc(value: datetime) -> datetime:
+    """Normalize timezone-naive SQLite timestamps to UTC."""
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
 
 
 class AuthService:
@@ -121,7 +129,7 @@ class AuthService:
 
             # Check expiration
             now = datetime.now(timezone.utc)
-            if now > entry.expires_at:
+            if now > _as_utc(entry.expires_at):
                 return VerifyCodeResponse(
                     verified=False,
                     email=norm_email,
@@ -166,7 +174,7 @@ class AuthService:
                 if (
                     not entry
                     or not secrets.compare_digest(entry.code, request.code.strip())
-                    or datetime.now(timezone.utc) > entry.expires_at
+                    or datetime.now(timezone.utc) > _as_utc(entry.expires_at)
                 ):
                     raise ValueError("Invalid or expired verification code.")
             else:
@@ -201,8 +209,32 @@ class AuthService:
                 is_verified=True,
             )
 
-            created_user = repo.create(new_user)
-            public_user = created_user.to_dict()
+            # Save account and registration demographics in one transaction.
+            if request.nationality == "Malaysia":
+                digits = clean_ic.replace('-', '')
+                try:
+                    year = int(digits[:2])
+                    today = date.today()
+                    year += 1900 if year > today.year % 100 else 2000
+                    birth_date = date(year, int(digits[2:4]), int(digits[4:6]))
+                except (ValueError, TypeError):
+                    raise ValueError("IC number must contain a valid date of birth.")
+            else:
+                birth_date = request.date_of_birth
+            session.add(new_user)
+            session.flush()
+            session.add(UserInformation(
+                user_id=user_id,
+                date_of_birth=birth_date,
+                sex_at_birth=request.sex_at_birth,
+                nationality=request.nationality,
+            ))
+            session.commit()
+            session.refresh(new_user)
+            public_user = new_user.to_dict()
+            public_user['sex_at_birth'] = request.sex_at_birth
+            public_user['nationality'] = request.nationality
+            public_user['date_of_birth'] = birth_date.isoformat()
 
             # Clean up verification codes for this email
             repo.cleanup_codes_for_email(norm_email)
@@ -237,6 +269,10 @@ class AuthService:
 
             token = secrets.token_urlsafe(32)
             public_user = matched_user.to_dict()
+            information = session.get(UserInformation, matched_user.id)
+            public_user['sex_at_birth'] = information.sex_at_birth if information else None
+            public_user['nationality'] = information.nationality if information else None
+            public_user['date_of_birth'] = information.date_of_birth.isoformat() if information else None
             self._active_sessions[token] = public_user
 
             logger.info(

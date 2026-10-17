@@ -5,12 +5,16 @@ from app.main import app
 
 
 @pytest.mark.asyncio
-async def test_auth_flow():
+@pytest.mark.parametrize("nationality", ["Malaysia", "Indonesia"])
+async def test_auth_flow(nationality):
     # Generate unique test data per run
     unique_suffix = uuid.uuid4().hex[:6]
     test_email = f"user_{unique_suffix}@example.com"
     test_phone = f"012{int(uuid.uuid4().hex[:7], 16) % 10000000:07d}"
     test_ic = f"990101-14-{int(uuid.uuid4().hex[:4], 16) % 10000:04d}"
+
+    if nationality != "Malaysia":
+        test_ic = "P" + uuid.uuid4().hex[:10]
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -42,7 +46,10 @@ async def test_auth_flow():
                 "phone": test_phone,
                 "email": test_email,
                 "password": "Password123!",
-                "name": "Test User"
+                "name": "Test User",
+                "sex_at_birth": "intersex",
+                "nationality": nationality,
+                "date_of_birth": "1995-06-12" if nationality != "Malaysia" else None
             }
         )
         assert reg_res.status_code == 201
@@ -50,13 +57,17 @@ async def test_auth_flow():
         assert reg_data["success"] is True
         assert "token" in reg_data["data"]
         token = reg_data["data"]["token"]
+        assert reg_data["data"]["user"]["name"] == "Test User"
+        assert reg_data["data"]["user"]["sex_at_birth"] == "intersex"
 
         # 4. Login with email
         login_email_res = await client.post(
             "/api/auth/login",
             json={"identifier": test_email, "password": "Password123!"}
         )
+        assert login_email_res.json()["data"]["user"]["nationality"] == nationality
         assert login_email_res.status_code == 200
+        assert login_email_res.json()["data"]["user"]["sex_at_birth"] == "intersex"
         assert login_email_res.json()["success"] is True
 
         # 5. Login with phone

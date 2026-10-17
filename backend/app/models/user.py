@@ -53,7 +53,7 @@ class EmailVerificationCode(Base):
     """Temporary email verification code stored in PostgreSQL."""
     __tablename__ = "email_verification_codes"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True)
     email = Column(Text, index=True, nullable=False)
     code = Column(String(6), nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)

@@ -173,7 +173,10 @@ class AuthService {
     required String email,
     required String password,
     String? code,
-    String? name,
+    required String name,
+    required String sexAtBirth,
+    required String nationality,
+    DateTime? dateOfBirth,
   }) async {
     final url = Uri.parse('${ApiService.baseUrl}/auth/register');
 
@@ -187,9 +190,10 @@ class AuthService {
       if (code != null && code.trim().isNotEmpty) {
         payload['code'] = code.trim();
       }
-      if (name != null && name.trim().isNotEmpty) {
-        payload['name'] = name.trim();
-      }
+      payload['name'] = name.trim();
+      payload['sex_at_birth'] = sexAtBirth;
+      payload['nationality'] = nationality;
+      if (dateOfBirth != null) payload['date_of_birth'] = dateOfBirth.toIso8601String().split('T').first;
 
       final response = await http
           .post(

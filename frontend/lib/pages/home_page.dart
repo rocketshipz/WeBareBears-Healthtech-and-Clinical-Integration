@@ -463,7 +463,7 @@ class _HomePageState extends State<HomePage>
       height: 142,
       child: AnimatedBuilder(
         animation: heartbeatController,
-        builder: (_, __) {
+        builder: (_, _) {
           return Stack(
             alignment: Alignment.center,
             children: [

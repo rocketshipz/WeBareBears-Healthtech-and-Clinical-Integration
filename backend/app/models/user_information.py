@@ -47,7 +47,7 @@ class UserInformation(Base):
     emergency_contact_phone = Column(Text, nullable=True)
     emergency_contact_relation = Column(Text, nullable=True)
     organ_donor = Column(Boolean, nullable=True)
-    history_consent = Column(Boolean, default=False, nullable=False)
+    location_consent = Column(Boolean, default=False, nullable=False)
 
     medical_info_updated_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), nullable=False)

@@ -26,7 +26,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     expect(find.text('Selamat kembali'), findsOneWidget);
-    expect(find.text('Nombor Telefon'), findsOneWidget);
+    expect(find.text('E-mel, Nombor Telefon, atau IC'), findsOneWidget);
     expect(find.text('Welcome back'), findsNothing);
     await AppLanguage.instance.select('en');
     await tester.pump();
