@@ -1,3 +1,4 @@
+import '../localization.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
@@ -124,6 +125,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     return Scaffold(
       body: GradientBackground(
         child: SafeArea(
@@ -162,9 +164,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Create your account', style: AppText.display),
+                          LocalizedText('Create your account', style: AppText.display),
                           const SizedBox(height: 8),
-                          Text(
+                          LocalizedText(
                             'Set up your account to start using TriageMY.',
                             style: AppText.body,
                           ),
@@ -248,7 +250,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                             const SizedBox(height: 6),
 
-                            Text(
+                            LocalizedText(
                               'Use at least 8 characters.',
                               style: AppText.caption,
                             ),
@@ -324,7 +326,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
-                                      child: Text(
+                                      child: LocalizedText(
                                         'A 6-digit TAC has been sent to '
                                         '${phoneController.text}.',
                                         style: AppText.style(
@@ -362,7 +364,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 alignment: Alignment.centerRight,
                                 child: TextButton(
                                   onPressed: _resendTac,
-                                  child: Text(
+                                  child: LocalizedText(
                                     'Resend TAC',
                                     style: AppText.style(
                                       12,
@@ -398,7 +400,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: Wrap(
                         alignment: WrapAlignment.center,
                         children: [
-                          Text(
+                          LocalizedText(
                             'Already have an account? ',
                             style: AppText.body,
                           ),
@@ -406,7 +408,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             onTap: () {
                               Navigator.pop(context);
                             },
-                            child: Text(
+                            child: LocalizedText(
                               'Log in',
                               style: AppText.style(
                                 14,
@@ -440,7 +442,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               'Your phone number is verified using TAC before your account is activated.',
                               style: AppText.caption,
                             ),

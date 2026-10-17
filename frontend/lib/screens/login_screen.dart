@@ -1,3 +1,4 @@
+import '../localization.dart';
 import 'package:flutter/material.dart';
 
 import '../pages/home_page.dart';
@@ -74,6 +75,7 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     return Scaffold(
       body: GradientBackground(
         child: SafeArea(
@@ -111,13 +113,13 @@ class _LoginScreenState extends State<LoginScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
+                            LocalizedText(
                               'Welcome back',
                               textAlign: TextAlign.center,
                               style: AppText.display,
                             ),
                             const SizedBox(height: 8),
-                            Text(
+                            LocalizedText(
                               'Log in to continue your screening.',
                               textAlign: TextAlign.center,
                               style: AppText.body,
@@ -205,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     vertical: 8,
                                   ),
                                 ),
-                                child: Text(
+                                child: LocalizedText(
                                   'Forgot password?',
                                   style: AppText.style(
                                     12,
@@ -238,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen>
                         child: Wrap(
                           alignment: WrapAlignment.center,
                           children: [
-                            Text(
+                            LocalizedText(
                               'Don\'t have an account? ',
                               style: AppText.body,
                             ),
@@ -251,7 +253,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                 );
                               },
-                              child: Text(
+                              child: LocalizedText(
                                 'Create account',
                                 style: AppText.style(
                                   14,
@@ -343,8 +345,8 @@ class _LoginScreenState extends State<LoginScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Need immediate help?', style: AppText.caption),
-                Text('Call emergency services', style: AppText.bodyStrong),
+                LocalizedText('Need immediate help?', style: AppText.caption),
+                LocalizedText('Call emergency services', style: AppText.bodyStrong),
               ],
             ),
           ),
@@ -358,7 +360,7 @@ class _LoginScreenState extends State<LoginScreen>
                 color: AppColors.red,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
+              child: LocalizedText(
                 '999',
                 style: AppText.style(14, FontWeight.w700, Colors.white),
               ),

@@ -1,3 +1,4 @@
+import 'localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -101,7 +102,7 @@ PreferredSizeWidget buildAppBar(
     centerTitle: false,
     leading: leading,
     iconTheme: const IconThemeData(color: AppColors.textDark),
-    title: Text(title, style: AppText.heading),
+    title: LocalizedText(title, style: AppText.heading),
     actions: actions,
   );
 }
@@ -116,7 +117,7 @@ void showAppSnack(BuildContext context, String message) {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
         ),
-        content: Text(
+        content: LocalizedText(
           message,
           style: AppText.style(14, FontWeight.w500, Colors.white),
         ),
@@ -177,12 +178,12 @@ void showEmergencyDialog(BuildContext context) {
             size: 26,
           ),
         ),
-        title: Text(
+        title: LocalizedText(
           'Emergency Services',
           textAlign: TextAlign.center,
           style: AppText.heading,
         ),
-        content: Text(
+        content: LocalizedText(
           'If you are experiencing a medical emergency, call 999 immediately.',
           textAlign: TextAlign.center,
           style: AppText.body,
@@ -191,7 +192,7 @@ void showEmergencyDialog(BuildContext context) {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
+            child: LocalizedText(
               'Close',
               style: AppText.style(14, FontWeight.w600, AppColors.grey),
             ),
@@ -211,7 +212,7 @@ void showEmergencyDialog(BuildContext context) {
                 showAppSnack(context, '999 copied. Open your dialer to call.');
               }
             },
-            child: Text(
+            child: LocalizedText(
               'Copy 999',
               style: AppText.style(14, FontWeight.w700, Colors.white),
             ),
@@ -321,7 +322,7 @@ class PrimaryButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            LocalizedText(
               label,
               style: AppText.style(14, FontWeight.w700, Colors.white),
             ),
@@ -359,7 +360,7 @@ class SecondaryButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.border),
         ),
-        child: Text(
+        child: LocalizedText(
           label,
           style: AppText.style(14, FontWeight.w700, AppColors.darkTeal),
         ),
@@ -404,7 +405,7 @@ class SelectChip extends StatelessWidget {
               const Icon(Icons.check_rounded, size: 16, color: Colors.white),
               const SizedBox(width: 6),
             ],
-            Text(
+            LocalizedText(
               label,
               style: AppText.style(
                 14,
@@ -549,7 +550,7 @@ class StepProgress extends StatelessWidget {
           }),
         ),
         const SizedBox(height: 8),
-        Text(
+        LocalizedText(
           'Step ${current + 1} of ${labels.length} · ${labels[current]}',
           style: AppText.caption,
         ),
@@ -558,7 +559,7 @@ class StepProgress extends StatelessWidget {
   }
 }
 
-Widget fieldLabel(String text) => Text(text, style: AppText.bodyStrong);
+Widget fieldLabel(String text) => LocalizedText(text, style: AppText.bodyStrong);
 
 InputDecoration appInputDecoration({
   required String hint,
@@ -573,7 +574,7 @@ InputDecoration appInputDecoration({
   }
 
   return InputDecoration(
-    hintText: hint,
+    hintText: tr(hint),
     hintStyle: AppText.style(14, FontWeight.w400, const Color(0xFFA5B2B2)),
     prefixIcon: Icon(icon, size: 20, color: AppColors.grey),
     suffixIcon: suffix,
