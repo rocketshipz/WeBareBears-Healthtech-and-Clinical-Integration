@@ -494,4 +494,11 @@ const malayTranslations = <String, String>{
   'Please enter your date of birth.': 'Sila masukkan tarikh lahir anda.',
   'IC / Passport Number': 'Nombor Kad Pengenalan / Pasport',
   'Registered date of birth.': 'Tarikh lahir yang didaftarkan.',
+  'Saving...': 'Menyimpan...',
+  'Loading...': 'Memuatkan...',
+  'Please enter a valid height and weight.': 'Sila masukkan ketinggian dan berat yang sah.',
+  'Please log in to save your profile.': 'Sila log masuk untuk menyimpan profil anda.',
+  'Could not save or load your profile. Please try again.': 'Profil tidak dapat disimpan atau dimuatkan. Sila cuba lagi.',
+  'Add': 'Tambah',
+  'Add each item, then tap +. You can add more than one.': 'Masukkan setiap item, kemudian tekan +. Anda boleh menambah lebih daripada satu.',
 };

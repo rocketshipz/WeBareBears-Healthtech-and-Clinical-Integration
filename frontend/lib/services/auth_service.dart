@@ -237,6 +237,30 @@ class AuthService {
     }
   }
 
+  static Future<Map<String, dynamic>> loadProfile() => _profileRequest();
+
+  static Future<Map<String, dynamic>> saveProfile(Map<String, dynamic> values) => _profileRequest(values);
+
+  static Future<Map<String, dynamic>> _profileRequest([Map<String, dynamic>? values]) async {
+    if (!isAuthenticated) throw AuthException('Please log in to save your profile.');
+    final uri = Uri.parse('${ApiService.baseUrl}/auth/profile');
+    try {
+      final response = await (values == null
+        ? http.get(uri, headers: ApiService.defaultHeaders)
+        : http.put(uri, headers: ApiService.defaultHeaders, body: jsonEncode(values)))
+        .timeout(const Duration(seconds: 12));
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw AuthException(_parseErrorMessage(response), statusCode: response.statusCode);
+      }
+      final result = jsonDecode(response.body) as Map<String, dynamic>;
+      return Map<String, dynamic>.from(result['data'] as Map);
+    } on AuthException {
+      rethrow;
+    } catch (_) {
+      throw AuthException('Could not save or load your profile. Please try again.');
+    }
+  }
+
   /// Clear the active user session and auth token.
   static void logout() {
     _token = null;

@@ -29,6 +29,9 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   bool isEditing = false;
+  bool _saving = false;
+  bool _loading = false;
+  bool _profileLoaded = false;
 
   // ============================================================
   // TEXT CONTROLLERS
@@ -88,9 +91,10 @@ class _ProfilePageState extends State<ProfilePage> {
     'Asthma',
   ];
 
-  final allergiesController = TextEditingController(
-    text: profileData.value['allergies'] ?? '',
-  );
+  final allergiesController = TextEditingController();
+  final conditionController = TextEditingController();
+  final List<String> selectedAllergies =
+      (profileData.value['allergies'] ?? '').split(',').map((v) => v.trim()).where((v) => v.isNotEmpty).toList();
 
   final List<String> selectedMedications = [
     'None',
@@ -224,6 +228,7 @@ class _ProfilePageState extends State<ProfilePage> {
       selectedSex = sex.isEmpty ? 'Not specified' : '${sex[0].toUpperCase()}${sex.substring(1)}';
       profileData.value = {...profileData.value, 'name': fullNameController.text, 'sex': selectedSex};
     }
+    if (AuthService.isAuthenticated) _loadProfile();
     sexController.text = selectedSex;
     nationalityController.text = selectedNationality;
 
@@ -232,6 +237,70 @@ class _ProfilePageState extends State<ProfilePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateDetailsFromIc();
     });
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() => _loading = true);
+    try {
+      final data = await AuthService.loadProfile();
+      if (!mounted) return;
+      setState(() {
+        String text(String key) => data[key]?.toString() ?? '';
+        String title(String key, String fallback) {
+          final value = text(key);
+          return value.isEmpty ? fallback : '${value[0].toUpperCase()}${value.substring(1)}';
+        }
+        void items(List<String> target, String key, [String? property]) {
+          target..clear()..addAll((data[key] as List? ?? []).map((item) =>
+            property == null ? item.toString() : (item[property] ?? '').toString()).where((value) => value.isNotEmpty));
+        }
+        fullNameController.text = text('name');
+        icController.text = text('ic');
+        dateOfBirthController.text = text('date_of_birth');
+        ageController.text = text('age');
+        selectedSex = title('sex_at_birth', 'Not specified');
+        sexController.text = selectedSex;
+        selectedNationality = text('nationality');
+        nationalityController.text = selectedNationality;
+        selectedLanguage = languageOptions.contains(text('preferred_language')) ? text('preferred_language') : 'Other';
+        languageOtherController.text = selectedLanguage == 'Other' ? text('preferred_language') : '';
+        heightController.text = text('height_cm');
+        weightController.text = text('weight_kg');
+        selectedBloodType = bloodTypeOptions.contains(text('blood_type')) ? text('blood_type') : 'Unsure';
+        items(selectedChronicConditions, 'chronic_conditions', 'name');
+        items(selectedMedications, 'current_medications', 'name');
+        items(selectedSurgeries, 'past_surgeries');
+        items(selectedFamilyHistory, 'family_history');
+        void custom(List<String> target, List<String> selected, List<String> options) {
+          target..clear()..addAll(selected.where((value) => !options.contains(value)));
+        }
+        custom(customChronicConditions, selectedChronicConditions, chronicConditionOptions);
+        custom(customMedications, selectedMedications, medicationOptions);
+        custom(customSurgeries, selectedSurgeries, surgeryOptions);
+        custom(customFamilyHistory, selectedFamilyHistory, familyHistoryOptions);
+        items(selectedAllergies, 'allergies', 'substance');
+        selectedSmokingStatus = title('smoking_status', 'Never');
+        selectedAlcoholUse = title('alcohol_use', 'None');
+        emergencyNameController.text = text('emergency_contact_name');
+        emergencyNumberController.text = text('emergency_contact_phone');
+        selectedRelationship = relationshipOptions.contains(text('emergency_contact_relation')) ? text('emergency_contact_relation') : 'Other';
+        relationshipOtherController.text = selectedRelationship == 'Other' ? text('emergency_contact_relation') : '';
+        selectedOrganDonor = data['organ_donor'] == true ? 'Yes' : 'No';
+        locationConsent = data['location_consent'] == true;
+        _profileLoaded = true;
+      });
+      profileData.value = {
+        ...profileData.value,
+        'name': fullNameController.text, 'sex': selectedSex,
+        'age': ageController.text, 'dateOfBirth': dateOfBirthController.text,
+        'blood': selectedBloodType, 'allergies': selectedAllergies.join(', '),
+        'chronic': selectedChronicConditions.join(', '), 'medication': selectedMedications.join(', '),
+      };
+    } on AuthException catch (error) {
+      if (mounted) showAppSnack(context, error.message);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   // ============================================================
@@ -337,6 +406,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void dispose() {
     icController.removeListener(_updateDetailsFromIc);
 
+    conditionController.dispose();
     allergiesController.dispose();
     sexController.dispose();
     fullNameController.dispose();
@@ -590,27 +660,20 @@ class _ProfilePageState extends State<ProfilePage> {
                             .medical_information_outlined,
                         title: 'Medical Information',
                         children: [
-                          _multiSelectRow(
-                            label:
-                                'Chronic Conditions',
-                            selectedValues:
-                                selectedChronicConditions,
-                            predefinedOptions:
-                                chronicConditionOptions,
-                            customValues:
-                                customChronicConditions,
-                            addHint:
-                                'Add another condition',
-                            exclusiveValues: const [
-                              'None',
-                            ],
+                          _multipleTextRow(
+                            label: 'Chronic Conditions',
+                            values: selectedChronicConditions,
+                            controller: conditionController,
+                            hint: 'Add another condition',
                           ),
 
                           _divider(),
 
-                          _editableRow(
+                          _multipleTextRow(
                             label: 'Allergies',
+                            values: selectedAllergies,
                             controller: allergiesController,
+                            hint: 'Add another allergy',
                           ),
 
                           _divider(),
@@ -876,13 +939,15 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _editButton() {
     return Pressable(
-      onTap: () {
-        setState(() {
-          isEditing = !isEditing;
-        });
-
-        if (!isEditing) {
-          _saveProfile();
+      onTap: _saving || _loading ? null : () async {
+        if (AuthService.isAuthenticated && !_profileLoaded) {
+          await _loadProfile();
+          return;
+        }
+        if (isEditing) {
+          await _saveProfile();
+        } else {
+          setState(() => isEditing = true);
         }
       },
       child: AnimatedContainer(
@@ -925,7 +990,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(width: 6),
 
             LocalizedText(
-              isEditing ? 'Save' : 'Edit',
+              _saving ? 'Saving...' : _loading ? 'Loading...' : isEditing ? 'Save' : 'Edit',
               style: AppText.style(
                 14,
                 FontWeight.w700,
@@ -944,7 +1009,17 @@ class _ProfilePageState extends State<ProfilePage> {
   // SAVE
   // ============================================================
 
-  void _saveProfile() {
+  Future<void> _saveProfile() async {
+    if (_saving) return;
+    _commitEntries(selectedChronicConditions, conditionController);
+    _commitEntries(selectedAllergies, allergiesController);
+    final height = heightController.text.trim();
+    final weight = weightController.text.trim();
+    if ((height.isNotEmpty && (double.tryParse(height) == null || !double.parse(height).isFinite || double.parse(height) <= 0)) ||
+        (weight.isNotEmpty && (double.tryParse(weight) == null || !double.parse(weight).isFinite || double.parse(weight) <= 0))) {
+      showAppSnack(context, 'Please enter a valid height and weight.');
+      return;
+    }
     final complete = [
       fullNameController.text.trim(),
       icController.text.trim(),
@@ -958,9 +1033,7 @@ class _ProfilePageState extends State<ProfilePage> {
       (value) => value.isNotEmpty,
     );
 
-    profileCompleted.value = complete;
-
-    profileData.value = {
+    final savedProfile = <String, String>{
       'name':
           fullNameController.text.trim(),
 
@@ -993,7 +1066,7 @@ class _ProfilePageState extends State<ProfilePage> {
           selectedChronicConditions.join(', '),
 
       'allergies':
-          allergiesController.text.trim(),
+          selectedAllergies.join(', '),
 
       'medication':
           selectedMedications.join(', '),
@@ -1028,6 +1101,37 @@ class _ProfilePageState extends State<ProfilePage> {
       'locationConsent':
           locationConsent ? 'Yes' : 'No',
     };
+
+    setState(() => _saving = true);
+    try {
+      await AuthService.saveProfile({
+        'preferred_language': savedProfile['language'],
+        'height_cm': height.isEmpty ? null : double.parse(height),
+        'weight_kg': weight.isEmpty ? null : double.parse(weight),
+        'blood_type': selectedBloodType == 'Unsure' ? 'unknown' : selectedBloodType,
+        'chronic_conditions': selectedChronicConditions.map((name) => {'name': name}).toList(),
+        'allergies': selectedAllergies.map((substance) => {'substance': substance}).toList(),
+        'current_medications': selectedMedications.map((name) => {'name': name}).toList(),
+        'past_surgeries': selectedSurgeries.toList(),
+        'family_history': selectedFamilyHistory.toList(),
+        'smoking_status': selectedSmokingStatus.toLowerCase(),
+        'alcohol_use': selectedAlcoholUse.toLowerCase(),
+        'emergency_contact_name': emergencyNameController.text.trim(),
+        'emergency_contact_phone': emergencyNumberController.text.trim(),
+        'emergency_contact_relation': savedProfile['emergencyRelationship'],
+        'organ_donor': selectedOrganDonor == 'Yes',
+        'location_consent': locationConsent,
+      });
+      if (!mounted) return;
+      profileData.value = savedProfile;
+      profileCompleted.value = complete;
+      setState(() => isEditing = false);
+    } on AuthException catch (error) {
+      if (mounted) showAppSnack(context, error.message);
+      return;
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
 
     showAppSnack(
       context,
@@ -1343,6 +1447,66 @@ class _ProfilePageState extends State<ProfilePage> {
                     AppText.caption,
               ),
             ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _commitEntries(List<String> values, TextEditingController controller) {
+    for (final entry in controller.text.split(RegExp(r'[,;\n]'))) {
+      final value = entry.trim();
+      if (value.isEmpty) continue;
+      if (value.toLowerCase() == 'none' || value.toLowerCase() == 'no known allergies') {
+        values.clear();
+      } else {
+        values.removeWhere((item) => item.toLowerCase() == 'none' || item.toLowerCase() == 'no known allergies');
+      }
+      if (!values.any((item) => item.toLowerCase() == value.toLowerCase())) values.add(value);
+    }
+    controller.clear();
+  }
+
+  Widget _multipleTextRow({required String label, required List<String> values,
+      required TextEditingController controller, required String hint}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LocalizedText(label, style: AppText.label),
+          const SizedBox(height: 8),
+          if (values.isEmpty && !isEditing) LocalizedText('None reported', style: AppText.bodyStrong),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: values.map((value) => InputChip(
+              label: LocalizedText(value),
+              onDeleted: isEditing ? () => setState(() => values.remove(value)) : null,
+              backgroundColor: AppColors.paleTeal,
+            )).toList(),
+          ),
+          if (isEditing) ...[
+            const SizedBox(height: 8),
+            Row(children: [
+              Expanded(child: TextField(
+                key: ValueKey('entries-$label'),
+                controller: controller,
+                style: AppText.input,
+                decoration: _fieldDecoration().copyWith(hintText: tr(hint)),
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => setState(() => _commitEntries(values, controller)),
+              )),
+              const SizedBox(width: 8),
+              IconButton.filled(
+                tooltip: tr('Add'),
+                style: IconButton.styleFrom(backgroundColor: AppColors.darkTeal),
+                onPressed: () => setState(() => _commitEntries(values, controller)),
+                icon: const Icon(Icons.add_rounded),
+              ),
+            ]),
+            const SizedBox(height: 5),
+            LocalizedText('Add each item, then tap +. You can add more than one.', style: AppText.caption),
           ],
         ],
       ),

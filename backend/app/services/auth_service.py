@@ -285,6 +285,28 @@ class AuthService:
                 user=public_user,
             )
 
+    def profile(self, token: str, changes=None) -> Dict[str, Any]:
+        """Read or update the authenticated user's single information row."""
+        identity = self.get_user_by_token(token)
+        if not identity:
+            raise PermissionError("Invalid or expired session token.")
+        with self._get_db() as session:
+            user = session.get(User, identity["id"])
+            if user is None:
+                raise PermissionError("Account no longer exists.")
+            info = session.get(UserInformation, user.id)
+            if info is None:
+                raise ValueError("Account information is missing. Please contact support.")
+            if changes is not None:
+                for key, value in changes.model_dump(exclude_unset=True).items():
+                    setattr(info, key, value)
+                info.medical_info_updated_at = datetime.now(timezone.utc)
+                session.commit()
+                session.refresh(info)
+            data = {column.name: getattr(info, column.name) for column in UserInformation.__table__.columns}
+            data.update(name=user.name, ic=user.ic, age=info.age)
+            return data
+
     def get_user_by_token(self, token: str) -> Optional[Dict[str, Any]]:
         """Retrieve user info associated with an active session token."""
         return self._active_sessions.get(token)

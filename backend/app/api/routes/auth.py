@@ -187,3 +187,33 @@ async def get_me(
         data=user,
         message="User profile retrieved.",
     )
+
+
+from app.schemas.profile import ProfileUpdate
+
+
+def _profile_token(authorization: Optional[str]) -> str:
+    if not authorization or not authorization.startswith("Bearer ") or not authorization[7:].strip():
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header.")
+    return authorization[7:].strip()
+
+
+@router.get("/profile", response_model=APIResponse[dict])
+def read_profile(authorization: Optional[str] = Header(None), service: AuthService = Depends(get_auth_service)):
+    try:
+        return APIResponse(success=True, data=service.profile(_profile_token(authorization)))
+    except PermissionError as exc:
+        raise HTTPException(status_code=401, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+
+
+@router.put("/profile", response_model=APIResponse[dict])
+def save_profile(request: ProfileUpdate, authorization: Optional[str] = Header(None),
+                 service: AuthService = Depends(get_auth_service)):
+    try:
+        return APIResponse(success=True, data=service.profile(_profile_token(authorization), request), message="Profile updated.")
+    except PermissionError as exc:
+        raise HTTPException(status_code=401, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
