@@ -31,6 +31,7 @@ from langchain_core.messages import HumanMessage, SystemMessage  # noqa: E402
 
 from app.agents.triage_agent import MedicalTriageAgent  # noqa: E402
 from app.core.llm import get_llm  # noqa: E402
+from app.services.triage_rules_engine import get_triage_rules_engine  # noqa: E402
 
 # (number, name, opening message, patient facts, accepted levels)
 SCENARIOS = [
@@ -103,6 +104,9 @@ def patient_reply(facts: str, transcript: list) -> str:
 def run_scenario(num, name, opening, facts, accepted, max_turns, quiet):
     agent = MedicalTriageAgent()
     transcript, session_id, result, turns, error = [], None, {}, 0, None
+    conditions = get_triage_rules_engine().conditions
+    findings_log, seen_present, seen_absent = [], set(), set()
+    label = lambda ids: [f"{i} ({conditions[i].text})" if i in conditions else i for i in sorted(ids)]
     msg = opening
     t0 = time.time()
     for turns in range(1, max_turns + 1):
@@ -123,6 +127,14 @@ def run_scenario(num, name, opening, facts, accepted, max_turns, quiet):
             print(f"           [status={result.get('status')} level={result.get('triage_level')} "
                   f"call_999={result.get('call_999')}]", flush=True)
         transcript.append(("bot", bot))
+        # What the LLM told the engine this turn: condition IDs newly recorded as present / absent.
+        present, absent = set(session.findings["present_condition_ids"]), set(session.findings["absent_condition_ids"])
+        findings_log.append({
+            "turn": turns, "age_years": session.findings.get("age_years"),
+            "newly_present": label(present - seen_present), "no_longer_present": label(seen_present - present),
+            "newly_absent": len(absent - seen_absent),
+        })
+        seen_present, seen_absent = present, absent
         if result.get("status") == "classified":
             break
         msg = patient_reply(facts, transcript)
@@ -140,7 +152,8 @@ def run_scenario(num, name, opening, facts, accepted, max_turns, quiet):
         "scenario": num, "name": name, "expected": sorted(accepted), "got": level,
         "call_999": result.get("call_999"), "turns": turns, "seconds": round(time.time() - t0, 1),
         "matched_rules": result.get("matched_rule_ids"), "verdict": verdict, "error": error,
-        "transcript": transcript,
+        "present_condition_ids": label(seen_present) if findings_log else [],
+        "findings_by_turn": findings_log, "transcript": transcript,
     }
 
 
