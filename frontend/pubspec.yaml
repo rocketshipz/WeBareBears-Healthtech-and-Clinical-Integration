@@ -41,6 +41,8 @@ dependencies:
   google_fonts: ^9.0.0
   pdf: ^3.13.1
   printing: ^5.15.1
+  image_picker: ^1.2.4
+  cunning_document_scanner: ^3.0.3
 
 dev_dependencies:
   flutter_test:

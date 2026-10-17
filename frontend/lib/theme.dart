@@ -69,6 +69,23 @@ class AppText {
 }
 
 // ============================================================
+// THEME
+// ============================================================
+
+ThemeData buildAppTheme() {
+  return ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: AppColors.teal,
+      primary: AppColors.teal,
+      error: AppColors.red,
+      surface: AppColors.background,
+    ),
+    scaffoldBackgroundColor: AppColors.background,
+  );
+}
+
+// ============================================================
 // HELPERS
 // ============================================================
 
