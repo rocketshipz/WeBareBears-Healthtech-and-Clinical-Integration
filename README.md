@@ -41,12 +41,20 @@ Flutter Mobile App (Frontend)
    ```bash
    cd backend
    ```
-2. Create and activate a Python virtual environment, then install dependencies:
+2. Create and activate the virtual environment (first time only):
+   ```powershell
+   # Create virtual environment
+   python -m venv venv
+   
+   # Activate (Windows)
+   .\venv\Scripts\Activate.ps1
+
+3. Create and activate a Python virtual environment, then install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-3. Configure your `.env` (copy from `.env.example`).
-4. Run the backend server:
+4. Configure your `.env` (copy from `.env.example`).
+5. Run the backend server:
    ```bash
    python main.py
    ```

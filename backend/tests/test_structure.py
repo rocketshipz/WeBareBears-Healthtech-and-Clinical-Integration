@@ -70,3 +70,29 @@ def test_agent_runnable_binding_with_groq():
     agent = MedicalTriageAgent()
     runnable = agent._get_runnable()
     assert runnable is not None
+
+
+def test_get_database_uri_in_get_settings():
+    """Verify that get_settings evaluates get_database_uri and populates DATABASE_URL."""
+    from app.core.config import get_settings, get_database_uri
+
+    settings = get_settings()
+    uri = get_database_uri()
+    assert uri is not None
+    assert settings.DATABASE_URL is not None
+    assert uri == settings.DATABASE_URL
+    assert uri == settings.get_database_uri()
+
+
+def test_db_connection_diagnostics():
+    """Verify that test_db_connection returns proper diagnostics schema."""
+    from app.core.database import test_db_connection
+
+    # Test with default settings (returns structured dict whether connected or connection error)
+    diag = test_db_connection(timeout=1)
+    assert isinstance(diag, dict)
+    assert "status" in diag
+    assert "connected" in diag
+    assert "database_uri" in diag
+    assert isinstance(diag["connected"], bool)
+

@@ -1,3 +1,4 @@
+import '../localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
@@ -145,7 +146,7 @@ class TriageReportData {
         'This is a screening aid, not a medical diagnosis. '
         'In an emergency call 999.',
       );
-    return b.toString();
+    return b.toString().split('\n').map(tr).join('\n');
   }
 
   // ----------------------------------------------------------
@@ -153,7 +154,7 @@ class TriageReportData {
   // ----------------------------------------------------------
 
   Future<Uint8List> buildPdf(Map<String, String> profile) async {
-    String clean(String s) => s
+    String clean(String s) => tr(s)
         .replaceAll('–', '-')
         .replaceAll('·', '-')
         .replaceAll('\n', ' ');
@@ -172,7 +173,7 @@ class TriageReportData {
         children: [
           pw.SizedBox(height: 18),
           pw.Text(
-            title,
+            tr(title),
             style: pw.TextStyle(
               fontSize: 13,
               fontWeight: pw.FontWeight.bold,
@@ -189,13 +190,13 @@ class TriageReportData {
                   pw.SizedBox(
                     width: 150,
                     child: pw.Text(
-                      clean(r.key),
+                      tr(clean(r.key)),
                       style: pw.TextStyle(fontSize: 11, color: grey),
                     ),
                   ),
                   pw.Expanded(
                     child: pw.Text(
-                      clean(r.value),
+                      tr(clean(r.value)),
                       style: pw.TextStyle(
                         fontSize: 11,
                         fontWeight: pw.FontWeight.bold,
@@ -220,7 +221,7 @@ class TriageReportData {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(
-                'TriageMY',
+                tr('TriageMY'),
                 style: pw.TextStyle(
                   fontSize: 24,
                   fontWeight: pw.FontWeight.bold,
@@ -231,14 +232,14 @@ class TriageReportData {
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
                   pw.Text(
-                    'Triage Report',
+                    tr('Triage Report'),
                     style: pw.TextStyle(
                       fontSize: 13,
                       fontWeight: pw.FontWeight.bold,
                     ),
                   ),
                   pw.Text(
-                    clean('$reportId  |  $dateText'),
+                    tr(clean('$reportId  |  $dateText')),
                     style: pw.TextStyle(fontSize: 10, color: grey),
                   ),
                 ],
@@ -257,7 +258,7 @@ class TriageReportData {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Text(
-                  clean(zoneLabel),
+                  tr(clean(zoneLabel)),
                   style: pw.TextStyle(
                     fontSize: 18,
                     fontWeight: pw.FontWeight.bold,
@@ -266,14 +267,14 @@ class TriageReportData {
                 ),
                 pw.SizedBox(height: 3),
                 pw.Text(
-                  headline,
+                  tr(headline),
                   style: pw.TextStyle(
                     fontSize: 12,
                     fontWeight: pw.FontWeight.bold,
                   ),
                 ),
                 pw.SizedBox(height: 6),
-                pw.Text(recommendation, style: const pw.TextStyle(fontSize: 11)),
+                pw.Text(tr(recommendation), style: const pw.TextStyle(fontSize: 11)),
               ],
             ),
           ),
@@ -281,10 +282,10 @@ class TriageReportData {
           section('Patient information', patientRows(profile)),
           pw.SizedBox(height: 26),
           pw.Text(
-            'This report is a screening aid generated from the answers you '
+            tr('This report is a screening aid generated from the answers you '
             'provided. It is not a medical diagnosis. If your symptoms become '
             'severe or you develop emergency warning signs, call 999 or seek '
-            'emergency care immediately.',
+            'emergency care immediately.'),
             style: pw.TextStyle(fontSize: 9, color: grey),
           ),
         ],
@@ -346,6 +347,7 @@ class TriageReportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     return Scaffold(
       bottomNavigationBar: AppBottomNav(
         selectedIndex: 1,
@@ -390,9 +392,9 @@ class TriageReportPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Triage Report', style: AppText.display),
+                          LocalizedText('Triage Report', style: AppText.display),
                           const SizedBox(height: 8),
-                          Text(
+                          LocalizedText(
                             'A summary of your screening, ready to save or share.',
                             style: AppText.body,
                           ),
@@ -484,9 +486,9 @@ class TriageReportPage extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(report.reportId, style: AppText.label),
+                child: LocalizedText(report.reportId, style: AppText.label),
               ),
-              Text(report.dateText, style: AppText.caption),
+              LocalizedText(report.dateText, style: AppText.caption),
             ],
           ),
 
@@ -504,16 +506,16 @@ class TriageReportPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Triage outcome', style: AppText.caption),
+                LocalizedText('Triage outcome', style: AppText.caption),
                 const SizedBox(height: 2),
-                Text(
+                LocalizedText(
                   report.zoneLabel,
                   style: AppText.style(18, FontWeight.w700, color),
                 ),
                 const SizedBox(height: 2),
-                Text(report.headline, style: AppText.bodyStrong),
+                LocalizedText(report.headline, style: AppText.bodyStrong),
                 const SizedBox(height: 6),
-                Text(report.recommendation, style: AppText.body),
+                LocalizedText(report.recommendation, style: AppText.body),
               ],
             ),
           ),
@@ -530,7 +532,7 @@ class TriageReportPage extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          Text(
+          LocalizedText(
             'This report is a screening aid, not a medical diagnosis. '
             'In an emergency, call 999.',
             style: AppText.caption,
@@ -546,7 +548,7 @@ class TriageReportPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(text, style: AppText.heading),
+          LocalizedText(text, style: AppText.heading),
           const SizedBox(height: 6),
           const Divider(height: 1, color: AppColors.border),
         ],
@@ -560,11 +562,11 @@ class TriageReportPage extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(flex: 4, child: Text(label, style: AppText.caption)),
+          Expanded(flex: 4, child: LocalizedText(label, style: AppText.caption)),
           const SizedBox(width: 12),
           Expanded(
             flex: 5,
-            child: Text(
+            child: LocalizedText(
               value,
               textAlign: TextAlign.right,
               style: AppText.bodyStrong,
@@ -591,7 +593,7 @@ class TriageReportPage extends StatelessWidget {
             child: Icon(icon, color: AppColors.darkTeal, size: 24),
           ),
           const SizedBox(height: 6),
-          Text(label, style: AppText.caption),
+          LocalizedText(label, style: AppText.caption),
         ],
       ),
     );

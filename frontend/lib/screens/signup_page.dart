@@ -1,6 +1,9 @@
+import '../localization.dart';
 import 'package:flutter/material.dart';
 
+import '../services/auth_service.dart';
 import '../theme.dart';
+import 'login_screen.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -12,110 +15,165 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final icController = TextEditingController();
   final phoneController = TextEditingController();
-  final tacController = TextEditingController();
+  final emailController = TextEditingController();
+  final codeController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
   bool hidePassword = true;
   bool hideConfirmPassword = true;
 
-  bool tacSent = false;
-  bool tacVerified = false;
-
-  // Prototype TAC only
-  final String sampleTac = '123456';
+  bool codeSent = false;
+  bool codeVerified = false;
+  bool isSendingCode = false;
+  bool isRegistering = false;
 
   @override
   void dispose() {
     icController.dispose();
     phoneController.dispose();
-    tacController.dispose();
+    emailController.dispose();
+    codeController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _createAccount() {
-    if (icController.text.trim().isEmpty ||
-        phoneController.text.trim().isEmpty ||
-        passwordController.text.isEmpty ||
-        confirmPasswordController.text.isEmpty) {
-      _showMessage(
-        'Please complete all required fields.',
-      );
+  bool _isValidEmail(String email) {
+    return RegExp(r"^[\w\.-]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email.trim());
+  }
+
+  Future<void> _sendVerificationCode() async {
+    if (isSendingCode) return;
+
+    final ic = icController.text.trim();
+    final phone = phoneController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
+
+    if (ic.isEmpty || phone.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      _showMessage('Please complete all required fields.');
       return;
     }
 
-    if (passwordController.text.length < 8) {
-      _showMessage(
-        'Password must contain at least 8 characters.',
-      );
+    if (!_isValidEmail(email)) {
+      _showMessage('Please enter a valid email address.');
       return;
     }
 
-    if (passwordController.text != confirmPasswordController.text) {
-      _showMessage(
-        'Passwords do not match.',
-      );
+    if (password.length < 8) {
+      _showMessage('Password must contain at least 8 characters.');
+      return;
+    }
+
+    if (password != confirmPassword) {
+      _showMessage('Passwords do not match.');
       return;
     }
 
     setState(() {
-      tacSent = true;
-      tacVerified = false;
+      isSendingCode = true;
     });
 
-    _showMessage(
-      'TAC sent to ${phoneController.text}. Prototype TAC: $sampleTac',
-    );
+    try {
+      final response = await AuthService.sendVerificationCode(email: email);
+      if (!mounted) return;
+
+      setState(() {
+        codeSent = true;
+        codeVerified = false;
+      });
+
+      final message = response['message'] ?? 'Verification code sent to $email.';
+      _showMessage(message);
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      _showMessage(e.message);
+    } catch (e) {
+      if (!mounted) return;
+      _showMessage('Failed to send code: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSendingCode = false;
+        });
+      }
+    }
   }
 
-  void _verifyTac() {
-    if (tacController.text.trim().isEmpty) {
-      _showMessage(
-        'Please enter the TAC.',
-      );
+  Future<void> _verifyAndRegister() async {
+    if (isRegistering) return;
+
+    final code = codeController.text.trim();
+    final email = emailController.text.trim();
+    final ic = icController.text.trim();
+    final phone = phoneController.text.trim();
+    final password = passwordController.text;
+
+    if (code.isEmpty || code.length != 6) {
+      _showMessage('Please enter the 6-digit verification code.');
       return;
     }
 
-    if (tacController.text.trim() == sampleTac) {
-      setState(() {
-        tacVerified = true;
-      });
+    setState(() {
+      isRegistering = true;
+    });
 
-      _showMessage(
-        'Account created successfully!',
+    try {
+      // Step 1: Verify 6-digit code
+      await AuthService.verifyCode(email: email, code: code);
+
+      // Step 2: Register account
+      await AuthService.register(
+        ic: ic,
+        phone: phone,
+        email: email,
+        password: password,
+        code: code,
       );
 
-      // Later you can navigate to another page here.
-      // Example:
-      //
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => const LoginScreen(),
-      //   ),
-      // );
-    } else {
+      if (!mounted) return;
       setState(() {
-        tacVerified = false;
+        codeVerified = true;
       });
 
-      _showMessage(
-        'Invalid TAC. Please try again.',
+      _showMessage('Account created successfully!');
+
+      // Navigate to login screen
+      await Future.delayed(const Duration(milliseconds: 600));
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      _showMessage(e.message);
+    } catch (e) {
+      if (!mounted) return;
+      _showMessage('Registration error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          isRegistering = false;
+        });
+      }
     }
   }
 
-  void _resendTac() {
-    setState(() {
-      tacVerified = false;
-      tacController.clear();
-    });
+  Future<void> _resendCode() async {
+    final email = emailController.text.trim();
+    if (email.isEmpty) return;
 
-    _showMessage(
-      'A new TAC has been sent. Prototype TAC: $sampleTac',
-    );
+    try {
+      await AuthService.sendVerificationCode(email: email);
+      if (!mounted) return;
+      _showMessage('A new 6-digit verification code has been sent to $email.');
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      _showMessage(e.message);
+    }
   }
 
   void _showMessage(String message) {
@@ -124,6 +182,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     return Scaffold(
       body: GradientBackground(
         child: SafeArea(
@@ -162,16 +221,16 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Create your account', style: AppText.display),
+                          LocalizedText('Create your account', style: AppText.display),
                           const SizedBox(height: 8),
-                          Text(
+                          LocalizedText(
                             'Set up your account to start using TriageMY.',
                             style: AppText.body,
                           ),
                           const SizedBox(height: 20),
                           StepProgress(
-                            current: tacSent ? 1 : 0,
-                            labels: const ['Your details', 'Verify phone'],
+                            current: codeSent ? 1 : 0,
+                            labels: const ['Your details', 'Verify email'],
                           ),
                         ],
                       ),
@@ -194,7 +253,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             const SizedBox(height: 8),
                             TextField(
                               controller: icController,
-                              keyboardType: TextInputType.number,
+                              keyboardType: TextInputType.text,
                               style: AppText.input,
                               decoration: appInputDecoration(
                                 hint: 'e.g. 010101-01-1234',
@@ -214,6 +273,21 @@ class _SignUpPageState extends State<SignUpPage> {
                               decoration: appInputDecoration(
                                 hint: 'e.g. 0123456789',
                                 icon: Icons.phone_outlined,
+                              ),
+                            ),
+
+                            const SizedBox(height: 18),
+
+                            // EMAIL ADDRESS
+                            fieldLabel('Email Address'),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              style: AppText.input,
+                              decoration: appInputDecoration(
+                                hint: 'e.g. user@example.com',
+                                icon: Icons.email_outlined,
                               ),
                             ),
 
@@ -248,7 +322,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                             const SizedBox(height: 6),
 
-                            Text(
+                            LocalizedText(
                               'Use at least 8 characters.',
                               style: AppText.caption,
                             ),
@@ -283,12 +357,19 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                             ),
 
-                            // CREATE ACCOUNT BUTTON
-                            if (!tacSent) ...[
+                            // SEND CODE BUTTON
+                            if (!codeSent) ...[
                               const SizedBox(height: 24),
                               PrimaryButton(
-                                label: 'Create Account',
-                                onPressed: _createAccount,
+                                label: isSendingCode
+                                    ? 'Sending code...'
+                                    : 'Send Verification Code',
+                                icon: isSendingCode
+                                    ? null
+                                    : Icons.arrow_forward_rounded,
+                                onPressed: isSendingCode
+                                    ? null
+                                    : _sendVerificationCode,
                               ),
                             ],
                           ],
@@ -296,8 +377,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                     ),
 
-                    // TAC SECTION
-                    if (tacSent) ...[
+                    // EMAIL VERIFICATION CODE SECTION
+                    if (codeSent) ...[
                       const SizedBox(height: 16),
                       FadeSlideIn(
                         child: Container(
@@ -318,15 +399,15 @@ class _SignUpPageState extends State<SignUpPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Icon(
-                                      Icons.sms_outlined,
+                                      Icons.mark_email_read_outlined,
                                       color: AppColors.darkTeal,
                                       size: 21,
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        'A 6-digit TAC has been sent to '
-                                        '${phoneController.text}.',
+                                        'A 6-digit verification code has been sent to '
+                                        '${emailController.text}. Please check your inbox.',
                                         style: AppText.style(
                                           12,
                                           FontWeight.w500,
@@ -341,15 +422,15 @@ class _SignUpPageState extends State<SignUpPage> {
 
                               const SizedBox(height: 18),
 
-                              fieldLabel('Enter TAC'),
+                              fieldLabel('Enter 6-Digit Code'),
                               const SizedBox(height: 8),
                               TextField(
-                                controller: tacController,
+                                controller: codeController,
                                 keyboardType: TextInputType.number,
                                 maxLength: 6,
                                 style: AppText.input,
                                 decoration: appInputDecoration(
-                                  hint: 'Enter 6-digit TAC',
+                                  hint: 'Enter 6-digit code',
                                   icon: Icons.password_rounded,
                                 ).copyWith(
                                   counterText: '',
@@ -361,9 +442,9 @@ class _SignUpPageState extends State<SignUpPage> {
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: TextButton(
-                                  onPressed: _resendTac,
+                                  onPressed: _resendCode,
                                   child: Text(
-                                    'Resend TAC',
+                                    'Resend Code',
                                     style: AppText.style(
                                       12,
                                       FontWeight.w600,
@@ -376,14 +457,18 @@ class _SignUpPageState extends State<SignUpPage> {
                               const SizedBox(height: 8),
 
                               PrimaryButton(
-                                label: tacVerified
-                                    ? 'Verified'
-                                    : 'Verify TAC & Create Account',
-                                icon: tacVerified ? Icons.check_rounded : null,
-                                color: tacVerified
+                                label: isRegistering
+                                    ? 'Verifying & Creating...'
+                                    : codeVerified
+                                        ? 'Verified'
+                                        : 'Verify & Create Account',
+                                icon: codeVerified ? Icons.check_rounded : null,
+                                color: codeVerified
                                     ? AppColors.green
                                     : AppColors.darkTeal,
-                                onPressed: _verifyTac,
+                                onPressed: (isRegistering || codeVerified)
+                                    ? null
+                                    : _verifyAndRegister,
                               ),
                             ],
                           ),
@@ -398,7 +483,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: Wrap(
                         alignment: WrapAlignment.center,
                         children: [
-                          Text(
+                          LocalizedText(
                             'Already have an account? ',
                             style: AppText.body,
                           ),
@@ -406,7 +491,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             onTap: () {
                               Navigator.pop(context);
                             },
-                            child: Text(
+                            child: LocalizedText(
                               'Log in',
                               style: AppText.style(
                                 14,
@@ -441,7 +526,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'Your phone number is verified using TAC before your account is activated.',
+                              'A 6-digit verification code is sent to your email to verify your identity before account activation.',
                               style: AppText.caption,
                             ),
                           ),

@@ -1,3 +1,4 @@
+import '../localization.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
@@ -7,6 +8,7 @@ class NotificationsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     return Scaffold(
       body: GradientBackground(
         child: SafeArea(
@@ -28,7 +30,7 @@ class NotificationsPage extends StatelessWidget {
                             },
                           ),
                           const SizedBox(width: 14),
-                          Text('Notifications', style: AppText.heading),
+                          LocalizedText('Notifications', style: AppText.heading),
                         ],
                       ),
                     ),
@@ -37,7 +39,7 @@ class NotificationsPage extends StatelessWidget {
 
                     FadeSlideIn(
                       index: 1,
-                      child: Text('Recent updates', style: AppText.display),
+                      child: LocalizedText('Recent updates', style: AppText.display),
                     ),
 
                     const SizedBox(height: 20),
@@ -168,7 +170,7 @@ class NotificationsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
+                      child: LocalizedText(
                         title,
                         style: unread
                             ? AppText.bodyStrong
@@ -192,9 +194,9 @@ class NotificationsPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(message, style: AppText.body),
+                LocalizedText(message, style: AppText.body),
                 const SizedBox(height: 8),
-                Text(time, style: AppText.caption),
+                LocalizedText(time, style: AppText.caption),
               ],
             ),
           ),

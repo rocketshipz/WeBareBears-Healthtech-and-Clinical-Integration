@@ -1,3 +1,4 @@
+import '../localization.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
@@ -19,6 +20,7 @@ class _TriagePageState extends State<TriagePage> {
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     return Scaffold(
       body: GradientBackground(
         child: SafeArea(
@@ -54,9 +56,9 @@ class _TriagePageState extends State<TriagePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('AI Triage', style: AppText.display),
+                          LocalizedText('AI Triage', style: AppText.display),
                           const SizedBox(height: 8),
-                          Text(
+                          LocalizedText(
                             'Answer a few questions to help us understand your condition.',
                             style: AppText.body,
                           ),
@@ -65,7 +67,7 @@ class _TriagePageState extends State<TriagePage> {
                           // PROGRESS
                           Row(
                             children: [
-                              Text(
+                              LocalizedText(
                                 'Step 1',
                                 style: AppText.style(
                                   12,
@@ -317,7 +319,7 @@ class _TriagePageState extends State<TriagePage> {
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               'If you are experiencing emergency warning signs, '
                               'call 999 or seek emergency medical care immediately.',
                               style: AppText.style(
@@ -392,7 +394,7 @@ class _TriagePageState extends State<TriagePage> {
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: Text(
+                  child: LocalizedText(
                     number,
                     style: AppText.style(14, FontWeight.w700, Colors.white,
                         height: 1),
@@ -404,9 +406,9 @@ class _TriagePageState extends State<TriagePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: AppText.heading),
+                    LocalizedText(title, style: AppText.heading),
                     const SizedBox(height: 2),
-                    Text(subtitle, style: AppText.caption),
+                    LocalizedText(subtitle, style: AppText.caption),
                   ],
                 ),
               ),
@@ -446,7 +448,7 @@ class _TriagePageState extends State<TriagePage> {
               color: selected ? AppColors.teal : AppColors.darkTeal,
             ),
             const SizedBox(height: 8),
-            Text(
+            LocalizedText(
               text,
               textAlign: TextAlign.center,
               style: _optionTextStyle(selected),
@@ -502,7 +504,7 @@ class _TriagePageState extends State<TriagePage> {
                     color: selected ? AppColors.teal : AppColors.darkTeal,
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  LocalizedText(
                     text,
                     textAlign: TextAlign.center,
                     style: _optionTextStyle(selected),

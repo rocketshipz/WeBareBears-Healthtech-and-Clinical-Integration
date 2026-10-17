@@ -1,3 +1,4 @@
+import '../localization.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
@@ -5,6 +6,7 @@ import 'hospital_homepage.dart';
 import 'notifications_page.dart';
 import 'profile_page.dart';
 import 'triage_engine.dart';
+import 'progress_tracking.dart';
 
 // ============================================================
 // MAIN NAVIGATION
@@ -34,13 +36,14 @@ class _MainNavigationState extends State<MainNavigation> {
           setState(() => currentIndex = 1);
         },
         onHospitals: () {
-          setState(() => currentIndex = 2);
+          setState(() => currentIndex = 3);
         },
         onMedicalHistory: () {
-          setState(() => currentIndex = 3);
+          setState(() => currentIndex = 4);
         },
       ),
       const TriagePage(),
+      const ProgressTrackingPage(),
       const HospitalsPage(),
       const ProfilePage(),
     ];
@@ -48,6 +51,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: IndexedStack(
@@ -168,6 +172,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     return Scaffold(
       body: GradientBackground(
         child: SafeArea(
@@ -208,7 +213,7 @@ class _HomePageState extends State<HomePage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Quick access', style: AppText.heading),
+                          LocalizedText('Quick access', style: AppText.heading),
                           const SizedBox(height: 12),
                           _buildQuickAccess(),
                         ],
@@ -222,7 +227,7 @@ class _HomePageState extends State<HomePage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Recent activity', style: AppText.heading),
+                          LocalizedText('Recent activity', style: AppText.heading),
                           const SizedBox(height: 12),
                           _buildRecentActivity(),
                         ],
@@ -300,9 +305,9 @@ class _HomePageState extends State<HomePage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('How are you feeling?', style: AppText.display),
+        LocalizedText('How are you feeling?', style: AppText.display),
         const SizedBox(height: 8),
-        Text(
+        LocalizedText(
           'Check your symptoms and get guidance on what to do next.',
           style: AppText.body,
         ),
@@ -360,7 +365,7 @@ class _HomePageState extends State<HomePage>
                   color: Colors.white.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: Text(
+                child: LocalizedText(
                   'Primary screening',
                   style: AppText.style(12, FontWeight.w600, Colors.white),
                 ),
@@ -371,7 +376,7 @@ class _HomePageState extends State<HomePage>
             Positioned(
               left: 22,
               top: 62,
-              child: Text(
+              child: LocalizedText(
                 'Check your\nsymptoms',
                 style: AppText.style(
                   26,
@@ -423,7 +428,7 @@ class _HomePageState extends State<HomePage>
                         color: AppColors.darkTeal,
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      LocalizedText(
                         'Start triage',
                         style: AppText.style(
                           14,
@@ -559,11 +564,11 @@ class _HomePageState extends State<HomePage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  LocalizedText(
                     'Complete your medical profile',
                     style: AppText.bodyStrong,
                   ),
-                  Text(
+                  LocalizedText(
                     'Help us provide more relevant guidance.',
                     style: AppText.caption,
                   ),
@@ -580,7 +585,7 @@ class _HomePageState extends State<HomePage>
                 color: AppColors.darkTeal,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
+              child: LocalizedText(
                 'Complete',
                 style: AppText.style(12, FontWeight.w700, Colors.white),
               ),
@@ -646,7 +651,7 @@ class _HomePageState extends State<HomePage>
             const Spacer(),
             Row(
               children: [
-                Expanded(child: Text(title, style: AppText.bodyStrong)),
+                Expanded(child: LocalizedText(title, style: AppText.bodyStrong)),
                 const Icon(
                   Icons.arrow_forward_rounded,
                   color: AppColors.grey,
@@ -655,7 +660,7 @@ class _HomePageState extends State<HomePage>
               ],
             ),
             const SizedBox(height: 2),
-            Text(subtitle, style: AppText.caption),
+            LocalizedText(subtitle, style: AppText.caption),
           ],
         ),
       ),
@@ -673,7 +678,7 @@ class _HomePageState extends State<HomePage>
         Row(
           children: [
             Expanded(
-              child: Text('How TriageMY works', style: AppText.heading),
+              child: LocalizedText('How TriageMY works', style: AppText.heading),
             ),
             Container(
               padding: const EdgeInsets.symmetric(
@@ -684,7 +689,7 @@ class _HomePageState extends State<HomePage>
                 color: AppColors.paleTeal,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Text(
+              child: LocalizedText(
                 '3 steps',
                 style: AppText.style(12, FontWeight.w700, AppColors.darkTeal),
               ),
@@ -762,7 +767,7 @@ class _HomePageState extends State<HomePage>
                   color: AppColors.darkTeal,
                   shape: BoxShape.circle,
                 ),
-                child: Text(
+                child: LocalizedText(
                   number,
                   style: AppText.style(12, FontWeight.w700, Colors.white,
                       height: 1),
@@ -772,8 +777,8 @@ class _HomePageState extends State<HomePage>
           ],
         ),
         const SizedBox(height: 10),
-        Text(title, style: AppText.label),
-        Text(
+        LocalizedText(title, style: AppText.label),
+        LocalizedText(
           subtitle,
           textAlign: TextAlign.center,
           style: AppText.caption,
@@ -822,8 +827,8 @@ class _HomePageState extends State<HomePage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('No recent triage', style: AppText.bodyStrong),
-                Text(
+                LocalizedText('No recent triage', style: AppText.bodyStrong),
+                LocalizedText(
                   'Your latest screening result will appear here.',
                   style: AppText.caption,
                 ),
@@ -869,12 +874,12 @@ class _HomePageState extends State<HomePage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                LocalizedText(
                   'Preliminary screening only',
                   style: AppText.style(14, FontWeight.w700, AppColors.darkTeal),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                LocalizedText(
                   'TriageMY does not diagnose conditions or replace assessment by a healthcare professional.',
                   style: AppText.caption,
                 ),
@@ -921,8 +926,8 @@ class _HomePageState extends State<HomePage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Need urgent help?', style: AppText.bodyStrong),
-                  Text(
+                  LocalizedText('Need urgent help?', style: AppText.bodyStrong),
+                  LocalizedText(
                     'For a medical emergency, call 999.',
                     style: AppText.caption,
                   ),
@@ -935,7 +940,7 @@ class _HomePageState extends State<HomePage>
                 color: AppColors.red,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
+              child: LocalizedText(
                 '999',
                 style: AppText.style(14, FontWeight.w700, Colors.white),
               ),
@@ -974,13 +979,13 @@ class _HomePageState extends State<HomePage>
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
+              LocalizedText(
                 'Emergency Services',
                 textAlign: TextAlign.center,
                 style: AppText.heading,
               ),
               const SizedBox(height: 8),
-              Text(
+              LocalizedText(
                 'If you are experiencing a medical emergency, call 999 immediately.',
                 textAlign: TextAlign.center,
                 style: AppText.body,
@@ -1096,6 +1101,7 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -1129,30 +1135,38 @@ class AppBottomNav extends StatelessWidget {
               );
             },
           ),
-          destinations: const [
+          destinations: [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),
               selectedIcon:
                   Icon(Icons.home_rounded, color: AppColors.darkTeal),
-              label: 'Home',
+              label: tr('Home'),
             ),
             NavigationDestination(
               icon: Icon(Icons.monitor_heart_outlined),
               selectedIcon:
                   Icon(Icons.monitor_heart_rounded, color: AppColors.darkTeal),
-              label: 'Triage',
+              label: tr('Triage'),
             ),
+            NavigationDestination(
+              icon: Icon(Icons.timeline_outlined),
+              selectedIcon: Icon(
+                Icons.timeline_rounded,
+                color: AppColors.darkTeal,
+                ),
+                label: tr('Progress'),
+                ),
             NavigationDestination(
               icon: Icon(Icons.local_hospital_outlined),
               selectedIcon:
                   Icon(Icons.local_hospital_rounded, color: AppColors.darkTeal),
-              label: 'Hospitals',
+              label: tr('Hospitals'),
             ),
             NavigationDestination(
               icon: Icon(Icons.person_outline_rounded),
               selectedIcon:
                   Icon(Icons.person_rounded, color: AppColors.darkTeal),
-              label: 'Profile',
+              label: tr('Profile'),
             ),
           ],
         ),

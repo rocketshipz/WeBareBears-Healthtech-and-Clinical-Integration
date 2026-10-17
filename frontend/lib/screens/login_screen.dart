@@ -1,9 +1,12 @@
+import '../localization.dart';
 import 'package:flutter/material.dart';
 
 import '../pages/home_page.dart';
 import '../theme.dart';
 import 'forgot_password.dart';
 import 'signup_page.dart';
+
+import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,10 +17,11 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
-  final phoneController = TextEditingController();
+  final identifierController = TextEditingController();
   final passwordController = TextEditingController();
 
   bool hidePassword = true;
+  bool isLoading = false;
 
   late AnimationController _animationController;
   late Animation<double> _pulseAnimation;
@@ -44,36 +48,61 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   void dispose() {
-    phoneController.dispose();
+    identifierController.dispose();
     passwordController.dispose();
     _animationController.dispose();
     super.dispose();
   }
 
-  void login() {
-    if (phoneController.text.trim().isEmpty ||
-        passwordController.text.isEmpty) {
+  Future<void> login() async {
+    if (isLoading) return;
+
+    final identifier = identifierController.text.trim();
+    final password = passwordController.text;
+
+    if (identifier.isEmpty || password.isEmpty) {
       showAppSnack(
         context,
-        'Please enter your phone number and password.',
+        'Please enter your email, phone, or IC and password.',
       );
-
       return;
     }
 
-    // Prototype login only.
-    // Real authentication will be connected later.
+    setState(() {
+      isLoading = true;
+    });
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const MainNavigation(),
-      ),
-    );
+    try {
+      await AuthService.login(
+        identifier: identifier,
+        password: password,
+      );
+
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MainNavigation(),
+        ),
+      );
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      showAppSnack(context, e.message);
+    } catch (e) {
+      if (!mounted) return;
+      showAppSnack(context, 'Login error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     return Scaffold(
       body: GradientBackground(
         child: SafeArea(
@@ -111,13 +140,13 @@ class _LoginScreenState extends State<LoginScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
+                            LocalizedText(
                               'Welcome back',
                               textAlign: TextAlign.center,
                               style: AppText.display,
                             ),
                             const SizedBox(height: 8),
-                            Text(
+                            LocalizedText(
                               'Log in to continue your screening.',
                               textAlign: TextAlign.center,
                               style: AppText.body,
@@ -139,17 +168,17 @@ class _LoginScreenState extends State<LoginScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // PHONE NUMBER
-                            fieldLabel('Phone Number'),
+                            // EMAIL / PHONE / IC
+                            fieldLabel('Email, Phone Number, or IC'),
                             const SizedBox(height: 8),
                             TextField(
-                              controller: phoneController,
-                              keyboardType: TextInputType.phone,
+                              controller: identifierController,
+                              keyboardType: TextInputType.emailAddress,
                               textInputAction: TextInputAction.next,
                               style: AppText.input,
                               decoration: appInputDecoration(
-                                hint: 'e.g. 0123456789',
-                                icon: Icons.phone_outlined,
+                                hint: 'e.g. user@example.com or 0123456789',
+                                icon: Icons.person_outline_rounded,
                               ),
                             ),
 
@@ -205,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     vertical: 8,
                                   ),
                                 ),
-                                child: Text(
+                                child: LocalizedText(
                                   'Forgot password?',
                                   style: AppText.style(
                                     12,
@@ -220,9 +249,9 @@ class _LoginScreenState extends State<LoginScreen>
 
                             // LOGIN BUTTON
                             PrimaryButton(
-                              label: 'Log in',
-                              icon: Icons.arrow_forward_rounded,
-                              onPressed: login,
+                              label: isLoading ? 'Logging in...' : 'Log in',
+                              icon: isLoading ? null : Icons.arrow_forward_rounded,
+                              onPressed: isLoading ? null : login,
                             ),
                           ],
                         ),
@@ -238,7 +267,7 @@ class _LoginScreenState extends State<LoginScreen>
                         child: Wrap(
                           alignment: WrapAlignment.center,
                           children: [
-                            Text(
+                            LocalizedText(
                               'Don\'t have an account? ',
                               style: AppText.body,
                             ),
@@ -251,7 +280,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                 );
                               },
-                              child: Text(
+                              child: LocalizedText(
                                 'Create account',
                                 style: AppText.style(
                                   14,
@@ -343,8 +372,8 @@ class _LoginScreenState extends State<LoginScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Need immediate help?', style: AppText.caption),
-                Text('Call emergency services', style: AppText.bodyStrong),
+                LocalizedText('Need immediate help?', style: AppText.caption),
+                LocalizedText('Call emergency services', style: AppText.bodyStrong),
               ],
             ),
           ),
@@ -358,7 +387,7 @@ class _LoginScreenState extends State<LoginScreen>
                 color: AppColors.red,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
+              child: LocalizedText(
                 '999',
                 style: AppText.style(14, FontWeight.w700, Colors.white),
               ),

@@ -1,19 +1,20 @@
+import '../localization.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
 
-/// Shared flag: becomes true once the user has saved a complete profile.
-/// The home page listens to this to hide the "Complete your medical profile" card.
+/// Shared flag used by the home page.
 final ValueNotifier<bool> profileCompleted = ValueNotifier<bool>(false);
 
-/// Latest saved profile details, read by the triage report.
+/// Latest saved profile details used by other prototype pages.
 final ValueNotifier<Map<String, String>> profileData =
     ValueNotifier<Map<String, String>>({
   'name': 'Aisyah Binti Ahmad',
   'age': '24',
+  'dateOfBirth': '2002-01-01',
   'sex': 'Female',
   'blood': 'O+',
-  'allergies': 'Penicillin',
+  'allergies': 'Medication',
   'medication': 'None',
   'chronic': 'Asthma',
 });
@@ -28,67 +29,360 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   bool isEditing = false;
 
-  final fullNameController = TextEditingController(text: 'Aisyah Binti Ahmad');
-  final icController = TextEditingController(text: '000101-00-0000');
-  final ageController = TextEditingController(text: '24');
-  final bloodTypeController = TextEditingController(text: 'O+');
-  final allergiesController = TextEditingController(text: 'Penicillin');
-  final medicationController = TextEditingController(text: 'None');
-  final chronicConditionController = TextEditingController(text: 'Asthma');
-  final surgeriesController =
-      TextEditingController(text: 'Appendectomy, 2020');
-  final pregnancyController = TextEditingController(text: 'Not applicable');
-  final languageController = TextEditingController(text: 'English');
+  // ============================================================
+  // TEXT CONTROLLERS
+  // ============================================================
+
+  final fullNameController =
+      TextEditingController(text: 'Aisyah Binti Ahmad');
+
+  final icController =
+      TextEditingController(text: '020101-08-1234');
+
+  final dateOfBirthController =
+      TextEditingController(text: '2002-01-01');
+
+  final ageController =
+      TextEditingController(text: '24');
+
+  final heightController =
+      TextEditingController(text: '160');
+
+  final weightController =
+      TextEditingController(text: '55');
+
   final emergencyNameController =
       TextEditingController(text: 'Ahmad Bin Rahman');
+
   final emergencyNumberController =
       TextEditingController(text: '+60 12-345 6789');
-  final relationshipController = TextEditingController(text: 'Father');
+
+  final nationalityOtherController = TextEditingController();
+  final languageOtherController = TextEditingController();
+  final relationshipOtherController = TextEditingController();
+
+  // ============================================================
+  // SINGLE-SELECT VALUES
+  // ============================================================
 
   String selectedSex = 'Female';
+  String selectedNationality = 'Malaysia';
+  String selectedLanguage = 'English';
+  String selectedBloodType = 'O+';
+
+  String selectedSmokingStatus = 'Never';
+  String selectedAlcoholUse = 'None';
+
+  String selectedRelationship = 'Father';
+  String selectedOrganDonor = 'No';
+
+  bool locationConsent = true;
+
+  // ============================================================
+  // MULTI-SELECT VALUES
+  // ============================================================
+
+  final List<String> selectedChronicConditions = [
+    'Asthma',
+  ];
+
+  final allergiesController = TextEditingController(
+    text: profileData.value['allergies'] ?? '',
+  );
+
+  final List<String> selectedMedications = [
+    'None',
+  ];
+
+  final List<String> selectedSurgeries = [
+    'Appendectomy',
+  ];
+
+  final List<String> selectedFamilyHistory = [
+    'Diabetes',
+  ];
+
+  // Custom items added by user
+  final List<String> customChronicConditions = [];
+  final List<String> customMedications = [];
+  final List<String> customSurgeries = [];
+  final List<String> customFamilyHistory = [];
+
+  // ============================================================
+  // OPTIONS
+  // ============================================================
+
+  final List<String> sexOptions = [
+    'Male',
+    'Female',
+    'Intersex',
+  ];
+
+  final List<String> nationalityOptions = [
+    'Malaysia',
+    'Other',
+  ];
+
+  final List<String> languageOptions = [
+    'English',
+    'Bahasa Melayu',
+    'Mandarin',
+    'Tamil',
+    'Other',
+  ];
+
+  final List<String> bloodTypeOptions = [
+    'A+',
+    'A-',
+    'B+',
+    'B-',
+    'AB+',
+    'AB-',
+    'O+',
+    'O-',
+    'Unsure',
+  ];
+
+  final List<String> chronicConditionOptions = [
+    'Asthma',
+    'Diabetes',
+    'Hypertension',
+    'Heart disease',
+    'Epilepsy',
+    'Kidney disease',
+    'None',
+  ];
+
+
+  final List<String> medicationOptions = [
+    'Painkillers',
+    'Antibiotics',
+    'Blood pressure medication',
+    'Diabetes medication',
+    'Asthma medication',
+    'None',
+  ];
+
+  final List<String> surgeryOptions = [
+    'Appendectomy',
+    'Caesarean section',
+    'Gallbladder surgery',
+    'Heart surgery',
+    'Orthopaedic surgery',
+    'None',
+  ];
+
+  final List<String> familyHistoryOptions = [
+    'Diabetes',
+    'Hypertension',
+    'Heart disease',
+    'Stroke',
+    'Cancer',
+    'Asthma',
+    'Kidney disease',
+    'None',
+    'Unknown',
+  ];
+
+  final List<String> smokingOptions = [
+    'Never',
+    'Former',
+    'Current',
+  ];
+
+  final List<String> alcoholOptions = [
+    'None',
+    'Occasional',
+    'Regular',
+  ];
+
+  final List<String> relationshipOptions = [
+    'Mother',
+    'Father',
+    'Child',
+    'Spouse',
+    'Sibling',
+    'Guardian',
+    'Relative',
+    'Friend',
+    'Other',
+  ];
+
+  final List<String> organDonorOptions = [
+    'Yes',
+    'No',
+  ];
+
+  // ============================================================
+  // INITIAL SETUP
+  // ============================================================
+
+  @override
+  void initState() {
+    super.initState();
+
+    icController.addListener(_updateDetailsFromIc);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateDetailsFromIc();
+    });
+  }
+
+  // ============================================================
+  // IC -> DOB + AGE
+  // ============================================================
+
+  void _updateDetailsFromIc() {
+    final cleanedIc =
+        icController.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (cleanedIc.length < 6) {
+      return;
+    }
+
+    final birthPart = cleanedIc.substring(0, 6);
+
+    final yy = int.tryParse(
+      birthPart.substring(0, 2),
+    );
+
+    final mm = int.tryParse(
+      birthPart.substring(2, 4),
+    );
+
+    final dd = int.tryParse(
+      birthPart.substring(4, 6),
+    );
+
+    if (yy == null || mm == null || dd == null) {
+      return;
+    }
+
+    final now = DateTime.now();
+
+    final currentTwoDigitYear =
+        now.year % 100;
+
+    final fullYear = yy > currentTwoDigitYear
+        ? 1900 + yy
+        : 2000 + yy;
+
+    try {
+      final dob = DateTime(
+        fullYear,
+        mm,
+        dd,
+      );
+
+      // Check whether the generated date actually matches.
+      // Example: prevents invalid 31/02.
+      if (dob.year != fullYear ||
+          dob.month != mm ||
+          dob.day != dd) {
+        return;
+      }
+
+      int age = now.year - dob.year;
+
+      final birthdayPassed =
+          now.month > dob.month ||
+              (now.month == dob.month &&
+                  now.day >= dob.day);
+
+      if (!birthdayPassed) {
+        age--;
+      }
+
+      final dobString =
+          '${dob.year.toString().padLeft(4, '0')}-'
+          '${dob.month.toString().padLeft(2, '0')}-'
+          '${dob.day.toString().padLeft(2, '0')}';
+
+      if (dateOfBirthController.text != dobString) {
+        dateOfBirthController.text = dobString;
+      }
+
+      if (ageController.text != age.toString()) {
+        ageController.text = age.toString();
+      }
+
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (_) {
+      // Ignore invalid IC DOB.
+    }
+  }
+
+  // ============================================================
+  // DISPOSE
+  // ============================================================
 
   @override
   void dispose() {
+    icController.removeListener(_updateDetailsFromIc);
+
+    allergiesController.dispose();
     fullNameController.dispose();
     icController.dispose();
+    dateOfBirthController.dispose();
     ageController.dispose();
-    bloodTypeController.dispose();
-    allergiesController.dispose();
-    medicationController.dispose();
-    chronicConditionController.dispose();
-    surgeriesController.dispose();
-    pregnancyController.dispose();
-    languageController.dispose();
+    heightController.dispose();
+    weightController.dispose();
+
     emergencyNameController.dispose();
     emergencyNumberController.dispose();
-    relationshipController.dispose();
+
+    nationalityOtherController.dispose();
+    languageOtherController.dispose();
+    relationshipOtherController.dispose();
 
     super.dispose();
   }
 
+  // ============================================================
+  // PAGE
+  // ============================================================
+
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     return Scaffold(
       body: GradientBackground(
         child: SafeArea(
           bottom: false,
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
+            padding: const EdgeInsets.fromLTRB(
+              20,
+              16,
+              20,
+              30,
+            ),
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
+                constraints:
+                    const BoxConstraints(maxWidth: 600),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
                     // HEADER
                     FadeSlideIn(
                       index: 0,
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
                         children: [
                           const BrandWordmark(),
-                          _editButton(),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _languageDropdown(),
+                              const SizedBox(width: 8),
+                              _editButton(),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -110,7 +404,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 boxShadow: [
                                   BoxShadow(
                                     color: AppColors.teal
-                                        .withValues(alpha: 0.20),
+                                        .withValues(
+                                      alpha: 0.20,
+                                    ),
                                     blurRadius: 30,
                                     spreadRadius: 2,
                                   ),
@@ -119,13 +415,21 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: const Icon(
                                 Icons.person_rounded,
                                 size: 46,
-                                color: AppColors.darkTeal,
+                                color:
+                                    AppColors.darkTeal,
                               ),
                             ),
+
                             const SizedBox(height: 14),
-                            Text('User Profile', style: AppText.display),
+
+                            LocalizedText(
+                              'User Profile',
+                              style: AppText.display,
+                            ),
+
                             const SizedBox(height: 4),
-                            Text(
+
+                            LocalizedText(
                               'Personal and medical information',
                               style: AppText.body,
                             ),
@@ -136,40 +440,135 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     const SizedBox(height: 30),
 
+                    // ========================================================
                     // PERSONAL
+                    // ========================================================
+
                     FadeSlideIn(
                       index: 2,
                       child: _section(
-                        icon: Icons.person_outline_rounded,
+                        icon:
+                            Icons.person_outline_rounded,
                         title: 'Personal Information',
                         children: [
                           _editableRow(
                             label: 'Full Name',
-                            controller: fullNameController,
+                            controller:
+                                fullNameController,
                           ),
+
                           _divider(),
+
                           _editableRow(
                             label: 'IC Number',
                             controller: icController,
+                            keyboardType:
+                                TextInputType.number,
                           ),
+
                           _divider(),
-                          _sexRow(),
+
+                          _readOnlyCalculatedRow(
+                            label: 'Date of Birth',
+                            controller:
+                                dateOfBirthController,
+                          ),
+
                           _divider(),
-                          _editableRow(
+
+                          _readOnlyCalculatedRow(
                             label: 'Age',
-                            controller: ageController,
-                            keyboardType: TextInputType.number,
+                            controller:
+                                ageController,
                             suffix: 'years old',
                           ),
+
                           _divider(),
-                          _editableRow(
-                            label: 'Blood Type',
-                            controller: bloodTypeController,
+
+                          _dropdownRow(
+                            label: 'Sex at Birth',
+                            value: selectedSex,
+                            options: sexOptions,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedSex = value;
+                              });
+                            },
                           ),
+
                           _divider(),
+
+                          _dropdownRow(
+                            label: 'Nationality',
+                            value:
+                                selectedNationality,
+                            options:
+                                nationalityOptions,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedNationality =
+                                    value;
+                              });
+                            },
+                            otherController:
+                                nationalityOtherController,
+                          ),
+
+                          _divider(),
+
+                          _dropdownRow(
+                            label:
+                                'Preferred Language',
+                            value:
+                                selectedLanguage,
+                            options:
+                                languageOptions,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedLanguage =
+                                    value;
+                              });
+                            },
+                            otherController:
+                                languageOtherController,
+                          ),
+
+                          _divider(),
+
                           _editableRow(
-                            label: 'Preferred Language',
-                            controller: languageController,
+                            label: 'Height',
+                            controller:
+                                heightController,
+                            keyboardType:
+                                TextInputType.number,
+                            suffix: 'cm',
+                          ),
+
+                          _divider(),
+
+                          _editableRow(
+                            label: 'Weight',
+                            controller:
+                                weightController,
+                            keyboardType:
+                                TextInputType.number,
+                            suffix: 'kg',
+                          ),
+
+                          _divider(),
+
+                          _dropdownRow(
+                            label: 'Blood Type',
+                            value:
+                                selectedBloodType,
+                            options:
+                                bloodTypeOptions,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedBloodType =
+                                    value;
+                              });
+                            },
                           ),
                         ],
                       ),
@@ -177,36 +576,140 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     const SizedBox(height: 26),
 
+                    // ========================================================
                     // MEDICAL
+                    // ========================================================
+
                     FadeSlideIn(
                       index: 3,
                       child: _section(
-                        icon: Icons.medical_information_outlined,
+                        icon: Icons
+                            .medical_information_outlined,
                         title: 'Medical Information',
                         children: [
+                          _multiSelectRow(
+                            label:
+                                'Chronic Conditions',
+                            selectedValues:
+                                selectedChronicConditions,
+                            predefinedOptions:
+                                chronicConditionOptions,
+                            customValues:
+                                customChronicConditions,
+                            addHint:
+                                'Add another condition',
+                            exclusiveValues: const [
+                              'None',
+                            ],
+                          ),
+
+                          _divider(),
+
                           _editableRow(
                             label: 'Allergies',
                             controller: allergiesController,
                           ),
+
                           _divider(),
-                          _editableRow(
-                            label: 'Current Medication',
-                            controller: medicationController,
+
+                          _multiSelectRow(
+                            label:
+                                'Current Medications',
+                            selectedValues:
+                                selectedMedications,
+                            predefinedOptions:
+                                medicationOptions,
+                            customValues:
+                                customMedications,
+                            addHint:
+                                'Add another medication',
+                            exclusiveValues: const [
+                              'None',
+                            ],
                           ),
+
                           _divider(),
-                          _editableRow(
-                            label: 'Chronic Medical Conditions',
-                            controller: chronicConditionController,
+
+                          _multiSelectRow(
+                            label: 'Past Surgeries',
+                            selectedValues:
+                                selectedSurgeries,
+                            predefinedOptions:
+                                surgeryOptions,
+                            customValues:
+                                customSurgeries,
+                            addHint:
+                                'Add another surgery',
+                            exclusiveValues: const [
+                              'None',
+                            ],
                           ),
+
                           _divider(),
-                          _editableRow(
-                            label: 'Previous Major Surgeries',
-                            controller: surgeriesController,
+
+                          _multiSelectRow(
+                            label: 'Family History',
+                            selectedValues:
+                                selectedFamilyHistory,
+                            predefinedOptions:
+                                familyHistoryOptions,
+                            customValues:
+                                customFamilyHistory,
+                            addHint:
+                                'Add another condition',
+                            exclusiveValues: const [
+                              'None',
+                              'Unknown',
+                            ],
                           ),
+
                           _divider(),
-                          _editableRow(
-                            label: 'Pregnancy Status',
-                            controller: pregnancyController,
+
+                          _dropdownRow(
+                            label:
+                                'Smoking Status',
+                            value:
+                                selectedSmokingStatus,
+                            options:
+                                smokingOptions,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedSmokingStatus =
+                                    value;
+                              });
+                            },
+                          ),
+
+                          _divider(),
+
+                          _dropdownRow(
+                            label: 'Alcohol Use',
+                            value:
+                                selectedAlcoholUse,
+                            options:
+                                alcoholOptions,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedAlcoholUse =
+                                    value;
+                              });
+                            },
+                          ),
+
+                          _divider(),
+
+                          _dropdownRow(
+                            label: 'Organ Donor',
+                            value:
+                                selectedOrganDonor,
+                            options:
+                                organDonorOptions,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedOrganDonor =
+                                    value;
+                              });
+                            },
                           ),
                         ],
                       ),
@@ -214,28 +717,69 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     const SizedBox(height: 26),
 
+                    // ========================================================
                     // EMERGENCY CONTACT
+                    // ========================================================
+
                     FadeSlideIn(
                       index: 4,
                       child: _section(
-                        icon: Icons.contact_phone_outlined,
+                        icon: Icons
+                            .contact_phone_outlined,
                         title: 'Emergency Contact',
                         children: [
                           _editableRow(
                             label: 'Contact Name',
-                            controller: emergencyNameController,
+                            controller:
+                                emergencyNameController,
                           ),
+
                           _divider(),
-                          _editableRow(
+
+                          _dropdownRow(
                             label: 'Relationship',
-                            controller: relationshipController,
+                            value:
+                                selectedRelationship,
+                            options:
+                                relationshipOptions,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedRelationship =
+                                    value;
+                              });
+                            },
+                            otherController:
+                                relationshipOtherController,
                           ),
+
                           _divider(),
+
                           _editableRow(
-                            label: 'Contact Number',
-                            controller: emergencyNumberController,
-                            keyboardType: TextInputType.phone,
+                            label:
+                                'Contact Number',
+                            controller:
+                                emergencyNumberController,
+                            keyboardType:
+                                TextInputType.phone,
                           ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 26),
+
+                    // ========================================================
+                    // PERMISSIONS
+                    // ========================================================
+
+                    FadeSlideIn(
+                      index: 5,
+                      child: _section(
+                        icon:
+                            Icons.location_on_outlined,
+                        title: 'Permissions',
+                        children: [
+                          _locationConsentRow(),
                         ],
                       ),
                     ),
@@ -244,22 +788,29 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding:
+                          const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(18),
+                        color: Colors.white.withValues(
+                          alpha: 0.7,
+                        ),
+                        borderRadius:
+                            BorderRadius.circular(18),
                       ),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
                         children: [
                           const Icon(
                             Icons.lock_outline_rounded,
                             size: 20,
                             color: AppColors.teal,
                           ),
+
                           const SizedBox(width: 10),
+
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               'Your medical information is sensitive. '
                               'Only information necessary for screening and care should be stored and used.',
                               style: AppText.caption,
@@ -268,6 +819,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       ),
                     ),
+
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -279,8 +832,44 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // ============================================================
-  // EDIT / SAVE BUTTON
+  // EDIT / SAVE
   // ============================================================
+
+  Widget _languageDropdown() {
+    return ValueListenableBuilder<Locale>(
+      valueListenable: AppLanguage.instance,
+      builder: (context, locale, child) => Container(
+        height: 42,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            key: const ValueKey('profile-language'),
+            value: locale.languageCode,
+            isDense: true,
+            borderRadius: BorderRadius.circular(14),
+            icon: const Icon(Icons.expand_more_rounded,
+              size: 18, color: AppColors.darkTeal),
+            style: AppText.bodyStrong,
+            selectedItemBuilder: (context) => const [
+              Center(child: Text('EN')),
+              Center(child: Text('BM')),
+            ],
+            items: const [
+              DropdownMenuItem(value: 'en', child: Text('English')),
+              DropdownMenuItem(value: 'ms', child: Text('Bahasa Melayu')),
+            ],
+            onChanged: (value) {
+              if (value != null) AppLanguage.instance.select(value);
+            },
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _editButton() {
     return Pressable(
@@ -290,51 +879,28 @@ class _ProfilePageState extends State<ProfilePage> {
         });
 
         if (!isEditing) {
-          final complete = [
-            fullNameController,
-            icController,
-            ageController,
-            bloodTypeController,
-            allergiesController,
-            medicationController,
-            chronicConditionController,
-            surgeriesController,
-            pregnancyController,
-            languageController,
-            emergencyNameController,
-            emergencyNumberController,
-            relationshipController,
-          ].every((c) => c.text.trim().isNotEmpty);
-
-          profileCompleted.value = complete;
-          profileData.value = {
-            'name': fullNameController.text.trim(),
-            'age': ageController.text.trim(),
-            'sex': selectedSex,
-            'blood': bloodTypeController.text.trim(),
-            'allergies': allergiesController.text.trim(),
-            'medication': medicationController.text.trim(),
-            'chronic': chronicConditionController.text.trim(),
-          };
-
-          showAppSnack(
-            context,
-            complete
-                ? 'Profile updated.'
-                : 'Profile saved. Some fields are still empty.',
-          );
+          _saveProfile();
         }
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration:
+            const Duration(milliseconds: 200),
         height: 42,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding:
+            const EdgeInsets.symmetric(
+          horizontal: 16,
+        ),
         decoration: BoxDecoration(
-          color: isEditing ? AppColors.darkTeal : Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          color: isEditing
+              ? AppColors.darkTeal
+              : Colors.white,
+          borderRadius:
+              BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withValues(
+                alpha: 0.04,
+              ),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -344,17 +910,25 @@ class _ProfilePageState extends State<ProfilePage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              isEditing ? Icons.check_rounded : Icons.edit_outlined,
-              color: isEditing ? Colors.white : AppColors.darkTeal,
+              isEditing
+                  ? Icons.check_rounded
+                  : Icons.edit_outlined,
+              color: isEditing
+                  ? Colors.white
+                  : AppColors.darkTeal,
               size: 18,
             ),
+
             const SizedBox(width: 6),
-            Text(
+
+            LocalizedText(
               isEditing ? 'Save' : 'Edit',
               style: AppText.style(
                 14,
                 FontWeight.w700,
-                isEditing ? Colors.white : AppColors.darkTeal,
+                isEditing
+                    ? Colors.white
+                    : AppColors.darkTeal,
               ),
             ),
           ],
@@ -364,34 +938,162 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // ============================================================
-  // ROWS
+  // SAVE
+  // ============================================================
+
+  void _saveProfile() {
+    final complete = [
+      fullNameController.text.trim(),
+      icController.text.trim(),
+      dateOfBirthController.text.trim(),
+      ageController.text.trim(),
+      heightController.text.trim(),
+      weightController.text.trim(),
+      emergencyNameController.text.trim(),
+      emergencyNumberController.text.trim(),
+    ].every(
+      (value) => value.isNotEmpty,
+    );
+
+    profileCompleted.value = complete;
+
+    profileData.value = {
+      'name':
+          fullNameController.text.trim(),
+
+      'age':
+          ageController.text.trim(),
+
+      'dateOfBirth':
+          dateOfBirthController.text.trim(),
+
+      'sex':
+          selectedSex,
+
+      'nationality': _resolvedValue(
+        selectedNationality,
+        nationalityOtherController,
+      ),
+
+      'language': _resolvedValue(
+        selectedLanguage,
+        languageOtherController,
+      ),
+
+      'height':
+          heightController.text.trim(),
+
+      'weight':
+          weightController.text.trim(),
+
+      'blood':
+          selectedBloodType,
+
+      'chronic':
+          selectedChronicConditions.join(', '),
+
+      'allergies':
+          allergiesController.text.trim(),
+
+      'medication':
+          selectedMedications.join(', '),
+
+      'surgeries':
+          selectedSurgeries.join(', '),
+
+      'familyHistory':
+          selectedFamilyHistory.join(', '),
+
+      'smoking':
+          selectedSmokingStatus,
+
+      'alcohol':
+          selectedAlcoholUse,
+
+      'emergencyName':
+          emergencyNameController.text.trim(),
+
+      'emergencyPhone':
+          emergencyNumberController.text.trim(),
+
+      'emergencyRelationship':
+          _resolvedValue(
+        selectedRelationship,
+        relationshipOtherController,
+      ),
+
+      'organDonor':
+          selectedOrganDonor,
+
+      'locationConsent':
+          locationConsent ? 'Yes' : 'No',
+    };
+
+    showAppSnack(
+      context,
+      complete
+          ? 'Profile updated.'
+          : 'Profile saved. Some fields are still empty.',
+    );
+  }
+
+  String _resolvedValue(
+    String selected,
+    TextEditingController otherController,
+  ) {
+    if (selected == 'Other') {
+      final custom =
+          otherController.text.trim();
+
+      if (custom.isNotEmpty) {
+        return custom;
+      }
+    }
+
+    return selected;
+  }
+
+  // ============================================================
+  // NORMAL EDITABLE ROW
   // ============================================================
 
   Widget _editableRow({
     required String label,
     required TextEditingController controller,
-    TextInputType keyboardType = TextInputType.text,
+    TextInputType keyboardType =
+        TextInputType.text,
     String? suffix,
   }) {
     if (!isEditing) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding:
+            const EdgeInsets.symmetric(
+          vertical: 14,
+        ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
           children: [
             Expanded(
               flex: 4,
-              child: Text(label, style: AppText.caption),
+              child: LocalizedText(
+                label,
+                style: AppText.caption,
+              ),
             ),
+
             const SizedBox(width: 12),
+
             Expanded(
               flex: 5,
-              child: Text(
+              child: LocalizedText(
                 suffix == null
                     ? controller.text
                     : '${controller.text} $suffix',
-                textAlign: TextAlign.right,
-                style: AppText.bodyStrong,
+                textAlign:
+                    TextAlign.right,
+                style:
+                    AppText.bodyStrong,
               ),
             ),
           ],
@@ -400,97 +1102,986 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding:
+          const EdgeInsets.symmetric(
+        vertical: 10,
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
         children: [
-          Text(label, style: AppText.label),
+          LocalizedText(
+            label,
+            style: AppText.label,
+          ),
+
           const SizedBox(height: 7),
+
           TextField(
             controller: controller,
-            keyboardType: keyboardType,
+            keyboardType:
+                keyboardType,
             style: AppText.input,
-            decoration: _fieldDecoration(suffix: suffix),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _sexRow() {
-    if (!isEditing) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Row(
-          children: [
-            Expanded(flex: 4, child: Text('Sex', style: AppText.caption)),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 5,
-              child: Text(
-                selectedSex,
-                textAlign: TextAlign.right,
-                style: AppText.bodyStrong,
-              ),
+            decoration:
+                _fieldDecoration(
+              suffix: suffix,
             ),
-          ],
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Sex', style: AppText.label),
-          const SizedBox(height: 7),
-          DropdownButtonFormField<String>(
-            initialValue: selectedSex,
-            style: AppText.input,
-            borderRadius: BorderRadius.circular(16),
-            items: const [
-              DropdownMenuItem(value: 'Female', child: Text('Female')),
-              DropdownMenuItem(value: 'Male', child: Text('Male')),
-            ],
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  selectedSex = value;
-                });
-              }
-            },
-            decoration: _fieldDecoration(),
           ),
         ],
-      ),
-    );
-  }
-
-  InputDecoration _fieldDecoration({String? suffix}) {
-    return InputDecoration(
-      suffixText: suffix,
-      suffixStyle: AppText.caption,
-      filled: true,
-      fillColor: AppColors.field,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppColors.teal, width: 1.5),
       ),
     );
   }
 
   // ============================================================
-  // SECTIONS
+  // READ-ONLY CALCULATED FIELD
+  // ============================================================
+
+  Widget _readOnlyCalculatedRow({
+    required String label,
+    required TextEditingController controller,
+    String? suffix,
+  }) {
+    if (!isEditing) {
+      return Padding(
+        padding:
+            const EdgeInsets.symmetric(
+          vertical: 14,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 4,
+              child: LocalizedText(
+                label,
+                style: AppText.caption,
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              flex: 5,
+              child: LocalizedText(
+                controller.text.isEmpty
+                    ? '-'
+                    : suffix == null
+                        ? controller.text
+                        : '${controller.text} $suffix',
+                textAlign:
+                    TextAlign.right,
+                style:
+                    AppText.bodyStrong,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(
+        vertical: 10,
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          LocalizedText(
+            label,
+            style: AppText.label,
+          ),
+
+          const SizedBox(height: 7),
+
+          TextField(
+            controller: controller,
+            readOnly: true,
+            style: AppText.input,
+            decoration:
+                _fieldDecoration(
+              suffix: suffix,
+            ).copyWith(
+              prefixIcon:
+                  const Icon(
+                Icons.lock_outline_rounded,
+                size: 18,
+                color: AppColors.grey,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 5),
+
+          LocalizedText(
+            'Calculated automatically from IC number.',
+            style: AppText.caption,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // SINGLE DROPDOWN
+  // ============================================================
+
+  Widget _dropdownRow({
+    required String label,
+    required String value,
+    required List<String> options,
+    required ValueChanged<String> onChanged,
+    TextEditingController? otherController,
+  }) {
+    final displayValue =
+        value == 'Other' &&
+                otherController != null &&
+                otherController
+                    .text
+                    .trim()
+                    .isNotEmpty
+            ? otherController.text.trim()
+            : value;
+
+    if (!isEditing) {
+      return Padding(
+        padding:
+            const EdgeInsets.symmetric(
+          vertical: 14,
+        ),
+        child: Row(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 4,
+              child: LocalizedText(
+                label,
+                style: AppText.caption,
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              flex: 5,
+              child: LocalizedText(
+                displayValue,
+                textAlign:
+                    TextAlign.right,
+                style:
+                    AppText.bodyStrong,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(
+        vertical: 10,
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          LocalizedText(
+            label,
+            style: AppText.label,
+          ),
+
+          const SizedBox(height: 7),
+
+          DropdownButtonFormField<String>(
+            initialValue: value,
+            isExpanded: true,
+            style: AppText.input,
+            borderRadius:
+                BorderRadius.circular(16),
+
+            decoration:
+                _fieldDecoration(),
+
+            items: options.map(
+              (option) {
+                return DropdownMenuItem<
+                    String>(
+                  value: option,
+                  child: LocalizedText(
+                    option,
+                    overflow:
+                        TextOverflow.ellipsis,
+                  ),
+                );
+              },
+            ).toList(),
+
+            onChanged: (newValue) {
+              if (newValue != null) {
+                onChanged(newValue);
+              }
+            },
+          ),
+
+          if (value == 'Other' &&
+              otherController != null) ...[
+            const SizedBox(height: 10),
+
+            TextField(
+              controller:
+                  otherController,
+              style: AppText.input,
+              decoration:
+                  _fieldDecoration()
+                      .copyWith(
+                hintText:
+                    tr('Please specify'),
+                hintStyle:
+                    AppText.caption,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // MULTI SELECT
+  // ============================================================
+
+  Widget _multiSelectRow({
+    required String label,
+    required List<String> selectedValues,
+    required List<String> predefinedOptions,
+    required List<String> customValues,
+    required String addHint,
+    List<String> exclusiveValues = const [],
+  }) {
+    if (!isEditing) {
+      return Padding(
+        padding:
+            const EdgeInsets.symmetric(
+          vertical: 14,
+        ),
+        child: Row(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 4,
+              child: LocalizedText(
+                label,
+                style: AppText.caption,
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              flex: 5,
+              child: LocalizedText(
+                selectedValues.isEmpty
+                    ? 'None selected'
+                    : selectedValues.join(', '),
+                textAlign:
+                    TextAlign.right,
+                style:
+                    AppText.bodyStrong,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(
+        vertical: 10,
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          LocalizedText(
+            label,
+            style: AppText.label,
+          ),
+
+          const SizedBox(height: 7),
+
+          Pressable(
+            onTap: () {
+              _showMultiSelectSheet(
+                title: label,
+                selectedValues:
+                    selectedValues,
+                predefinedOptions:
+                    predefinedOptions,
+                customValues:
+                    customValues,
+                addHint:
+                    addHint,
+                exclusiveValues:
+                    exclusiveValues,
+              );
+            },
+
+            child: Container(
+              width: double.infinity,
+              padding:
+                  const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.field,
+                borderRadius:
+                    BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: selectedValues.isEmpty
+                        ? LocalizedText(
+                            'Select one or more',
+                            style:
+                                AppText.caption,
+                          )
+                        : Wrap(
+                            spacing: 6,
+                            runSpacing: 6,
+                            children:
+                                selectedValues
+                                    .map(
+                              (item) {
+                                return Container(
+                                  padding:
+                                      const EdgeInsets
+                                          .symmetric(
+                                    horizontal: 9,
+                                    vertical: 5,
+                                  ),
+                                  decoration:
+                                      BoxDecoration(
+                                    color: AppColors
+                                        .paleTeal,
+                                    borderRadius:
+                                        BorderRadius
+                                            .circular(
+                                      20,
+                                    ),
+                                  ),
+                                  child: LocalizedText(
+                                    item,
+                                    style:
+                                        AppText.style(
+                                      11,
+                                      FontWeight
+                                          .w600,
+                                      AppColors
+                                          .darkTeal,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ).toList(),
+                          ),
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  const Icon(
+                    Icons
+                        .keyboard_arrow_down_rounded,
+                    color: AppColors.grey,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 5),
+
+          LocalizedText(
+            'You can select multiple options or add your own.',
+            style: AppText.caption,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // MULTI SELECT SHEET
+  // ============================================================
+
+  Future<void> _showMultiSelectSheet({
+    required String title,
+    required List<String> selectedValues,
+    required List<String> predefinedOptions,
+    required List<String> customValues,
+    required String addHint,
+    required List<String> exclusiveValues,
+  }) async {
+    final customController =
+        TextEditingController();
+
+    final workingSelection =
+        List<String>.from(
+      selectedValues,
+    );
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor:
+          Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (
+            context,
+            setSheetState,
+          ) {
+            final allOptions = [
+              ...predefinedOptions,
+              ...customValues,
+            ];
+
+            void toggleOption(
+              String option,
+              bool checked,
+            ) {
+              setSheetState(() {
+                if (checked) {
+                  // If selecting an exclusive option,
+                  // clear everything else.
+                  if (exclusiveValues
+                      .contains(option)) {
+                    workingSelection
+                      ..clear()
+                      ..add(option);
+                  } else {
+                    // Remove exclusive values such as None.
+                    workingSelection
+                        .removeWhere(
+                      (item) =>
+                          exclusiveValues
+                              .contains(item),
+                    );
+
+                    if (!workingSelection
+                        .contains(option)) {
+                      workingSelection
+                          .add(option);
+                    }
+                  }
+                } else {
+                  workingSelection
+                      .remove(option);
+                }
+              });
+            }
+
+            void addCustomValue() {
+              final custom =
+                  customController.text
+                      .trim();
+
+              if (custom.isEmpty) {
+                return;
+              }
+
+              setSheetState(() {
+                if (!customValues
+                    .contains(custom)) {
+                  customValues.add(custom);
+                }
+
+                workingSelection.removeWhere(
+                  (item) =>
+                      exclusiveValues
+                          .contains(item),
+                );
+
+                if (!workingSelection
+                    .contains(custom)) {
+                  workingSelection.add(custom);
+                }
+
+                customController.clear();
+              });
+            }
+
+            return Padding(
+              padding:
+                  EdgeInsets.only(
+                bottom:
+                    MediaQuery.of(context)
+                        .viewInsets
+                        .bottom,
+              ),
+              child: Container(
+                constraints:
+                    BoxConstraints(
+                  maxHeight:
+                      MediaQuery.of(context)
+                              .size
+                              .height *
+                          0.82,
+                ),
+                decoration:
+                    const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius:
+                      BorderRadius.vertical(
+                    top:
+                        Radius.circular(28),
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize:
+                      MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 10),
+
+                    Container(
+                      width: 42,
+                      height: 4,
+                      decoration:
+                          BoxDecoration(
+                        color:
+                            AppColors.border,
+                        borderRadius:
+                            BorderRadius
+                                .circular(
+                          10,
+                        ),
+                      ),
+                    ),
+
+                    Padding(
+                      padding:
+                          const EdgeInsets
+                              .fromLTRB(
+                        20,
+                        18,
+                        20,
+                        12,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: LocalizedText(
+                              title,
+                              style:
+                                  AppText.heading,
+                            ),
+                          ),
+
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pop(
+                                sheetContext,
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.close_rounded,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const Divider(
+                      height: 1,
+                      color:
+                          AppColors.border,
+                    ),
+
+                    Flexible(
+                      child: ListView(
+                        padding:
+                            const EdgeInsets
+                                .fromLTRB(
+                          12,
+                          8,
+                          12,
+                          8,
+                        ),
+                        children: [
+                          ...allOptions.map(
+                            (option) {
+                              final checked =
+                                  workingSelection
+                                      .contains(
+                                option,
+                              );
+
+                              final isCustom =
+                                  customValues
+                                      .contains(
+                                option,
+                              );
+
+                              return CheckboxListTile(
+                                value: checked,
+                                activeColor:
+                                    AppColors
+                                        .darkTeal,
+                                controlAffinity:
+                                    ListTileControlAffinity
+                                        .leading,
+                                contentPadding:
+                                    const EdgeInsets
+                                        .symmetric(
+                                  horizontal: 4,
+                                ),
+                                title: LocalizedText(
+                                  option,
+                                  style: AppText
+                                      .bodyStrong,
+                                ),
+                                secondary:
+                                    isCustom
+                                        ? IconButton(
+                                            tooltip:
+                                                tr('Remove'),
+                                            onPressed:
+                                                () {
+                                              setSheetState(
+                                                () {
+                                                  customValues
+                                                      .remove(
+                                                    option,
+                                                  );
+
+                                                  workingSelection
+                                                      .remove(
+                                                    option,
+                                                  );
+                                                },
+                                              );
+                                            },
+                                            icon:
+                                                const Icon(
+                                              Icons
+                                                  .delete_outline_rounded,
+                                              color:
+                                                  AppColors.grey,
+                                              size:
+                                                  20,
+                                            ),
+                                          )
+                                        : null,
+                                onChanged:
+                                    (value) {
+                                  toggleOption(
+                                    option,
+                                    value ??
+                                        false,
+                                  );
+                                },
+                              );
+                            },
+                          ),
+
+                          const SizedBox(
+                            height: 12,
+                          ),
+
+                          Padding(
+                            padding:
+                                const EdgeInsets
+                                    .symmetric(
+                              horizontal: 4,
+                            ),
+                            child: LocalizedText(
+                              'Add your own',
+                              style:
+                                  AppText.label,
+                            ),
+                          ),
+
+                          const SizedBox(
+                            height: 7,
+                          ),
+
+                          Padding(
+                            padding:
+                                const EdgeInsets
+                                    .symmetric(
+                              horizontal: 4,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child:
+                                      TextField(
+                                    controller:
+                                        customController,
+                                    style:
+                                        AppText.input,
+                                    decoration:
+                                        _fieldDecoration()
+                                            .copyWith(
+                                      hintText:
+                                          tr(addHint),
+                                      hintStyle:
+                                          AppText.caption,
+                                    ),
+                                    onSubmitted:
+                                        (_) {
+                                      addCustomValue();
+                                    },
+                                  ),
+                                ),
+
+                                const SizedBox(
+                                  width: 8,
+                                ),
+
+                                Pressable(
+                                  onTap:
+                                      addCustomValue,
+                                  child:
+                                      Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration:
+                                        BoxDecoration(
+                                      color:
+                                          AppColors
+                                              .darkTeal,
+                                      borderRadius:
+                                          BorderRadius
+                                              .circular(
+                                        14,
+                                      ),
+                                    ),
+                                    child:
+                                        const Icon(
+                                      Icons
+                                          .add_rounded,
+                                      color:
+                                          Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(
+                            height: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    Padding(
+                      padding:
+                          const EdgeInsets
+                              .fromLTRB(
+                        20,
+                        10,
+                        20,
+                        20,
+                      ),
+                      child: SizedBox(
+                        width:
+                            double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              selectedValues
+                                ..clear()
+                                ..addAll(
+                                  workingSelection,
+                                );
+                            });
+
+                            Navigator.pop(
+                              sheetContext,
+                            );
+                          },
+                          style:
+                              ElevatedButton.styleFrom(
+                            backgroundColor:
+                                AppColors
+                                    .darkTeal,
+                            foregroundColor:
+                                Colors.white,
+                            elevation: 0,
+                            padding:
+                                const EdgeInsets
+                                    .symmetric(
+                              vertical: 15,
+                            ),
+                            shape:
+                                RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius
+                                      .circular(
+                                14,
+                              ),
+                            ),
+                          ),
+                          child: LocalizedText(
+                            'Done',
+                            style:
+                                AppText.style(
+                              14,
+                              FontWeight
+                                  .w700,
+                              Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    customController.dispose();
+  }
+
+  // ============================================================
+  // LOCATION CONSENT
+  // ============================================================
+
+  Widget _locationConsentRow() {
+    if (!isEditing) {
+      return Padding(
+        padding:
+            const EdgeInsets.symmetric(
+          vertical: 14,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: LocalizedText(
+                'Location Consent',
+                style: AppText.caption,
+              ),
+            ),
+
+            LocalizedText(
+              locationConsent
+                  ? 'Yes'
+                  : 'No',
+              style:
+                  AppText.bodyStrong,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(
+        vertical: 10,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                LocalizedText(
+                  'Location Consent',
+                  style: AppText.label,
+                ),
+
+                const SizedBox(height: 3),
+
+                LocalizedText(
+                  'Allow TriageMY to use your location for nearby care.',
+                  style:
+                      AppText.caption,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Switch(
+            value: locationConsent,
+            activeThumbColor:
+                Colors.white,
+            activeTrackColor:
+                AppColors.darkTeal,
+            onChanged: (value) {
+              setState(() {
+                locationConsent =
+                    value;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // DECORATION
+  // ============================================================
+
+  InputDecoration _fieldDecoration({
+    String? suffix,
+  }) {
+    return InputDecoration(
+      suffixText: suffix == null ? null : tr(suffix),
+      suffixStyle: AppText.caption,
+
+      filled: true,
+      fillColor: AppColors.field,
+
+      contentPadding:
+          const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 14,
+      ),
+
+      border: OutlineInputBorder(
+        borderRadius:
+            BorderRadius.circular(14),
+        borderSide:
+            BorderSide.none,
+      ),
+
+      enabledBorder:
+          OutlineInputBorder(
+        borderRadius:
+            BorderRadius.circular(14),
+        borderSide:
+            BorderSide.none,
+      ),
+
+      focusedBorder:
+          OutlineInputBorder(
+        borderRadius:
+            BorderRadius.circular(14),
+        borderSide:
+            const BorderSide(
+          color: AppColors.teal,
+          width: 1.5,
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // SECTION
   // ============================================================
 
   Widget _section({
@@ -499,35 +2090,65 @@ class _ProfilePageState extends State<ProfilePage> {
     required List<Widget> children,
   }) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment:
+          CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Container(
               width: 34,
               height: 34,
-              decoration: BoxDecoration(
-                color: AppColors.paleTeal,
-                borderRadius: BorderRadius.circular(11),
+              decoration:
+                  BoxDecoration(
+                color:
+                    AppColors.paleTeal,
+                borderRadius:
+                    BorderRadius.circular(
+                  11,
+                ),
               ),
-              child: Icon(icon, size: 18, color: AppColors.teal),
+              child: Icon(
+                icon,
+                size: 18,
+                color:
+                    AppColors.teal,
+              ),
             ),
+
             const SizedBox(width: 10),
-            Text(title, style: AppText.heading),
+
+            LocalizedText(
+              title,
+              style: AppText.heading,
+            ),
           ],
         ),
+
         const SizedBox(height: 12),
+
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-          decoration: cardDecoration(radius: 24),
-          child: Column(children: children),
+          padding:
+              const EdgeInsets.symmetric(
+            horizontal: 18,
+            vertical: 6,
+          ),
+          decoration:
+              cardDecoration(
+            radius: 24,
+          ),
+          child: Column(
+            children: children,
+          ),
         ),
       ],
     );
   }
 
   Widget _divider() {
-    return const Divider(height: 1, color: AppColors.border);
+    return const Divider(
+      height: 1,
+      color: AppColors.border,
+    );
   }
 }

@@ -1,3 +1,4 @@
+import '../localization.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
@@ -92,6 +93,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     final int currentStep = linkVerified ? 2 : (linkSent ? 1 : 0);
 
     return Scaffold(
@@ -155,10 +157,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Forgot your password?',
+                          LocalizedText('Forgot your password?',
                               style: AppText.display),
                           const SizedBox(height: 8),
-                          Text(
+                          LocalizedText(
                             'Enter your registered email address and we\'ll send you a password reset link.',
                             style: AppText.body,
                           ),
@@ -231,7 +233,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
-                                      child: Text(
+                                      child: LocalizedText(
                                         'A password reset link has been sent to '
                                         '${emailController.text}.',
                                         style: AppText.style(
@@ -255,7 +257,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               Center(
                                 child: TextButton(
                                   onPressed: _sendResetLink,
-                                  child: Text(
+                                  child: LocalizedText(
                                     'Resend email',
                                     style: AppText.style(
                                       12,
@@ -286,7 +288,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
-                                      child: Text(
+                                      child: LocalizedText(
                                         'Email verified. You can now create a new password.',
                                         style: AppText.style(
                                           12,
@@ -330,7 +332,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
                               const SizedBox(height: 6),
 
-                              Text(
+                              LocalizedText(
                                 'Use at least 8 characters.',
                                 style: AppText.caption,
                               ),

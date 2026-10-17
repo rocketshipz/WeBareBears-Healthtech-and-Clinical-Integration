@@ -1,3 +1,4 @@
+import '../localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -124,9 +125,9 @@ class _HospitalsPageState extends State<HospitalsPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              Text('Open directions with', style: AppText.heading),
+              LocalizedText('Open directions with', style: AppText.heading),
               const SizedBox(height: 4),
-              Text(hospitalName, style: AppText.caption),
+              LocalizedText(hospitalName, style: AppText.caption),
               const SizedBox(height: 14),
               _routeTile(
                 icon: Icons.map_outlined,
@@ -177,7 +178,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
               child: Icon(icon, color: AppColors.darkTeal, size: 21),
             ),
             const SizedBox(width: 12),
-            Expanded(child: Text(title, style: AppText.bodyStrong)),
+            Expanded(child: LocalizedText(title, style: AppText.bodyStrong)),
             const Icon(
               Icons.arrow_forward_ios_rounded,
               size: 14,
@@ -191,6 +192,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     // Sample nearby locations for the prototype.
     final LatLng hospital1 = LatLng(
       currentLocation.latitude + 0.008,
@@ -249,9 +251,9 @@ class _HospitalsPageState extends State<HospitalsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Hospitals & Clinics', style: AppText.display),
+                          LocalizedText('Hospitals & Clinics', style: AppText.display),
                           const SizedBox(height: 8),
-                          Text(
+                          LocalizedText(
                             'Browse nearby care options.',
                             style: AppText.body,
                           ),
@@ -268,7 +270,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
                         controller: searchController,
                         style: AppText.input,
                         decoration: InputDecoration(
-                          hintText: 'Search hospital or clinic',
+                          hintText: tr('Search hospital or clinic'),
                           hintStyle: AppText.style(
                             14,
                             FontWeight.w400,
@@ -329,7 +331,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
                             ),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: Text(
+                              child: LocalizedText(
                                 locationLoaded
                                     ? 'Showing hospitals and clinics near your location.'
                                     : 'Getting your current location...',
@@ -434,7 +436,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
 
                     const SizedBox(height: 28),
 
-                    Text('Nearby care', style: AppText.heading),
+                    LocalizedText('Nearby care', style: AppText.heading),
 
                     const SizedBox(height: 14),
 
@@ -544,7 +546,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name, style: AppText.heading),
+                    LocalizedText(name, style: AppText.heading),
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -554,7 +556,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
                           color: AppColors.grey,
                         ),
                         const SizedBox(width: 4),
-                        Text('$distance away', style: AppText.caption),
+                        LocalizedText('$distance away', style: AppText.caption),
                         const SizedBox(width: 8),
                         Container(
                           width: 3,
@@ -565,7 +567,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(travelTime, style: AppText.caption),
+                        LocalizedText(travelTime, style: AppText.caption),
                       ],
                     ),
                   ],
@@ -595,7 +597,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
                 color: AppColors.grey,
               ),
               const SizedBox(width: 6),
-              Expanded(child: Text(address, style: AppText.caption)),
+              Expanded(child: LocalizedText(address, style: AppText.caption)),
             ],
           ),
 
@@ -629,7 +631,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
         children: [
           Icon(icon, size: 15, color: AppColors.darkTeal),
           const SizedBox(width: 5),
-          Text(
+          LocalizedText(
             text,
             style: AppText.style(12, FontWeight.w600, AppColors.darkTeal),
           ),

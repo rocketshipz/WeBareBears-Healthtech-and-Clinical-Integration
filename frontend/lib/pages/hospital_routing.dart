@@ -1,3 +1,4 @@
+import '../localization.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -74,9 +75,9 @@ class RecommendedHospitalsPage extends StatelessWidget {
                   ),
                 ),
               ),
-              Text('Open route with', style: AppText.heading),
+              LocalizedText('Open route with', style: AppText.heading),
               const SizedBox(height: 4),
-              Text(hospitalName, style: AppText.caption),
+              LocalizedText(hospitalName, style: AppText.caption),
               const SizedBox(height: 14),
               _routeTile(
                 icon: Icons.map_outlined,
@@ -127,7 +128,7 @@ class RecommendedHospitalsPage extends StatelessWidget {
               child: Icon(icon, color: AppColors.darkTeal, size: 21),
             ),
             const SizedBox(width: 12),
-            Expanded(child: Text(title, style: AppText.bodyStrong)),
+            Expanded(child: LocalizedText(title, style: AppText.bodyStrong)),
             const Icon(
               Icons.arrow_forward_ios_rounded,
               size: 14,
@@ -141,6 +142,7 @@ class RecommendedHospitalsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Localizations.localeOf(context);
     final Color outcomeColor = report?.color ?? AppColors.green;
     final IconData outcomeIcon = (report?.level ?? 4) <= 3
         ? Icons.priority_high_rounded
@@ -192,10 +194,10 @@ class RecommendedHospitalsPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Recommended Hospitals',
+                          LocalizedText('Recommended Hospitals',
                               style: AppText.display),
                           const SizedBox(height: 8),
-                          Text(
+                          LocalizedText(
                             'Based on your triage result and available care information.',
                             style: AppText.body,
                           ),
@@ -245,9 +247,9 @@ class RecommendedHospitalsPage extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Triage outcome',
+                                  LocalizedText('Triage outcome',
                                       style: AppText.caption),
-                                  Text(
+                                  LocalizedText(
                                     report?.zoneLabel ?? 'Green Zone · Level 4',
                                     style: AppText.style(
                                       18,
@@ -256,7 +258,7 @@ class RecommendedHospitalsPage extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  Text(
+                                  LocalizedText(
                                     report?.recommendation ??
                                         'Your screening indicates a non-critical case. '
                                             'You may consider facilities with a shorter waiting time.',
@@ -272,9 +274,9 @@ class RecommendedHospitalsPage extends StatelessWidget {
 
                     const SizedBox(height: 28),
 
-                    Text('Suggested care options', style: AppText.heading),
+                    LocalizedText('Suggested care options', style: AppText.heading),
                     const SizedBox(height: 4),
-                    Text(
+                    LocalizedText(
                       'Sample data is shown for the prototype.',
                       style: AppText.caption,
                     ),
@@ -347,7 +349,7 @@ class RecommendedHospitalsPage extends StatelessWidget {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text(
+                            child: LocalizedText(
                               'If your symptoms become severe or you develop '
                               'emergency warning signs, seek emergency care immediately.',
                               style: AppText.caption,
@@ -390,7 +392,7 @@ class RecommendedHospitalsPage extends StatelessWidget {
               color: AppColors.paleTeal,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Text(
+            child: LocalizedText(
               badge,
               style: AppText.style(12, FontWeight.w700, AppColors.darkTeal),
             ),
@@ -398,7 +400,7 @@ class RecommendedHospitalsPage extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          Text(hospitalName, style: AppText.heading),
+          LocalizedText(hospitalName, style: AppText.heading),
 
           const SizedBox(height: 6),
 
@@ -410,7 +412,7 @@ class RecommendedHospitalsPage extends StatelessWidget {
                 color: AppColors.grey,
               ),
               const SizedBox(width: 4),
-              Text('$distance away', style: AppText.caption),
+              LocalizedText('$distance away', style: AppText.caption),
               const SizedBox(width: 8),
               Container(
                 width: 3,
@@ -421,7 +423,7 @@ class RecommendedHospitalsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(travelTime, style: AppText.caption),
+              LocalizedText(travelTime, style: AppText.caption),
             ],
           ),
 
@@ -487,12 +489,12 @@ class RecommendedHospitalsPage extends StatelessWidget {
       children: [
         Icon(icon, size: 21, color: AppColors.teal),
         const SizedBox(height: 6),
-        Text(
+        LocalizedText(
           value,
           textAlign: TextAlign.center,
           style: AppText.bodyStrong,
         ),
-        Text(
+        LocalizedText(
           label,
           textAlign: TextAlign.center,
           style: AppText.caption,
