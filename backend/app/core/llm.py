@@ -1,47 +1,43 @@
 import logging
 from typing import Optional
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-_llm_instance: Optional[ChatGroq] = None
+_llm_instance: Optional[ChatOpenAI] = None
 _embeddings_instance: Optional[GoogleGenerativeAIEmbeddings] = None
 
 
-def get_llm() -> ChatGroq:
-    """Returns a singleton or lazily initialized ChatGroq LLM instance for the main agent.
-    
-    Uses GROQ_API_KEY from settings/environment.
-    Falls back to a placeholder key if not provided to permit offline or test initialization.
+def get_llm() -> ChatOpenAI:
+    """Returns a lazily initialized ChatOpenAI client (Azure OpenAI v1 endpoint) for the main agent.
+
+    Falls back to a placeholder key if not configured to permit offline or test initialization.
     """
     global _llm_instance
     if _llm_instance is not None:
         return _llm_instance
 
     settings = get_settings()
-    api_key = settings.get_groq_api_key()
-
-    if not api_key or api_key.strip() == "your_groq_api_key_here" or api_key.startswith("your_"):
+    api_key = settings.OPENAI_API_KEY
+    if not api_key or api_key.startswith("your_"):
         logger.warning(
-            "Groq API key is not configured. Initializing ChatGroq with a placeholder key. "
-            "Please set GROQ_API_KEY in your .env file for live inference."
+            "OPENAI_API_KEY is not configured. Initializing ChatOpenAI with a placeholder key. "
+            "Please set OPENAI_API_KEY in your .env file for live inference."
         )
-        api_key = "dummy-groq-key"
-
-    base_url = settings.get_groq_base_url()
-    logger.info(f"Initializing Groq LLM client (model='{settings.GROQ_MODEL_NAME}').")
+        api_key = "dummy-openai-key"
 
     kwargs = {
-        "model": settings.GROQ_MODEL_NAME,
+        "model": settings.OPENAI_MODEL_NAME,
         "api_key": api_key,
-        "temperature": settings.GROQ_TEMPERATURE,
+        "temperature": settings.OPENAI_TEMPERATURE,
     }
+    base_url = settings.get_openai_base_url()
     if base_url:
         kwargs["base_url"] = base_url
-
-    _llm_instance = ChatGroq(**kwargs)
+    logger.info(f"Initializing Azure OpenAI LLM client (deployment='{settings.OPENAI_MODEL_NAME}').")
+    _llm_instance = ChatOpenAI(**kwargs)
     return _llm_instance
 
 

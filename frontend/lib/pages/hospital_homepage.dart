@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../theme.dart';
+import '../services/location_service.dart';
 
 class HospitalsPage extends StatefulWidget {
   const HospitalsPage({super.key});
@@ -35,40 +35,12 @@ class _HospitalsPageState extends State<HospitalsPage> {
 
   Future<void> _getCurrentLocation() async {
     try {
-      bool serviceEnabled;
-      LocationPermission permission;
-
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
-      if (!serviceEnabled) {
-        if (!mounted) return;
-        setState(() {
-          locationLoaded = true;
-        });
-        return;
-      }
-
-      permission = await Geolocator.checkPermission();
-
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        if (!mounted) return;
-        setState(() {
-          locationLoaded = true;
-        });
-        return;
-      }
-
-      final Position position = await Geolocator.getCurrentPosition();
-
+      final position = await LocationService.getCurrentPosition();
       if (!mounted) return;
-
       setState(() {
-        currentLocation = LatLng(position.latitude, position.longitude);
+        if (position != null) {
+          currentLocation = LatLng(position.latitude, position.longitude);
+        }
         locationLoaded = true;
       });
     } catch (e) {

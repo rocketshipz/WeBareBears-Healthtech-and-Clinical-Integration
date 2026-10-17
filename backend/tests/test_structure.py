@@ -45,28 +45,28 @@ def test_repositories_instantiation():
     assert hospital_repo.get_by_id("any") is None
 
 
-def test_groq_llm_and_gemini_embeddings():
-    """Verify that get_llm instantiates ChatGroq and get_embeddings instantiates Gemini."""
-    from langchain_groq import ChatGroq
+def test_llm_and_gemini_embeddings():
+    """Verify that get_llm instantiates ChatOpenAI and get_embeddings instantiates Gemini."""
+    from langchain_openai import ChatOpenAI
     from langchain_google_genai import GoogleGenerativeAIEmbeddings
     from app.core.llm import get_llm, get_embeddings, reset_llm_cache
     from app.core.config import get_settings
 
     reset_llm_cache()
     settings = get_settings()
-    assert settings.GROQ_MODEL_NAME is not None
+    assert settings.OPENAI_MODEL_NAME is not None
 
     llm = get_llm()
-    assert isinstance(llm, ChatGroq)
-    assert llm.model_name == settings.GROQ_MODEL_NAME or llm.model == settings.GROQ_MODEL_NAME
+    assert isinstance(llm, ChatOpenAI)
+    assert llm.model_name == settings.OPENAI_MODEL_NAME
 
     embeddings = get_embeddings()
     assert isinstance(embeddings, GoogleGenerativeAIEmbeddings)
     assert embeddings.model == settings.GEMINI_EMBEDDING_MODEL
 
 
-def test_agent_runnable_binding_with_groq():
-    """Verify MedicalTriageAgent binds its clinical tools to the Groq LLM."""
+def test_agent_runnable_binding_with_llm():
+    """Verify MedicalTriageAgent binds its clinical tools to the LLM."""
     agent = MedicalTriageAgent()
     runnable = agent._get_runnable()
     assert runnable is not None
