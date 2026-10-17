@@ -11,7 +11,7 @@ if str(backend_dir) not in sys.path:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
-from app.api.routes import health, triage
+from app.api.routes import health, triage, auth
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,6 +40,7 @@ app.add_middleware(
 # Register API routes
 app.include_router(health.router, prefix="/api")
 app.include_router(triage.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
 
 
 @app.get("/")
@@ -51,6 +52,10 @@ async def root():
         "docs_url": "/docs",
         "api_endpoints": {
             "health": "/api/health",
+            "auth_send_code": "/api/auth/send-code",
+            "auth_verify_code": "/api/auth/verify-code",
+            "auth_register": "/api/auth/register",
+            "auth_login": "/api/auth/login",
             "triage_assess": "/api/triage/assess",
             "triage_chat": "/api/triage/chat"
         }

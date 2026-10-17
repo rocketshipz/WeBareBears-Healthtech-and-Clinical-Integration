@@ -44,6 +44,7 @@ dependencies:
   google_fonts: ^9.0.0
   pdf: ^3.13.1
   printing: ^5.15.1
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

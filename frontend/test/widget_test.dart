@@ -9,6 +9,6 @@ void main() {
 
     // Verify that the login screen elements are present.
     expect(find.text('Welcome back'), findsOneWidget);
-    expect(find.text('Phone Number'), findsOneWidget);
+    expect(find.text('Email, Phone Number, or IC'), findsOneWidget);
   });
 }
