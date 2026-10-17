@@ -22,11 +22,11 @@ class Settings(BaseSettings):
     HOST: str = "127.0.0.1"
     PORT: int = 8000
     
-    # Main Agent LLM Configuration (Groq)
-    GROQ_API_KEY: Optional[str] = None
-    GROQ_MODEL_NAME: str = "openai/gpt-oss-120b"
-    GROQ_BASE_URL: Optional[str] = "https://api.groq.com"
-    GROQ_TEMPERATURE: float = 0.0
+    # Main Agent LLM Configuration (Azure OpenAI, OpenAI-compatible v1 endpoint)
+    OPENAI_API_KEY: Optional[str] = None
+    OPENAI_MODEL_NAME: str = "gpt-5-mini"  # Azure: the *deployment name*
+    OPENAI_BASE_URL: Optional[str] = None
+    OPENAI_TEMPERATURE: float = 0.0
 
     # Embedding Model Configuration (Google Gemini)
     GEMINI_API_KEY: Optional[str] = None
@@ -41,6 +41,20 @@ class Settings(BaseSettings):
     POSTGRES_DB_NAME: Optional[str] = "postgres"
     DATABASE_URL: Optional[str] = None
     
+    # Waiting-time label job (ratio = numerator / denominator -> label, every N minutes).
+    # TODO: set these to the real Supabase table/column names (override via backend/.env).
+    WAIT_LABEL_ENABLED: bool = True
+    WAIT_LABEL_INTERVAL_MINUTES: int = 5
+    WAIT_LABEL_TABLE: str = "MOCK_level_1_waiting_time"
+    WAIT_LABEL_KEY_COL: str = "hospital_id"
+    WAIT_LABEL_NUMERATOR_COL: str = "current_ed_patients"
+    WAIT_LABEL_DENOMINATOR_COL: str = "operational_ed_spaces"
+    WAIT_LABEL_COL: str = "activity_level"  # the column to update with "low", "moderate", "busy", "very busy"
+    # Upper bounds (exclusive) for low / moderate / busy; anything above is "very busy".
+    WAIT_LABEL_LOW_MAX: float = 0.5
+    WAIT_LABEL_MODERATE_MAX: float = 1.0
+    WAIT_LABEL_BUSY_MAX: float = 1.5 # Anything above is "very busy".
+
     # Data Directory
     DATA_DIR: str = str(Path(__file__).resolve().parent.parent.parent / "data")
     
@@ -94,17 +108,18 @@ class Settings(BaseSettings):
 
         return uri
 
-    def get_groq_api_key(self) -> Optional[str]:
-        """Returns the configured Groq API key."""
-        return self.GROQ_API_KEY or os.getenv("GROQ_API_KEY")
+    def get_openai_base_url(self) -> Optional[str]:
+        """Returns an OpenAI-compatible base URL.
 
-    def get_groq_base_url(self) -> Optional[str]:
-        """Returns the sanitized Groq base URL."""
-        url = self.GROQ_BASE_URL or os.getenv("GROQ_BASE_URL") or "https://api.groq.com"
-        url = url.rstrip("/")
-        if url.endswith("/openai/v1"):
-            url = url[:-len("/openai/v1")]
-        return url
+        Azure AI Foundry project endpoints (https://<res>.services.ai.azure.com/api/projects/<p>)
+        are converted to the resource's v1 endpoint (https://<res>.services.ai.azure.com/openai/v1/).
+        """
+        url = (self.OPENAI_BASE_URL or "").strip().rstrip("/")
+        if not url:
+            return None
+        if ".azure.com" in url and "/openai/v1" not in url:
+            url = url.split(".azure.com", 1)[0] + ".azure.com/openai/v1"
+        return url + "/" if ".azure.com" in url else url
 
     def get_gemini_api_key(self) -> Optional[str]:
         """Returns the configured Gemini API key, falling back between GEMINI_API_KEY and GOOGLE_API_KEY."""
@@ -122,11 +137,6 @@ def get_settings() -> Settings:
         if not os.environ.get("DATABASE_URL"):
             os.environ["DATABASE_URL"] = db_uri
         s.DATABASE_URL = db_uri
-
-    groq_key = s.get_groq_api_key()
-    if groq_key and not groq_key.startswith("your_"):
-        if not os.environ.get("GROQ_API_KEY"):
-            os.environ["GROQ_API_KEY"] = groq_key
 
     gemini_key = s.get_gemini_api_key()
     if gemini_key and not gemini_key.startswith("your_"):

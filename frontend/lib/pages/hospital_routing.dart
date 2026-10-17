@@ -1,61 +1,129 @@
 import '../localization.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../services/location_service.dart';
 import '../theme.dart';
 import 'home_page.dart';
 import 'triage_report.dart';
 
-class RecommendedHospitalsPage extends StatelessWidget {
+/// Representation of a hospital facility with geographical coordinates.
+class HospitalOption {
+  final String name;
+  final String badge;
+  final double latitude;
+  final double longitude;
+  final String waitingTime;
+  final String emptyBeds;
+  final String registeredPatients;
+
+  const HospitalOption({
+    required this.name,
+    required this.badge,
+    required this.latitude,
+    required this.longitude,
+    required this.waitingTime,
+    required this.emptyBeds,
+    required this.registeredPatients,
+  });
+}
+
+class RecommendedHospitalsPage extends StatefulWidget {
   final TriageReportData? report;
 
   const RecommendedHospitalsPage({super.key, this.report});
 
-  Future<void> _openGoogleMaps(
-    String hospitalName,
-  ) async {
-    final String query = Uri.encodeComponent(hospitalName);
+  @override
+  State<RecommendedHospitalsPage> createState() =>
+      _RecommendedHospitalsPageState();
+}
 
+class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
+  Position? _currentPosition;
+  bool _isLoadingLocation = true;
+
+  // Hospital options. Coordinate values can be customized or replaced with real backend data.
+  final List<HospitalOption> _hospitals = const [
+    HospitalOption(
+      name: 'Central General Hospital',
+      badge: 'Best match',
+      latitude: 3.1470,
+      longitude: 101.6910,
+      waitingTime: '30 min',
+      emptyBeds: '12',
+      registeredPatients: '36',
+    ),
+    HospitalOption(
+      name: 'Riverside Medical Centre',
+      badge: 'Shortest wait',
+      latitude: 3.1650,
+      longitude: 101.7100,
+      waitingTime: '15 min',
+      emptyBeds: '8',
+      registeredPatients: '28',
+    ),
+    HospitalOption(
+      name: 'Maple Community Hospital',
+      badge: 'Closest',
+      latitude: 3.1310,
+      longitude: 101.6820,
+      waitingTime: '45 min',
+      emptyBeds: '6',
+      registeredPatients: '42',
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLocation();
+  }
+
+  Future<void> _fetchLocation() async {
+    try {
+      final position = await LocationService.getCurrentPosition();
+      if (!mounted) return;
+      setState(() {
+        _currentPosition = position;
+        _isLoadingLocation = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingLocation = false;
+      });
+    }
+  }
+
+  Future<void> _openGoogleMaps(String hospitalName) async {
+    final String query = Uri.encodeComponent(hospitalName);
     final Uri url = Uri.parse(
       'https://www.google.com/maps/search/?api=1&query=$query',
     );
 
-    if (!await launchUrl(
-      url,
-      mode: LaunchMode.externalApplication,
-    )) {
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception('Could not open Google Maps');
     }
   }
 
-  Future<void> _openWaze(
-    String hospitalName,
-  ) async {
+  Future<void> _openWaze(String hospitalName) async {
     final String query = Uri.encodeComponent(hospitalName);
-
     final Uri url = Uri.parse(
       'https://waze.com/ul?q=$query&navigate=yes',
     );
 
-    if (!await launchUrl(
-      url,
-      mode: LaunchMode.externalApplication,
-    )) {
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception('Could not open Waze');
     }
   }
 
-  void _showRouteOptions(
-    BuildContext context,
-    String hospitalName,
-  ) {
+  void _showRouteOptions(BuildContext context, String hospitalName) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(28),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (context) {
         return Padding(
@@ -143,6 +211,7 @@ class RecommendedHospitalsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Localizations.localeOf(context);
+    final report = widget.report;
     final Color outcomeColor = report?.color ?? AppColors.green;
     final IconData outcomeIcon = (report?.level ?? 4) <= 3
         ? Icons.priority_high_rounded
@@ -279,57 +348,108 @@ class RecommendedHospitalsPage extends StatelessWidget {
                     LocalizedText(
                       'Sample data is shown for the prototype.',
                       style: AppText.caption,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Suggested care options',
+                                style: AppText.heading),
+                            const SizedBox(height: 4),
+                            Text(
+                              _isLoadingLocation
+                                  ? 'Acquiring GPS location...'
+                                  : _currentPosition != null
+                                      ? 'Distances calculated from your live GPS.'
+                                      : 'Using regional baseline coordinates.',
+                              style: AppText.caption,
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _currentPosition != null
+                                ? AppColors.paleTeal
+                                : AppColors.field,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.my_location_rounded,
+                                size: 14,
+                                color: _currentPosition != null
+                                    ? AppColors.darkTeal
+                                    : AppColors.grey,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _currentPosition != null ? 'GPS Active' : 'Default',
+                                style: AppText.style(
+                                  11,
+                                  FontWeight.w600,
+                                  _currentPosition != null
+                                      ? AppColors.darkTeal
+                                      : AppColors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
 
                     const SizedBox(height: 14),
 
-                    FadeSlideIn(
-                      index: 3,
-                      child: _hospitalCard(
-                        context: context,
-                        badge: 'Best match',
-                        hospitalName: 'Central General Hospital',
-                        distance: '2.3 km',
-                        travelTime: '8 min',
-                        waitingTime: '30 min',
-                        emptyBeds: '12',
-                        registeredPatients: '36',
-                      ),
-                    ),
+                    // RENDER DYNAMIC HOSPITAL CARDS
+                    ..._hospitals.asMap().entries.map((entry) {
+                      final int index = entry.key;
+                      final HospitalOption hospital = entry.value;
 
-                    const SizedBox(height: 14),
+                      // Calculate dynamic distance and travel time
+                      final userLat = _currentPosition?.latitude ??
+                          LocationService.defaultCoordinates.latitude;
+                      final userLon = _currentPosition?.longitude ??
+                          LocationService.defaultCoordinates.longitude;
 
-                    FadeSlideIn(
-                      index: 4,
-                      child: _hospitalCard(
-                        context: context,
-                        badge: 'Shortest wait',
-                        hospitalName: 'Riverside Medical Centre',
-                        distance: '5.1 km',
-                        travelTime: '15 min',
-                        waitingTime: '15 min',
-                        emptyBeds: '8',
-                        registeredPatients: '28',
-                      ),
-                    ),
+                      final distanceKm = LocationService.calculateDistanceKm(
+                        startLatitude: userLat,
+                        startLongitude: userLon,
+                        endLatitude: hospital.latitude,
+                        endLongitude: hospital.longitude,
+                      );
 
-                    const SizedBox(height: 14),
+                      final travelMinutes =
+                          LocationService.estimateTravelTimeMinutes(distanceKm);
+                      final distanceLabel =
+                          LocationService.formatDistance(distanceKm);
+                      final travelLabel =
+                          LocationService.formatTravelTime(travelMinutes);
 
-                    FadeSlideIn(
-                      index: 5,
-                      child: _hospitalCard(
-                        context: context,
-                        badge: 'Closest',
-                        hospitalName: 'Maple Community Hospital',
-                        distance: '1.2 km',
-                        travelTime: '5 min',
-                        waitingTime: '45 min',
-                        emptyBeds: '6',
-                        registeredPatients: '42',
-                      ),
-                    ),
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: FadeSlideIn(
+                          index: 3 + index,
+                          child: _hospitalCard(
+                            context: context,
+                            badge: hospital.badge,
+                            hospitalName: hospital.name,
+                            distance: distanceLabel,
+                            travelTime: travelLabel,
+                            waitingTime: hospital.waitingTime,
+                            emptyBeds: hospital.emptyBeds,
+                            registeredPatients: hospital.registeredPatients,
+                          ),
+                        ),
+                      );
+                    }),
 
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 10),
 
                     // DISCLAIMER
                     Container(

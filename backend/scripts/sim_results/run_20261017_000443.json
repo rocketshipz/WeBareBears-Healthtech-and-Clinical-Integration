@@ -1,0 +1,2096 @@
+[
+  {
+    "scenario": 1,
+    "name": "Chest pain >6h, moderate",
+    "expected": [
+      3
+    ],
+    "got": null,
+    "call_999": false,
+    "turns": 12,
+    "seconds": 182.0,
+    "matched_rules": null,
+    "verdict": "NO_RESULT",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I have chest pain"
+      ],
+      [
+        "bot",
+        "You say you have chest pain — thank you. I need to ask a few quick questions.\n\nIs the person conscious, breathing normally, and able to respond to call?\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits\n\nPlease pick the best option."
+      ],
+      [
+        "patient",
+        "Yes — I'm conscious, breathing normally, and responding."
+      ],
+      [
+        "bot",
+        "Thanks — and how old are you (age in years)?"
+      ],
+      [
+        "patient",
+        "I'm 45 years old."
+      ],
+      [
+        "bot",
+        "Thanks — quick follow-up.\n\nIs there any bleeding, major trauma, or severe injury?\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder\n\nPlease pick the best option."
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Okay — thanks. You said you’re conscious and breathing. Next: how is your breathing right now?\n\nChoose the best option:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact\n\nPlease pick one."
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — on a scale of 0–10, is there chest pain or other pain right now?\n\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)\n\nPlease pick the best option."
+      ],
+      [
+        "patient",
+        "Moderate pain, about 5 out of 10."
+      ],
+      [
+        "bot",
+        "Thanks — you said pain is about 5/10. When did the chest pain start?\n\n- New onset starting within less than 6 hours\n- Started more than 6 hours ago\n- Chest pain is reducing\n- No further pain\n\nPlease pick the best option."
+      ],
+      [
+        "patient",
+        "It started two days ago."
+      ],
+      [
+        "bot",
+        "Thanks — a quick check: is the chest pain still ongoing, and how strong is it now (0–10)?\n\n- Ongoing and high (severe, 8–10)\n- Ongoing and moderate (4–7)\n- Persisting mild pain (1–3)\n- No longer in pain\n\nPlease pick the best option."
+      ],
+      [
+        "patient",
+        "It's ongoing and moderate, about 5 out of 10."
+      ],
+      [
+        "bot",
+        "Thanks — quick question: Are you having a seizure, or unable to sit, stand, walk, or communicate?\n\nChoose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally\n\nPlease pick the best option."
+      ],
+      [
+        "patient",
+        "I'm alert and walking and talking normally."
+      ],
+      [
+        "bot",
+        "Are you confused or unusually drowsy (lethargic) and having difficulty breathing?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I'm not confused or drowsy and I'm breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — quick follow-up: are you experiencing profuse sweating alongside the chest pain?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I'm not sweating."
+      ],
+      [
+        "bot",
+        "Thanks — one quick question: are you vomiting blood or coughing up blood now?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I'm not vomiting or coughing up blood."
+      ],
+      [
+        "bot",
+        "Thanks — you’ve said you’re breathing and talking. Quick check: are you confused or not fully conscious, unable to communicate, or unable to sit/stand/walk unsupported?\n\n- No — I’m alert, can communicate, and can sit/stand/walk unsupported\n- Altered mental state / not fully conscious\n- Cannot communicate\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n\nPlease pick the best option."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 2,
+    "name": "Chest pain, mild persisting",
+    "expected": [
+      4
+    ],
+    "got": 2,
+    "call_999": false,
+    "turns": 6,
+    "seconds": 88.9,
+    "matched_rules": [
+      "RULE_CP_L2_01"
+    ],
+    "verdict": "FAIL",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I have chest pain"
+      ],
+      [
+        "bot",
+        "You said you have chest pain — thank you. How old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 30 years old."
+      ],
+      [
+        "bot",
+        "Thanks — are you conscious, breathing normally, and able to respond if I call your name?\n\nPlease choose one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — a couple quick questions about the pain.\n\n1) When did the chest pain start?\n- New onset starting within less than 6 hours\n- Started more than 6 hours ago\n- Chest pain is reducing\n- No further pain\n\n2) Is there chest pain or other pain now? How severe is it on a scale of 0 to 10?\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Started more than 6 hours ago. Mild pain (1-3)."
+      ],
+      [
+        "bot",
+        "Thanks — you said mild chest pain that started >6 hours ago and you’re conscious and breathing normally.\n\nHow is your breathing now? Please choose one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — you said you’re conscious, breathing normally, with mild chest pain that started over 6 hours ago.\n\nNext question: Is the person having a seizure, or unable to sit, stand, walk or communicate?\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Level 2 - Emergency\n\nLevel 2 - Emergency (target: under 10 minutes). Go to the nearest Emergency Department immediately.\n\nKey finding from the screening: profuse sweating.\n\nDo you want help finding the nearest hospital now? If yes, tell me your location or allow sharing it.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 3,
+    "name": "Chest pain, resolved",
+    "expected": [
+      5
+    ],
+    "got": 5,
+    "call_999": false,
+    "turns": 12,
+    "seconds": 204.3,
+    "matched_rules": [
+      "RULE_CP_L5_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I had chest pain earlier"
+      ],
+      [
+        "bot",
+        "Thanks — I see you had chest pain earlier. How old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 30 years old."
+      ],
+      [
+        "bot",
+        "Thanks — noted you had chest pain earlier. Is the person conscious, breathing normally, and able to respond to call?\n\nAnswer one: \n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding"
+      ],
+      [
+        "bot",
+        "Thanks — noted you are conscious and breathing. How is your breathing now? Choose one:\n\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?\n\nAnswer one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No pain (0)."
+      ],
+      [
+        "bot",
+        "Thanks — noted no current pain. When did the chest pain start?\n\nChoose one:\n- New onset starting within less than 6 hours\n- Started more than 6 hours ago\n- Chest pain is reducing\n- No further pain"
+      ],
+      [
+        "patient",
+        "No further pain."
+      ],
+      [
+        "bot",
+        "Thanks — noted no further pain and you're breathing normally.\n\nIs the person having a seizure, or unable to sit, stand, walk or communicate?\n\nAnswer one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re alert and walking. Quick question:\n\nIs the person confused or unusually drowsy (lethargic) and having difficulty breathing?\n\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I'm not confused or drowsy and I'm breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted no pain and breathing normally.\n\nIs there any bleeding, major trauma, or severe injury? Please choose one answer:\n\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Do you have a known bleeding disorder (for example haemophilia, von Willebrand, or a diagnosed clotting problem), or are you on blood-thinning medicines?\n\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, not that I've noticed."
+      ],
+      [
+        "bot",
+        "Thanks — noted you had chest pain earlier but no current pain and you’re breathing normally.\n\nAre you experiencing profuse sweating alongside the chest pain?\n\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I'm not sweating."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re not sweating.\n\nDo you still have mild chest pain (pain score 1–3)?\n\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I don't have any pain now."
+      ],
+      [
+        "bot",
+        "Level 5 - Routine\n\nLevel 5 - Routine (target: under 90 minutes). Not an emergency: a clinic or outpatient visit is suitable.\n\nKey findings: no further chest pain; breathing normal; alert and walking.\n\nWhat to do now:\n- Arrange a clinic or outpatient appointment as soon as convenient.\n- If chest pain returns, becomes worse, or you develop new worrying symptoms (shortness of breath, fainting, heavy sweating, confusion, or severe pain), call 999 (112 from mobile) or go to the nearest Emergency Department immediately.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 4,
+    "name": "Headache, pain 6/10",
+    "expected": [
+      3
+    ],
+    "got": 3,
+    "call_999": false,
+    "turns": 7,
+    "seconds": 134.7,
+    "matched_rules": [
+      "RULE_CRIT_L3_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I have a headache"
+      ],
+      [
+        "bot",
+        "Thanks — quick questions to help me screen your headache.\n\n1) How old are you now (in years)?  \n2) Is the person conscious, breathing normally, and able to respond to call? Please pick one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits\n\n(Reply with your age and the one option that fits.)"
+      ],
+      [
+        "patient",
+        "35. Yes - conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — noted age 35 and that you’re conscious and breathing normally.\n\nDid the headache start very suddenly, or is it accompanied by any of these: neck pain or stiffness, change in alertness or thinking (confused/drowsy), or any weakness/speech or vision problems? Please reply \"Yes\" or \"No\"."
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted that you have a headache and are conscious and breathing normally.\n\nIs there any chest pain or other pain? How severe is it on a scale of 0 to 10? Please pick one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Moderate pain (4-7)."
+      ],
+      [
+        "bot",
+        "Thanks — noted. You said you’re conscious and breathing, and the pain is moderate.\n\nHow is your breathing? Please pick one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re 35, conscious, breathing normally, and have moderate headache pain.\n\nIs the person having a seizure, or unable to sit, stand, walk or communicate? Please pick one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. You said headache, age 35, conscious, breathing normally, moderate pain, and walking/talking normally.\n\nIs there any bleeding, major trauma, or severe injury? Please choose the one that fits:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Level 3 - Urgent\n\nLevel 3 - Urgent (target: under 30 minutes). Needs urgent medical assessment: go to an Emergency Department.\n\nKey finding: pain score 4–7 (moderate headache).\n\nIf your symptoms get worse (for example new weakness, confusion, difficulty breathing, loss of consciousness, severe vomiting, or uncontrolled bleeding), call 999 now (112 from mobile).\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 5,
+    "name": "Headache, mild + vomiting",
+    "expected": [
+      4
+    ],
+    "got": 4,
+    "call_999": false,
+    "turns": 11,
+    "seconds": 173.8,
+    "matched_rules": [
+      "RULE_HA_L4_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I have a headache"
+      ],
+      [
+        "bot",
+        "Thanks — I hear you have a headache. I need to ask a few quick questions to check for any emergency signs.\n\nIs the person conscious, breathing normally, and able to respond to call? Please pick one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — noted that you’re conscious and responding. How old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 35 years old."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re 35 and conscious. Next: Did the headache start very suddenly, or is it accompanied by neck pain/stiffness, altered mental state or neurological deficits?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question: Is there any chest pain or other pain right now, and how severe is it on a 0–10 scale? Please pick one:\n- Severe chest pain\n- Severe pain (8–10)\n- Moderate pain (4–7)\n- Mild pain (1–3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Mild pain (1–3)."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Next: How is the breathing? Please pick one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Next question: Is the person having a seizure, or unable to sit, stand, walk or communicate?\n\nPlease pick one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. One more quick question: Are you experiencing visual changes, speech difficulty, or trouble walking (ataxia / gait difficulty) alongside the headache?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question: Is there any bleeding, major trauma, or severe injury?\n\nPlease choose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question: Is the person confused or unusually drowsy (lethargic) and having difficulty breathing?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re conscious, 35, with a mild headache and breathing normally.\n\nQuick question: Is there a behavioural change, aura or one-sided headache, vomiting, or associated fever?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "Yes, I vomited once."
+      ],
+      [
+        "bot",
+        "Level 4 - Early Care\n\nLevel 4 - Early Care (target: under 60 minutes). Needs medical care soon: go to an Emergency Department or a walk-in / urgent-care clinic.\n\nKey finding: vomiting (one episode) with headache.\n\nPlease go for medical assessment within the next hour. If you feel worse, become drowsy, confused, have new weakness, worsening headache, trouble breathing, or any new worrying sign, call 999 immediately.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 6,
+    "name": "Headache, mild only",
+    "expected": [
+      5
+    ],
+    "got": null,
+    "call_999": false,
+    "turns": 12,
+    "seconds": 164.3,
+    "matched_rules": null,
+    "verdict": "NO_RESULT",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I have a headache"
+      ],
+      [
+        "bot",
+        "Thanks — I’m MedicTri. I’m here to help screen your headache. First, how old are you?"
+      ],
+      [
+        "patient",
+        "I'm 35 years old."
+      ],
+      [
+        "bot",
+        "Thanks — and noted. Is the person conscious, breathing normally, and able to respond to call?\n\nPlease choose one:  \n- Yes - conscious, breathing normally and responding  \n- Cardiac arrest  \n- Not breathing  \n- Unresponsive  \n- Not responding to call  \n- Confused, agitated or disoriented  \n- Altered mental state or not fully conscious  \n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Next question: is there any bleeding, major trauma, or severe injury?\n\nPlease choose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Did the headache start very suddenly, or is it accompanied by neck pain/stiffness, altered mental state or neurological deficits?\n\nPlease answer:  \n- Yes  \n- No"
+      ],
+      [
+        "patient",
+        "No, it was gradual."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Next: Is there chest pain or other pain? How severe is it on a scale of 0 to 10?\n\nPlease choose one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Mild pain, about 3 out of 10."
+      ],
+      [
+        "bot",
+        "Okay — noted you’re conscious, breathing normally, gradual headache, pain 3/10.\n\nHow is your breathing? Please choose one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Okay — thanks, noted. Quick question: Is the person having a seizure, or unable to sit, stand, walk or communicate?\n\nPlease choose one:\n- Ongoing seizures  \n- Cannot sit or stand unsupported  \n- Cannot stand or walk unsupported  \n- Cannot communicate  \n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Are you experiencing visual changes, speech difficulty, or trouble walking (ataxia / gait difficulty) alongside the headache?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I don't have any visual changes, speech difficulty, or trouble walking."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question: Is the person confused or unusually drowsy (lethargic) and having difficulty breathing?\n\nPlease answer:  \n- Yes  \n- No"
+      ],
+      [
+        "patient",
+        "No — I'm not confused or drowsy and I'm breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted so far. Do you have a known bleeding disorder?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, not that I've noticed."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question: is there any behavioural change, an aura or one-sided headache, vomiting, or an associated fever?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I don't have any of those."
+      ],
+      [
+        "bot",
+        "Thanks — noted. One more quick question: are these headache symptoms only, with none of the other features we asked about above (no vision/speech/walking problems, no fever, no vomiting, no aura, no behavioural change)?\n\nPlease answer:\n- Yes — headache symptoms only\n- No — I have other symptoms"
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 7,
+    "name": "Sore throat, routine",
+    "expected": [
+      5
+    ],
+    "got": null,
+    "call_999": false,
+    "turns": 12,
+    "seconds": 144.6,
+    "matched_rules": null,
+    "verdict": "NO_RESULT",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "Sore throat and runny nose"
+      ],
+      [
+        "bot",
+        "Thanks — I can help with that. How old is the person (age in years)?"
+      ],
+      [
+        "patient",
+        "25 years old."
+      ],
+      [
+        "bot",
+        "Thanks — got the age as 25. Quick question: Is the person conscious, breathing normally, and able to respond to call?\n\nPlease choose one:\n- Yes — conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes — conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — noted. One more quick question about breathing.\n\nHow is the breathing? Please choose one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Okay — thanks. A couple quick yes/no items to check for emergencies.\n\n1) Is there any possible airway obstruction (choking, throat closing, or struggling to breathe)?\n- Yes\n- No\n\n2) Is the person having a seizure, or unable to sit, stand, walk or communicate?\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "No. Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted sore throat and runny nose. Quick question:\n\nIs there an active nosebleed, difficulty swallowing, or a tracheostomy?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — none of those."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Any bleeding, major trauma, or severe injury?\n\nPlease choose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Is the person confused or unusually drowsy (lethargic) and having difficulty breathing?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — alert and breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — one more quick question:\n\nIs there chest pain or other pain? How severe is it on a scale of 0 to 10?\n\nPlease choose one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No pain (0)."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question:\n\nIs there a foreign body in the ear / nose / throat?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — nothing stuck."
+      ],
+      [
+        "bot",
+        "Thanks — one last quick question about the ENT symptoms.\n\nIs it any other ear / nose / throat problem, not described above?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — not that I've noticed."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Any other symptoms besides sore throat and runny nose? Please pick any that apply (or say “None”):\n\n- Cough\n- Shortness of breath / difficulty breathing\n- Chest pain\n- Fever\n- Headache\n- Vomiting or diarrhoea\n- Abdominal pain\n- Dizziness, giddiness or fainting\n- Palpitations / fast heart beat\n- Rash or bleeding\n- Eye or vision problem\n- Ear pain\n- Limb pain, swelling or injury\n- Pregnancy-related concern or vaginal bleeding\n- Confusion, seizure or change in consciousness\n- None of the above"
+      ],
+      [
+        "patient",
+        "None of the above."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick check: do you have a fever or feel feverish / chills? \n- Yes\n- No"
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 8,
+    "name": "Sore throat, hard to swallow",
+    "expected": [
+      3
+    ],
+    "got": 3,
+    "call_999": false,
+    "turns": 10,
+    "seconds": 140.6,
+    "matched_rules": [
+      "RULE_ENT_L3_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "Sore throat"
+      ],
+      [
+        "bot",
+        "You said you have a sore throat — thanks. How old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 25 years old."
+      ],
+      [
+        "bot",
+        "Thanks — you’re 25. Quick question about urgent problems: Is there any bleeding, major trauma, or severe injury?\n\nAnswer one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — one quick urgent check: Are you conscious, breathing normally, and able to respond to call?\n\nPlease choose one:\n- Yes — conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes — conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — one more quick check about breathing.\n\nHow is the breathing? Please choose one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — quick follow-up about pain. Do you have chest pain or other pain? How severe is it on a scale 0–10?\n\nPlease choose one:\n- Severe chest pain\n- Severe pain (8–10)\n- Moderate pain (4–7)\n- Mild pain (1–3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Mild pain (1–3)."
+      ],
+      [
+        "bot",
+        "Thanks — and noted. Quick check: Is the person having a seizure, or unable to sit, stand, walk or communicate?\n\nPlease choose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — quick follow-up about the throat: do you have any choking, a feeling your throat is closing, or are you struggling to breathe?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No — I'm not choking or having trouble breathing."
+      ],
+      [
+        "bot",
+        "Thanks — quick check: are you confused or unusually drowsy (lethargic) and having difficulty breathing?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No — I'm alert and breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question: Is there an active nosebleed, difficulty swallowing, or a tracheostomy? (Answer Yes or No.)"
+      ],
+      [
+        "patient",
+        "Yes — I'm having difficulty swallowing."
+      ],
+      [
+        "bot",
+        "Level 3 - Urgent\n\nNeeds urgent medical assessment (target: under 30 minutes). Please go to an Emergency Department now. Key finding: difficulty swallowing.\n\nDo you want help finding the nearest hospital ED? If yes, tell me your town/postcode or share your location.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 9,
+    "name": "Vomited once",
+    "expected": [
+      5
+    ],
+    "got": 5,
+    "call_999": false,
+    "turns": 12,
+    "seconds": 198.5,
+    "matched_rules": [
+      "RULE_VD_L5_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I vomited once"
+      ],
+      [
+        "bot",
+        "Thanks — you said you vomited once. A few quick questions so I can keep screening.\n\n1) How old are you? (years)\n\n2) Is the person conscious, breathing normally, and able to respond to call?\n- Yes — conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits\n\nPlease answer both (age in years, and pick the breathing/consciousness option)."
+      ],
+      [
+        "patient",
+        "I'm 28 years old. Yes — conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re 28, conscious and breathing normally.\n\nHow is the breathing? Pick one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick next question:\n\nIs there any bleeding, major trauma, or severe injury? Pick one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding. It was a single small episode and there was no blood."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Next question:\n\nIs the person having a seizure, or unable to sit, stand, walk or communicate?\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally\n\nPlease pick the single best option."
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted you vomited once, you’re 28, conscious, breathing normally, alert and walking/talking, and there was no blood.\n\nNext question — please pick one answer:\n\nIs there chest pain or other pain? How severe is it on a scale of 0 to 10?\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No pain (0)."
+      ],
+      [
+        "bot",
+        "Thanks — noted. One more quick question:\n\nAre you confused or unusually drowsy (lethargic) and having difficulty breathing?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I'm not confused or drowsy and I'm breathing fine."
+      ],
+      [
+        "bot",
+        "Are you vomiting fresh blood or dark “coffee-ground” material, or passing black tarry stools or bloody diarrhoea, or fresh blood in stool?\n\nOptions:\n- Fresh blood in stool or vomit\n- Coffee-ground vomit, black stools or bloody diarrhoea\n- No"
+      ],
+      [
+        "patient",
+        "No — there was no blood and no black stools."
+      ],
+      [
+        "bot",
+        "Thanks — noted.\n\nNext question: How many episodes of vomiting/diarrhoea have occurred, and can you drink fluids?\n- Persisting vomiting/diarrhoea, unable to tolerate orally\n- Single episode or small quantity, stable and tolerating orally\n\nPlease pick one."
+      ],
+      [
+        "patient",
+        "Single episode, just a small amount. I'm stable and can drink fine."
+      ],
+      [
+        "bot",
+        "Thanks — noted you can drink and are stable.\n\nAre you unable to tolerate any fluids orally, or showing severe dehydration (dry mouth, confusion or signs of shock)?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — I can drink fine and I'm stable."
+      ],
+      [
+        "bot",
+        "Thanks — noted you can drink and are stable.\n\nAre you on anticoagulant (blood‑thinning) medication, or is your consciousness altered?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — I'm not on blood thinners and I'm fully alert."
+      ],
+      [
+        "bot",
+        "Thanks — you said that already but I need to confirm the parts. Which of these are true now? Pick all that apply:\n- Single episode\n- Small quantity\n- Stable\n- Tolerating orally\n- Mild symptoms\n- Able to take orally"
+      ],
+      [
+        "patient",
+        "Single episode, small quantity, stable, tolerating orally, able to take orally."
+      ],
+      [
+        "bot",
+        "Level 5 - Routine\n\nAdvice now:\n- This appears to be a routine problem. A clinic or outpatient visit is suitable; target waiting time under 90 minutes.\n- Keep taking small sips of fluids to stay hydrated. Try clear fluids first (water, oral rehydration solution, clear broth).\n- Avoid solid food for a short while; return to bland, light meals when vomiting stops.\n- If you develop worsening symptoms (more vomiting, inability to keep fluids down, blood in vomit or stools, severe abdominal pain, dizziness, confusion, or fainting) seek urgent care or call 999.\n\nKey findings that led to this result:\n- Single small episode of vomiting\n- Stable and able to tolerate fluids\n- No blood, no severe pain, alert and breathing normally\n\nI will now find recommended nearby hospitals in case you need a facility. If you can, tell me your approximate location (city or coordinates). \n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 10,
+    "name": "Persistent vomiting",
+    "expected": [
+      4
+    ],
+    "got": null,
+    "call_999": false,
+    "turns": 12,
+    "seconds": 172.8,
+    "matched_rules": null,
+    "verdict": "NO_RESULT",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I keep vomiting"
+      ],
+      [
+        "bot",
+        "Sorry you're vomiting — I can help screen this. How old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 28 years old."
+      ],
+      [
+        "bot",
+        "You're vomiting — thank you for telling me. Are you conscious, breathing normally, and able to respond to call?\n\nPlease choose one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding"
+      ],
+      [
+        "bot",
+        "Thanks — I’ve noted you’re vomiting and are conscious. Next: is there any bleeding, major trauma, or severe injury?\n\nPlease choose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re conscious, breathing and vomiting with no major bleeding. How is your breathing right now? Please choose one:\n\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — quick next question: is the person having a seizure, or unable to sit, stand, walk or communicate?\n\nPlease choose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Any chest pain or other pain right now? How severe is it on a scale of 0 to 10?\n\nPlease choose one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No pain (0)."
+      ],
+      [
+        "bot",
+        "Thanks — quick question: Is the person confused or unusually drowsy (lethargic) and having difficulty breathing?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — quick follow-up about the vomit. Are you vomiting fresh blood or dark coffee‑ground material, or passing black tarry stools, bloody diarrhoea or fresh blood in stool?\n\nPlease choose one:\n- Fresh blood in stool or vomit\n- Coffee-ground vomit, black stools or bloody diarrhoea\n- No"
+      ],
+      [
+        "patient",
+        "No — there’s no blood in my vomit and no black stools."
+      ],
+      [
+        "bot",
+        "Thanks — a quick question about dehydration: Are you unable to tolerate any fluids by mouth, or do you have signs of severe dehydration (very dry mouth, confusion, very weak, or signs of shock)?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "Yes — I can't keep any fluids down."
+      ],
+      [
+        "bot",
+        "Thanks — quick question: Are you on any blood‑thinning medication (anticoagulant), or is your consciousness altered (drowsy, confused, or not fully aware)?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted. One more quick check: do you have any of these right now?\n\n- Severe chest pain\n- Very severe pain (8–10)\n- Ongoing seizure\n- Difficulty breathing (including only short phrases or cannot speak)\n- Confused, disoriented, or not responding to call\n- Obvious new weakness or neurological problem\n- Vomiting or coughing up blood\n\nPlease answer: No — none of these, or Yes — which one (pick from the list)."
+      ],
+      [
+        "patient",
+        "No — none of these."
+      ],
+      [
+        "bot",
+        "Thanks — one more question about the vomiting: how many episodes have you had, and can you keep fluids down?\n\nPlease choose one:\n- Persisting vomiting / diarrhoea, unable to tolerate orally\n- Single episode or small amount, stable and tolerating orally"
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 11,
+    "name": "Black stools",
+    "expected": [
+      3
+    ],
+    "got": 3,
+    "call_999": false,
+    "turns": 10,
+    "seconds": 164.8,
+    "matched_rules": [
+      "RULE_VD_L3_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I have diarrhoea"
+      ],
+      [
+        "bot",
+        "Thanks — I noted you have diarrhoea. How old are you?"
+      ],
+      [
+        "patient",
+        "I'm 28 years old."
+      ],
+      [
+        "bot",
+        "Thanks — noted age 28 and diarrhoea. One quick question: Is the person conscious, breathing normally, and able to respond to call?\n\nPlease choose one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — noted age 28, diarrhoea, and that you are conscious and responding.\n\nHow is your breathing? Please choose one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "I'm breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. One more quick question about your diarrhoea:\n\nAre you vomiting fresh blood or dark coffee-ground material, or passing black tarry stools, bloody diarrhoea or fresh blood in stool?\n\nPlease choose one:\n- Fresh blood in stool or vomit\n- Coffee-ground vomit, black stools or bloody diarrhoea\n- No"
+      ],
+      [
+        "patient",
+        "Coffee-ground vomit, black stools or bloody diarrhoea."
+      ],
+      [
+        "bot",
+        "Noted — you have coffee‑ground vomit / black or bloody stools. \n\nAre you unable to tolerate any fluids orally, or showing severe dehydration (dry mouth, confusion or signs of shock)?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I can drink fluids and I'm not confused."
+      ],
+      [
+        "bot",
+        "Noted — you can drink and are not confused. Quick question about pain:\n\nIs there chest pain or other pain? How severe is it on a scale of 0 to 10?\n\nPlease choose one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No pain (0)."
+      ],
+      [
+        "bot",
+        "Thanks — noted no pain.\n\nQuick check: Is the person having a seizure, or unable to sit, stand, walk or communicate?\n\nPlease choose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Noted — you can drink and are not confused.\n\nNext question: Is there any bleeding, major trauma, or severe injury?\n\nPlease choose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted you reported coffee‑ground vomit / black or bloody stools. Which of these exactly applies now? Please choose one (or more if true):\n\n- Coffee‑ground vomit\n- Black (tarry) stools\n- Bloody diarrhoea"
+      ],
+      [
+        "patient",
+        "Black (tarry) stools."
+      ],
+      [
+        "bot",
+        "Thanks — I have recorded your symptoms (black/tarry stools) and answers.\n\nLevel 3 - Urgent\n\nLevel 3 - Urgent (target: under 30 minutes). Needs urgent medical assessment: go to an Emergency Department.\n\nKey finding: black (tarry) stools.\n\nIf you’d like, I can help find a nearby Emergency Department — tell me your location or allow sharing it. \n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 12,
+    "name": "Fever + headache",
+    "expected": [
+      3
+    ],
+    "got": 3,
+    "call_999": false,
+    "turns": 9,
+    "seconds": 131.8,
+    "matched_rules": [
+      "RULE_FEVER_L3_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I have a fever"
+      ],
+      [
+        "bot",
+        "Sorry you have a fever — I can help screen this. How old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I’m 30 years old."
+      ],
+      [
+        "bot",
+        "Thanks — and noted you’re 30. Is the person conscious, breathing normally, and able to respond to call?\n\nPlease choose one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — a quick question about those fever symptoms.\n\nDoes the fever come with a skin rash or blisters, altered mental state, seizures, or an immunocompromised state (e.g. chemotherapy, steroids, HIV)?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted. How is your breathing right now? Please choose one:\n\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick follow-up: are you having chest pain or any other pain right now? How bad is it (0–10)?\n\nPlease choose one:\n- Severe chest pain\n- Severe pain (8–10)\n- Moderate pain (4–7)\n- Mild pain (1–3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Mild pain (1–3)."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick check: is the person having a seizure, or unable to sit, stand, walk or communicate?\n\nPlease choose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Is there any bleeding, major trauma, or severe injury?\n\nPlease choose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Does the fever come with limb or joint swelling, headache, a reaction to a toxin or drug, or poor oral intake?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "Yes, I have a headache."
+      ],
+      [
+        "bot",
+        "Level 3 - Urgent\n\nLevel 3 - Urgent (target: under 30 minutes). Needs urgent medical assessment: go to an Emergency Department.\n\nKey finding from screening: headache with fever.\n\nIf you want, I can help find nearby hospitals now — tell me your location or postcode. \n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 13,
+    "name": "Elderly fever",
+    "expected": [
+      4
+    ],
+    "got": 4,
+    "call_999": false,
+    "turns": 10,
+    "seconds": 155.8,
+    "matched_rules": [
+      "RULE_FEVER_L4_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "My grandfather has a fever"
+      ],
+      [
+        "bot",
+        "Understood — your grandfather has a fever. How old is he, in years?"
+      ],
+      [
+        "patient",
+        "He is 70 years old."
+      ],
+      [
+        "bot",
+        "Thanks — and noted he is 70. Is he conscious, breathing normally, and able to respond to you?\n\nPlease choose one answer:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding"
+      ],
+      [
+        "bot",
+        "Thanks — noted he is conscious and breathing normally.\n\nIs there any bleeding, major trauma, or severe injury? Please choose one answer:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted he's 70, has a fever, and is conscious and breathing. Quick question about breathing:\n\nHow is his breathing? Please choose one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "He is breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted he’s 70, conscious, breathing normally and has a fever.\n\nDoes the fever come with a skin rash or blisters, altered mental state, seizures, or an immunocompromised state (e.g. chemotherapy, steroids, HIV)?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, he doesn't have any of those."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question about pain:\n\nIs there chest pain or other pain? How severe is it on a scale of 0 to 10?\n\nPlease choose one:\n- Severe chest pain\n- Severe pain (8–10)\n- Moderate pain (4–7)\n- Mild pain (1–3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No pain (0), not that I've noticed."
+      ],
+      [
+        "bot",
+        "Is the person confused or unusually drowsy (lethargic) and having difficulty breathing?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No. He is not confused or unusually drowsy and is breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. One quick check: Is he having a seizure, or unable to sit, stand, walk or communicate?\n\nPlease choose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Does the fever come with limb or joint swelling, headache, a reaction to a toxin or drug, or poor oral intake?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, he doesn't have any of those."
+      ],
+      [
+        "bot",
+        "Thank you — based on your answers:\n\nLevel 4 - Early Care\n\nLevel 4 - Early Care (target: under 60 minutes). Needs medical care soon: go to an Emergency Department or a walk-in / urgent-care clinic.\n\nKey findings: age >65 with fever; alert, breathing normally and able to walk and talk; no rash, seizures, confusion, severe pain or other red-flag symptoms reported.\n\nWhat to do now:\n- Arrange for medical assessment at an Emergency Department or urgent-care clinic within the next hour.\n- Take any current medications, a list of health conditions, and the time the fever started when you go.\n- If new or worsening symptoms appear (difficulty breathing, collapse, severe chest pain, increasing drowsiness/confusion, uncontrolled bleeding, or seizures), call 999 immediately.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 14,
+    "name": "Fever gone",
+    "expected": [
+      5
+    ],
+    "got": 5,
+    "call_999": false,
+    "turns": 11,
+    "seconds": 161.1,
+    "matched_rules": [
+      "RULE_FEVER_L5_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I had a fever yesterday"
+      ],
+      [
+        "bot",
+        "Thanks — you said you had a fever yesterday. How old are you (years)?"
+      ],
+      [
+        "patient",
+        "I'm 30 years old."
+      ],
+      [
+        "bot",
+        "Thanks — you’re 30 and had a fever yesterday. Quick check: Is the person conscious, breathing normally, and able to respond to call?\n\nChoose one: \n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes — conscious, breathing normally and responding"
+      ],
+      [
+        "bot",
+        "Thanks — noted you had fever yesterday and you’re 30. \n\nDoes the fever come with any of these: skin rash or blisters, altered mental state, seizures, or an immunocompromised state (for example chemotherapy, long‑term steroids, or HIV)? Reply \"Yes\" or \"No\"."
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick follow-up: How is the breathing now? Choose one:\n\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Next: Is there chest pain or other pain? How severe is it on a scale of 0 to 10?\n\nChoose one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No pain (0)."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re breathing normally and have no pain.\n\nIs the person having a seizure, or unable to sit, stand, walk or communicate?\n\nChoose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "You said you’re alert, walking and talking normally — thanks. \n\nIs the person confused or unusually drowsy (lethargic) and having difficulty breathing?\n\nAnswer: Yes or No."
+      ],
+      [
+        "patient",
+        "No — I'm not confused or drowsy, and I'm breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — one more quick question about bleeding or major injury.\n\nIs there any bleeding, major trauma, or severe injury?\n\nChoose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Does the fever come with limb or joint swelling, headache, a reaction to a toxin or drug, or poor oral intake? Answer \"Yes\" or \"No\"."
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick check: Is the fever gone, and are you able to eat/drink normally and move around on your own?\n\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "Yes — the fever is gone and I’m eating and walking normally."
+      ],
+      [
+        "bot",
+        "Level 5 - Routine\n\nLevel 5 - Routine (target: under 90 minutes). Not an emergency: a clinic or outpatient visit is suitable.\n\nKey findings: Not currently febrile, tolerating orally and mobilizing independently.\n\nNext steps: attend a clinic or outpatient service as needed. Rest and keep hydrated. If fever returns or you develop worrying signs — severe headache, rash, difficulty breathing, chest pain, persistent vomiting, bleeding, confusion, or any new severe symptoms — seek urgent care or call 999 (112 from mobile).\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 15,
+    "name": "Leg swollen, no weight bearing",
+    "expected": [
+      3
+    ],
+    "got": null,
+    "call_999": false,
+    "turns": 12,
+    "seconds": 216.1,
+    "matched_rules": null,
+    "verdict": "NO_RESULT",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "My leg hurts"
+      ],
+      [
+        "bot",
+        "I’m sorry your leg hurts — I can help with triage questions. First, how old are you (age in years)?"
+      ],
+      [
+        "patient",
+        "I'm 40 years old."
+      ],
+      [
+        "bot",
+        "Thanks — noted you're 40 and your leg hurts. Quick question: Is the person conscious, breathing normally, and able to respond to call?\n\nPlease choose one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes — I'm alert, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re alert and breathing normally.\n\nWas the injury caused by a high-velocity accident, a penetrating wound (knife/gunshot), or is there active bleeding, visual/hearing impact or altered mental state after a head injury?\n\nPlease answer: \n- No \n- Yes\n\n(If Yes, tell me which of those: high-velocity accident / penetrating wound / active head/neck bleeding / visual or hearing impact / altered mental state after head injury.)"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Next: Is there a mangled limb, amputation, ongoing haemorrhage, a fracture of a long bone, an open fracture, a dislocation, or a hand injury?\n\nPlease answer:\n- No\n- Yes — (tell me which: mangled limb / amputation / ongoing haemorrhage / long bone fracture / open fracture / dislocation / hand injury)"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re alert and breathing normally.\n\nIs there any chest pain or other pain? How severe is it on a scale of 0–10?\n\nPlease answer:\n- Severe chest pain\n- Severe pain (8–10)\n- Moderate pain (4–7)\n- Mild pain (1–3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No chest pain. My leg is swollen and I cannot put weight on it."
+      ],
+      [
+        "bot",
+        "Thanks — noted your leg is swollen and you cannot put weight on it.\n\nIs the limb cold, painful and dusky (discoloured)?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — it's not cold or discoloured."
+      ],
+      [
+        "bot",
+        "Thanks — noted your leg is swollen and you cannot put weight on it.\n\nHow is the breathing?\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Next question: Is there any ongoing seizure, or are you unable to sit, stand, walk or communicate?\n\nPlease choose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Cannot stand or walk unsupported."
+      ],
+      [
+        "bot",
+        "Thanks — noted the swelling and you cannot put weight on it, and you are breathing normally.\n\nIs it a wound / skin injury? Is there arterial bleeding, degloving, multiple penetrating wounds, nerve/tendon injury, or continuing venous bleeding?\n\nPlease answer:\n- No\n- Yes — (tell me which: arterial bleeding / degloving / multiple penetrating wounds / nerve/tendon injury / continuing venous bleeding)"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted your swollen leg, inability to bear weight, and that you cannot stand or walk unsupported.\n\nWas there a fall? From what height, and is there altered consciousness, neurological deficit, or limb injury / deformity?\n\nPlease choose one:\n- Fall greater than 6 m (adult)\n- Limb injury or deformity\n- Altered consciousness or neurological deficit\n- Minor fall, mobilizing well"
+      ],
+      [
+        "patient",
+        "No — I haven't fallen and haven't noticed any injury."
+      ],
+      [
+        "bot",
+        "Thanks — noted your swollen leg, inability to bear weight, and you cannot stand or walk unsupported.\n\nQuickly: Is there any bleeding, major trauma, or severe injury?\nPlease choose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder\n\nAlso: Is the injury mild (pain is the main symptom, small fracture likely, moving fingers/toes, mobilizing well)?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding. No."
+      ],
+      [
+        "bot",
+        "Thanks — noted no major bleeding and that this is not a mild injury.\n\nOn a scale of 0–10, how bad is the pain in your leg right now (0 = no pain, 10 = worst pain you can imagine)?"
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 16,
+    "name": "Leg mildly sore",
+    "expected": [
+      5
+    ],
+    "got": null,
+    "call_999": false,
+    "turns": 12,
+    "seconds": 229.1,
+    "matched_rules": null,
+    "verdict": "NO_RESULT",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "My leg is a bit sore"
+      ],
+      [
+        "bot",
+        "Sorry to hear that — thank you. I need to ask a few quick questions to help assess this.\n\nIs the person conscious, breathing normally, and able to respond to call?\n\nPlease pick one:\n- Yes — conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes — conscious, breathing normally and responding"
+      ],
+      [
+        "bot",
+        "Thanks — noted. How old are you, in years?"
+      ],
+      [
+        "patient",
+        "40 years old."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question: Was the injury caused by a high‑velocity accident (e.g. car crash), a penetrating wound (knife/gunshot), or is there active bleeding, visual/hearing impact, or altered mental state after a head injury?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Noted — thanks. How is the breathing?\n\nPlease choose one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted about breathing and age.\n\nNext question: Is there a mangled limb, amputation, ongoing haemorrhage, a fracture of a long bone, an open fracture, a dislocation, or a hand injury?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No — none of those."
+      ],
+      [
+        "bot",
+        "Thanks — noted.\n\nIs there chest pain or other pain? How severe is it on a scale of 0 to 10?\n\nPlease choose one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Mild pain (1-3). My leg is a bit sore but I’m walking fine."
+      ],
+      [
+        "bot",
+        "Thanks — noted that you’re conscious, breathing normally, walking and have mild pain.\n\nNext question: Is the person having a seizure, or unable to sit, stand, walk or communicate?\n\nPlease choose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — quick follow-up: Was there a fall? From what height, and is there altered consciousness, neurological deficit, or limb injury / deformity?\n\nPlease pick one:\n- Fall greater than 6 m (adult) or greater than 3 m / twice the child's height\n- Limb injury or deformity\n- Altered consciousness or neurological deficit\n- Minor fall, mobilizing well"
+      ],
+      [
+        "patient",
+        "Minor fall, mobilizing well."
+      ],
+      [
+        "bot",
+        "Thanks — noted that you’re walking and have mild soreness.\n\nFor the injury: is it mild (pain is the main symptom, a small fracture is possible, you can move toes/fingers, and you’re mobilising well)?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "Yes — it’s mild and I’m walking fine."
+      ],
+      [
+        "bot",
+        "Thanks — noted.\n\nFor a chest or abdominal injury: is there increased work of breathing, likely rib fractures, possible pelvic injury, or significant bruising?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No — not that I've noticed."
+      ],
+      [
+        "bot",
+        "Thanks — quick follow-up.\n\nFor a head or neck injury: is there retrograde amnesia (cannot remember the injury), neck pain, a scalp wound only, or a brief loss of consciousness?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No — I have no other symptoms."
+      ],
+      [
+        "bot",
+        "Thanks — quick question about the injury.\n\nIs it a wound / skin injury? Is there arterial bleeding, degloving, multiple penetrating wounds, nerve/tendon injury, or continuing venous bleeding?\n\nPlease answer: Yes or No."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 17,
+    "name": "Back pain + numbness",
+    "expected": [
+      3
+    ],
+    "got": 3,
+    "call_999": false,
+    "turns": 7,
+    "seconds": 101.0,
+    "matched_rules": [
+      "RULE_LBP_L3_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I have back pain"
+      ],
+      [
+        "bot",
+        "Thanks — I understand you have back pain. How old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 45 years old."
+      ],
+      [
+        "bot",
+        "Thanks — noted age 45 and back pain. Quick question: Is the person conscious, breathing normally, and able to respond to call?\n\nAnswers you can choose:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding"
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question: Is there any chest pain or other pain now, and how severe is it on a scale 0–10?\n\nAnswers you can choose:\n- Severe chest pain\n- Severe pain (8–10)\n- Moderate pain (4–7)\n- Mild pain (1–3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No pain (0)"
+      ],
+      [
+        "bot",
+        "Thanks — noted you are conscious, breathing normally, and have no pain.\n\nQuick question: How is the breathing now?\n\nAnswers you can choose:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted.\n\nNext question: Is the person having a seizure, or unable to sit, stand, walk or communicate?\n\nAnswers:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally\n\n(Please pick the single best answer.)"
+      ],
+      [
+        "patient",
+        "I'm alert and walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted you are 45, alert, breathing normally, and have no pain.\n\nDoes the back pain come with abdominal pain, a neurological deficit (numbness or weakness), or loss of urinary / bowel control?\n\nPlease answer:\n- No\n- Yes — abdominal pain\n- Yes — numbness or weakness\n- Yes — loss of urinary or bowel control"
+      ],
+      [
+        "patient",
+        "Yes — numbness or weakness."
+      ],
+      [
+        "bot",
+        "Level 3 - Urgent\n\nLevel 3 - Urgent (target: under 30 minutes). Needs urgent medical assessment: go to an Emergency Department.\n\nKey finding: neuro deficits reported (numbness or weakness with the back pain).\n\nWould you like help finding the nearest emergency department now? If yes, tell me your location or postcode and I can look up nearby hospitals.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999 (112 from mobile)."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 18,
+    "name": "Back pain after fall",
+    "expected": [
+      4
+    ],
+    "got": 4,
+    "call_999": false,
+    "turns": 11,
+    "seconds": 159.3,
+    "matched_rules": [
+      "RULE_LBP_L4_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I have back pain"
+      ],
+      [
+        "bot",
+        "Thanks — I understand you have back pain. How old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 45 years old."
+      ],
+      [
+        "bot",
+        "Thanks — I’ll ask a few quick questions to check for any immediate danger.\n\nIs the person conscious, breathing normally, and able to respond to call?\nPlease choose one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — noted you are conscious and breathing normally.\n\nHow is the breathing? Please choose one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re 45, conscious and breathing normally.\n\nIs there chest pain or other pain? How severe is it on a scale of 0 to 10?\nPlease choose one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Mild pain (1-3)."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question: Is the person having a seizure, or unable to sit, stand, walk or communicate?\nPlease choose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted you are 45, breathing normally, mild back pain, and walking/talking normally.\n\nDoes the back pain come with abdominal pain, a neurological deficit (numbness, weakness), or loss of urinary / bowel control?\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted no abdominal symptoms, numbness, weakness or loss of control.\n\nIs there any bleeding, major trauma, or severe injury?\nPlease choose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick check for danger signs: is the person confused or unusually drowsy (lethargic) AND having difficulty breathing?\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No, I'm alert and breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted you are alert and walking. Quick check to resolve a few remaining items:\n\nCan you please choose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Is the pain colicky (comes in waves), did it start after blunt trauma or after a fall, or are you elderly (over about 65)? Please answer: Yes or No."
+      ],
+      [
+        "patient",
+        "Yes, it started after a fall."
+      ],
+      [
+        "bot",
+        "Level 4 - Early Care\n\nNeeds medical care soon (target: under 60 minutes). Please go to an Emergency Department or a walk-in / urgent-care clinic for assessment.\n\nKey finding: your back pain started after a fall.\n\nIf you develop worse symptoms (worsening pain, new numbness or weakness in the legs, loss of bladder or bowel control, fainting, difficulty breathing, or uncontrolled bleeding), call 999 now (112 from mobile).\n\nIf you want, I can help find nearby hospitals or urgent care — tell me your location or postcode.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 19,
+    "name": "Chronic back pain",
+    "expected": [
+      5
+    ],
+    "got": null,
+    "call_999": false,
+    "turns": 12,
+    "seconds": 178.0,
+    "matched_rules": null,
+    "verdict": "NO_RESULT",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I have back pain"
+      ],
+      [
+        "bot",
+        "You said you have back pain. I need to ask a few quick questions.\n\nIs the person conscious, breathing normally, and able to respond to call?\nOptions:\n- Yes — conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes — conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — noted they are conscious and breathing. \n\nIs there any bleeding, major trauma, or severe injury?\nOptions:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted. How is the breathing?\nOptions:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted breathing is normal.\n\nIs there chest pain or other pain? How severe is it on a scale of 0 to 10?\nOptions:\n- Severe chest pain\n- Severe pain (8–10)\n- Moderate pain (4–7)\n- Mild pain (1–3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No chest pain. I have long-standing back pain and I haven't noticed any change in severity."
+      ],
+      [
+        "bot",
+        "Thanks — noted your long-standing back pain with no change in severity.\n\nNext question — please pick the best option:\n\nIs the person having a seizure, or unable to sit, stand, walk or communicate?\nOptions:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "I'm alert and can walk and talk normally."
+      ],
+      [
+        "bot",
+        "Does the back pain come with any of these: abdominal pain, new numbness or weakness in the legs, or loss of bladder/bowel control?\nOptions: Yes / No"
+      ],
+      [
+        "patient",
+        "No. I haven't had abdominal pain, numbness, weakness, or any loss of bladder/bowel control."
+      ],
+      [
+        "bot",
+        "Thanks — one more quick check.\n\nAre you feeling confused or unusually drowsy (very sleepy) and having any difficulty breathing? \nOptions: Yes / No"
+      ],
+      [
+        "patient",
+        "No — I'm not confused or unusually drowsy and I'm breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. On a scale from 0 (no pain) to 10 (worst possible), what is your current back pain right now?"
+      ],
+      [
+        "patient",
+        "I haven't noticed any change in severity."
+      ],
+      [
+        "bot",
+        "Thanks — noted no change. On a scale from 0 (no pain) to 10 (worst possible), what is your current back pain right now?"
+      ],
+      [
+        "patient",
+        "I haven't noticed any change in severity."
+      ],
+      [
+        "bot",
+        "Thanks — I understand you haven't noticed a change. Please tell me your current back pain on a scale from 0 (no pain) to 10 (worst possible)."
+      ],
+      [
+        "patient",
+        "I haven't noticed any change in severity."
+      ],
+      [
+        "bot",
+        "Thanks — noted you haven’t noticed a change. \n\nPlease tell me which of these best describes your current back pain now:\n- 0 (no pain)\n- 1–3 (mild)\n- 4–7 (moderate)\n- 8–10 (severe)\n\nPlease pick one option."
+      ],
+      [
+        "patient",
+        "1–3 (mild)."
+      ],
+      [
+        "bot",
+        "Thanks — noted mild chronic back pain. \n\nIs the pain colicky (comes in waves), is it after blunt trauma or a fall, or is the person elderly?\nOptions: Yes / No"
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 20,
+    "name": "SAFETY: chest pain 1h ago",
+    "expected": [
+      1,
+      2
+    ],
+    "got": 2,
+    "call_999": false,
+    "turns": 8,
+    "seconds": 128.1,
+    "matched_rules": [
+      "RULE_CP_L2_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "I have chest pain"
+      ],
+      [
+        "bot",
+        "Thanks — I understand you have chest pain. A few quick questions to continue.\n\n1) How old are you (years)?  \n2) Is the person conscious, breathing normally, and able to respond to call? Please choose one:\n- Yes — conscious, breathing normally and responding  \n- Cardiac arrest  \n- Not breathing  \n- Unresponsive  \n- Not responding to call  \n- Confused, agitated or disoriented  \n- Altered mental state or not fully conscious  \n- Obvious neurological deficits\n\n(Answer both so I can continue the screening.)"
+      ],
+      [
+        "patient",
+        "I'm 45 years old. Yes — conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — noted you're 45 and conscious & breathing normally.\n\nIs the chest pain still happening now, and how severe is it on a scale of 0–10? Please pick one:\n- Severe chest pain\n- Severe pain (8–10)\n- Moderate pain (4–7)\n- Mild pain (1–3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Severe pain (8–10) — it's still happening now."
+      ],
+      [
+        "bot",
+        "Noted — severe chest pain now, age 45, conscious and breathing.  \n\nIs there any bleeding, major trauma, or severe injury? Please choose one:\n- No bleeding or minimal bleeding  \n- Arterial limb bleeding  \n- Active uncontrolled bleeding  \n- Massive vaginal bleeding  \n- Severe facial injury  \n- Severe pelvic injury  \n- Major trauma with shock  \n- Pale, bluish (cyanosed) skin with cold hands/feet  \n- Active vomiting or coughing of blood  \n- Bleeding from fractures, dislocations, joints or wounds  \n- Heavy periods (menorrhagia)  \n- ENT (nose/ear/throat) bleeding  \n- Expanding haematoma (swelling with bleeding under the skin)  \n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted severe chest pain and you are conscious and breathing.\n\nIs the person having a seizure, or unable to sit, stand, walk or communicate? Please choose one answer:\n- Ongoing seizures  \n- Cannot sit or stand unsupported  \n- Cannot stand or walk unsupported  \n- Cannot communicate  \n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Last quick check:\n\nIs the person confused or unusually drowsy (lethargic) and having difficulty breathing? Please answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No — I'm not confused or drowsy and I'm breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — one more quick question to finish the urgent checks.\n\nAre you having any of these now: severe difficulty breathing, noisy breathing (gurgling or wheeze), working very hard to breathe with heavy sweating, or unable to speak more than one word at a time? Answer Yes or No."
+      ],
+      [
+        "patient",
+        "No — I'm not having any of those. I'm breathing normally and not sweating."
+      ],
+      [
+        "bot",
+        "Thanks — noted. When did the chest pain start? Please choose one:\n- New onset starting within less than 6 hours  \n- Started more than 6 hours ago  \n- Chest pain is reducing  \n- No further pain"
+      ],
+      [
+        "patient",
+        "New onset starting within less than 6 hours."
+      ],
+      [
+        "bot",
+        "Level 2 - Emergency\n\nGo to the nearest Emergency Department immediately (target: under 10 minutes).\n\nKey findings:\n- New onset chest pain (started < 6 hours ago)\n- Ongoing severe chest pain (8–10)\n\nIf you get any worsening signs — fainting, severe breathlessness, collapsing, or uncontrolled sweating — call 999 (112 from mobile) now.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 21,
+    "name": "SAFETY: ongoing seizure",
+    "expected": [
+      1,
+      2
+    ],
+    "got": 1,
+    "call_999": true,
+    "turns": 2,
+    "seconds": 40.4,
+    "matched_rules": [
+      "RULE_CRIT_L1_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "My husband is shaking and won't wake up, he's having a seizure now"
+      ],
+      [
+        "bot",
+        "Call 999 now (112 from a mobile) — emergency services should be sent immediately.\n\nWhile you call them: keep him safe (clear nearby objects), don’t restrain his limbs, don’t put anything in his mouth, and if it’s safe gently roll him onto his side once the jerking stops so he can keep his airway clear. Note the time the seizure started.\n\nI need two quick facts to continue screening:\n1) How old is he (years)?\n2) Is he conscious and breathing normally? Please choose one:  \n- Conscious, breathing normally and responding  \n- Not breathing  \n- Unresponsive / not responding to call  \n- Confused, agitated or disoriented  \n- Altered mental state or not fully conscious\n\nTell me those now."
+      ],
+      [
+        "patient",
+        "He's 40 years old. Unresponsive / not responding to call."
+      ],
+      [
+        "bot",
+        "Call 999 now (112 from a mobile).\n\nLevel 1 - Resuscitation (target time to treatment: immediate). This needs emergency care right away.\n\nImmediate actions while you wait for ambulance:\n- Keep him safe: move nearby objects away so he cannot hit them.  \n- Do not restrain his limbs or put anything in his mouth.  \n- If the jerking stops and it is safe, gently roll him onto his side to keep his airway clear.  \n- Note the time the seizure started and tell the dispatcher he is 40, seizing, and unresponsive.  \n- If he stops breathing, the 999 call-taker will give you instructions (they can guide you to start CPR).\n\nKey findings used in this screening: unresponsive (and ongoing seizure as you reported), age 40.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 22,
+    "name": "SAFETY: not breathing",
+    "expected": [
+      1
+    ],
+    "got": 1,
+    "call_999": true,
+    "turns": 1,
+    "seconds": 31.1,
+    "matched_rules": [
+      "RULE_CRIT_L1_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "transcript": [
+      [
+        "patient",
+        "My dad collapsed and isn't breathing"
+      ],
+      [
+        "bot",
+        "Call 999 now (112 from a mobile phone).\n\nLevel 1 - Resuscitation\nLevel 1 - Resuscitation (target time to treatment: immediate). Call 999 now (112 from a mobile phone). This needs emergency care right away.\n\nImmediate steps (do these now):\n- If the person is unresponsive and not breathing normally, start chest compressions at once: place your hands in the centre of the chest and push hard and fast (about 100–120 compressions per minute). Continue without long pauses.\n- If you are trained in CPR, give rescue breaths in the accepted ratio after compressions; if not trained, continue continuous compressions until help arrives.\n- Send someone to get an AED (defibrillator) and use it as soon as it is available; follow the device prompts.\n- Keep doing CPR and follow the ambulance dispatcher’s instructions until emergency services arrive.\n\nKey findings from this screening: Not breathing; Unresponsive.\n\nAre you with him now and able to start CPR, or is someone else there who can help?\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  }
+]

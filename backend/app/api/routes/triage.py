@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 from fastapi import APIRouter, Depends, status
 from app.schemas.common import APIResponse
 from app.schemas.triage import (
@@ -6,6 +7,8 @@ from app.schemas.triage import (
     TriageResponse,
     TriageChatRequest,
     TriageChatResponse,
+    TriageAssessment,
+    TriageLevel,
 )
 from app.services.triage_service import TriageService
 from app.agents.triage_agent import MedicalTriageAgent
@@ -50,13 +53,31 @@ async def chat_triage(
     """Conversational interaction with the Medical Triage AI Agent."""
     logger.info(f"Incoming triage chat request: {request.message[:40]}")
     context = {"patient_id": request.patient_id} if request.patient_id else None
-    agent_reply = agent.run(request.message, context=context)
-    
+    session = agent.run_session(request.message, context=context, session_id=request.session_id)
+
     return APIResponse(
         success=True,
         data=TriageChatResponse(
-            reply=agent_reply,
-            session_id=request.session_id
+            reply=session.messages[-1].content,
+            session_id=session.session_id,
+            assessment=_assessment_from_result(session.triage_result),
         ),
         message="Agent response generated."
+    )
+
+
+def _assessment_from_result(result: Optional[dict]) -> Optional[TriageAssessment]:
+    """Build the API assessment from the rules engine output (never from LLM text)."""
+    if not result or result.get("status") != "classified":
+        return None
+    sources = "; ".join(
+        f"{ref['rule_id']}: {ref.get('criterion', '')}" for ref in result.get("source_references", [])
+    )
+    return TriageAssessment(
+        triage_level=TriageLevel(result["triage_code"]),
+        urgency_description=f"Level {result['triage_level']} - {result['triage_name']}",
+        primary_concerns=result.get("key_findings", []),
+        immediate_actions=[a for a in [result.get("level_advice"), *result.get("emergency_advice", [])] if a],
+        required_specialties=[],
+        clinical_rationale=f"Malaysian Triage Scale 2019 rules matched: {sources}",
     )

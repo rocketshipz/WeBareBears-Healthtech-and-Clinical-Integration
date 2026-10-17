@@ -8,9 +8,12 @@ backend_dir = Path(__file__).resolve().parent.parent
 if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
+from app.core.scheduler import start_scheduler, stop_scheduler
 from app.api.routes import health, triage, auth
 
 logging.basicConfig(
@@ -21,7 +24,16 @@ logger = logging.getLogger("medictri")
 
 settings = get_settings()
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    start_scheduler()
+    yield
+    stop_scheduler()
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title=settings.APP_NAME,
     description="First-level medical emergency triage and hospital routing backend API.",
     version="0.1.0",

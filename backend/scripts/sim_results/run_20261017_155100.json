@@ -1,0 +1,1721 @@
+[
+  {
+    "scenario": 1,
+    "name": "Chest pain >6h, moderate",
+    "expected": [
+      3
+    ],
+    "got": 3,
+    "call_999": false,
+    "turns": 11,
+    "seconds": 153.7,
+    "matched_rules": [
+      "RULE_CRIT_L3_01",
+      "RULE_CP_L3_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "present_condition_ids": [
+      "RULE_CP_L3_01.C1 (Chest pain onset > 6 H with moderate pain (4-7))",
+      "RULE_CRIT_L3_01.C7 (Pain score 4-7)"
+    ],
+    "findings_by_turn": [
+      {
+        "turn": 1,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 2,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 3
+      },
+      {
+        "turn": 3,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 4,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 4
+      },
+      {
+        "turn": 5,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 7
+      },
+      {
+        "turn": 6,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 7,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 8,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 9,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 10,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 11,
+        "age_years": 45,
+        "newly_present": [
+          "RULE_CP_L3_01.C1 (Chest pain onset > 6 H with moderate pain (4-7))",
+          "RULE_CRIT_L3_01.C7 (Pain score 4-7)"
+        ],
+        "no_longer_present": [],
+        "newly_absent": 24
+      }
+    ],
+    "transcript": [
+      [
+        "patient",
+        "I have chest pain"
+      ],
+      [
+        "bot",
+        "You said you have chest pain — thank you. First: Is the person conscious, breathing normally, and able to respond to call?\n\nPlease choose one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding"
+      ],
+      [
+        "bot",
+        "Thanks — noted that you have chest pain and are conscious and breathing normally. How old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 45 years old."
+      ],
+      [
+        "bot",
+        "Noted — thanks. Next: How is your breathing right now?\n\nPlease choose one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "You said chest pain, conscious and breathing normally, age 45 — thanks. Is there any bleeding, major trauma, or severe injury?\n\nPlease choose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted. One quick question: are you confused or unusually drowsy (lethargic) AND having difficulty breathing?\n\nPlease choose:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I'm alert and breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted that you’re conscious, breathing normally, age 45, and have chest pain.\n\nNext question: Is there chest pain or other pain? How severe is it on a scale of 0 to 10?\n\nPlease choose one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Moderate pain (4-7)."
+      ],
+      [
+        "bot",
+        "Thanks — noted you have ongoing moderate chest pain. Next: When did the chest pain start?\n\nPlease choose one:\n- New onset starting within less than 6 hours\n- Started more than 6 hours ago\n- Chest pain is reducing\n- No further pain"
+      ],
+      [
+        "patient",
+        "Started more than 6 hours ago."
+      ],
+      [
+        "bot",
+        "Thanks — noted that your chest pain is ongoing, moderate, and started more than 6 hours ago.\n\nNext question: Is the person having a seizure, or unable to sit, stand, walk or communicate?\n\nPlease choose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "You said moderate chest pain that started >6 hours ago — thanks. Are you experiencing profuse sweating alongside the chest pain?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, I'm not sweating."
+      ],
+      [
+        "bot",
+        "Is the chest pain still ongoing, and how strong is it (0 to 10)?\n\nPlease choose one:\n- Ongoing and high (severe, 8-10)\n- Ongoing and moderate (4-7)\n- Persisting mild pain (1-3)\n- No longer in pain"
+      ],
+      [
+        "patient",
+        "It's ongoing and moderate, about 5 out of 10. It's on and off."
+      ],
+      [
+        "bot",
+        "Level 3 - Urgent. Needs urgent medical assessment: go to an Emergency Department (target: under 30 minutes).\n\nKey findings:\n- Ongoing chest pain, moderate intensity (about 5/10)\n- Pain started more than 6 hours ago\n- Alert and breathing normally, no sweating or major bleeding\n\nPlease go to the nearest Emergency Department for urgent assessment now. If your symptoms worsen (breathing becomes difficult, you become drowsy/confused, pain rapidly increases, you collapse, or bleeding becomes uncontrolled), call 999 (112 from mobile) immediately.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 2,
+    "name": "Chest pain, mild persisting",
+    "expected": [
+      4
+    ],
+    "got": 4,
+    "call_999": false,
+    "turns": 8,
+    "seconds": 131.3,
+    "matched_rules": [
+      "RULE_CP_L4_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "present_condition_ids": [
+      "RULE_CP_L4_01.C1 (Persisting mild pain)"
+    ],
+    "findings_by_turn": [
+      {
+        "turn": 1,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 2,
+        "age_years": 30,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 23
+      },
+      {
+        "turn": 3,
+        "age_years": 30,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 3
+      },
+      {
+        "turn": 4,
+        "age_years": 30,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 5,
+        "age_years": 30,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 7
+      },
+      {
+        "turn": 6,
+        "age_years": 30,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 6
+      },
+      {
+        "turn": 7,
+        "age_years": 30,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 8,
+        "age_years": 30,
+        "newly_present": [
+          "RULE_CP_L4_01.C1 (Persisting mild pain)"
+        ],
+        "no_longer_present": [],
+        "newly_absent": 0
+      }
+    ],
+    "transcript": [
+      [
+        "patient",
+        "I have chest pain"
+      ],
+      [
+        "bot",
+        "You said you have chest pain — thank you. I need two quick details to continue.\n\n1) How old are you (years)?  \n2) Is the person conscious, breathing normally, and able to respond to call? Pick one answer:\n- Yes - conscious, breathing normally and responding  \n- Cardiac arrest  \n- Not breathing  \n- Unresponsive  \n- Not responding to call  \n- Confused, agitated or disoriented  \n- Altered mental state or not fully conscious  \n- Obvious neurological deficits\n\nPlease reply with your age and which option above matches right now."
+      ],
+      [
+        "patient",
+        "I'm 30 years old. Yes — conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re 30 and conscious and breathing normally.\n\nNext question (one): Is there chest pain or other pain? How severe is it on a scale of 0 to 10?\n\nChoose one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Mild pain (1-3)."
+      ],
+      [
+        "bot",
+        "Noted — mild chest pain (1–3). When did the chest pain start? Pick one:\n\n- New onset starting within less than 6 hours  \n- Started more than 6 hours ago  \n- Chest pain is reducing  \n- No further pain"
+      ],
+      [
+        "patient",
+        "Started more than 6 hours ago."
+      ],
+      [
+        "bot",
+        "Thanks — noted chest pain >6 hours, mild (1–3). Are you experiencing profuse sweating alongside the chest pain? Answer Yes or No."
+      ],
+      [
+        "patient",
+        "No — I'm not sweating."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question: is there any bleeding, major trauma, or severe injury? Pick one:\n\n- No bleeding or minimal bleeding  \n- Arterial limb bleeding  \n- Active uncontrolled bleeding  \n- Massive vaginal bleeding  \n- Severe facial injury  \n- Severe pelvic injury  \n- Major trauma with shock  \n- Pale, bluish (cyanosed) skin with cold hands/feet  \n- Active vomiting or coughing of blood  \n- Bleeding from fractures, dislocations, joints or wounds  \n- Heavy periods (menorrhagia)  \n- ENT (nose/ear/throat) bleeding  \n- Expanding haematoma (swelling with bleeding under the skin)  \n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted no significant bleeding.\n\nNext question: Is the person having a seizure, or unable to sit, stand, walk or communicate? Choose one:\n\n- Ongoing seizures  \n- Cannot sit or stand unsupported  \n- Cannot stand or walk unsupported  \n- Cannot communicate  \n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re walking, talking and alert.\n\nIs the mild chest pain (1–3) still present now, or has it improved/gone? Please reply with one:\n\n- Persisting — still present now  \n- Improving — getting less  \n- Resolved — no more pain"
+      ],
+      [
+        "patient",
+        "Persisting — still present now."
+      ],
+      [
+        "bot",
+        "Level 4 - Early Care\n\nWhat to do now: Level 4 - Early Care (target: under 60 minutes). Needs medical care soon: go to an Emergency Department or a walk-in / urgent-care clinic.\n\nKey findings from your answers: 30 years old, conscious and breathing normally, mild chest pain (1–3) that started more than 6 hours ago and is still present; no sweating, no significant bleeding, alert and walking.\n\nIf you’d like, I can help find a nearby hospital or urgent care now — tell me your location or postcode. If symptoms get worse (more pain, difficulty breathing, fainting, collapse, heavy sweating or confusion), call 999 (112 from mobile) immediately.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 6,
+    "name": "Headache, mild only",
+    "expected": [
+      5
+    ],
+    "got": 5,
+    "call_999": false,
+    "turns": 14,
+    "seconds": 207.7,
+    "matched_rules": [
+      "RULE_HA_L5_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "present_condition_ids": [
+      "RULE_HA_L5_01.C1 (Symptoms only)"
+    ],
+    "findings_by_turn": [
+      {
+        "turn": 1,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 2,
+        "age_years": 35,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 3,
+        "age_years": 35,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 15
+      },
+      {
+        "turn": 4,
+        "age_years": 35,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 4
+      },
+      {
+        "turn": 5,
+        "age_years": 35,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 3
+      },
+      {
+        "turn": 6,
+        "age_years": 35,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 3
+      },
+      {
+        "turn": 7,
+        "age_years": 35,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 5
+      },
+      {
+        "turn": 8,
+        "age_years": 35,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 5
+      },
+      {
+        "turn": 9,
+        "age_years": 35,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 10,
+        "age_years": 35,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 11,
+        "age_years": 35,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 12,
+        "age_years": 35,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 4
+      },
+      {
+        "turn": 13,
+        "age_years": 35,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 4
+      },
+      {
+        "turn": 14,
+        "age_years": 35,
+        "newly_present": [
+          "RULE_HA_L5_01.C1 (Symptoms only)"
+        ],
+        "no_longer_present": [],
+        "newly_absent": 0
+      }
+    ],
+    "transcript": [
+      [
+        "patient",
+        "I have a headache"
+      ],
+      [
+        "bot",
+        "You said you have a headache — how old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 35 years old."
+      ],
+      [
+        "bot",
+        "Thanks — quick question: Is the person conscious, breathing normally, and able to respond to call?\n\nPlease pick one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes — conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "Thanks — quick question:\n\nDid the headache start very suddenly, or is it accompanied by any of these: neck pain/stiffness, altered mental state (confusion, not fully aware), or neurological deficits (weakness, numbness, difficulty speaking or seeing)?\n\nPlease answer \"No\" if none, or tell me which one(s) exactly."
+      ],
+      [
+        "patient",
+        "No. It started gradually and I have no neck pain, confusion, weakness, or vision/speech problems."
+      ],
+      [
+        "bot",
+        "Thanks — quick question:\n\nIs there chest pain or other pain? How severe is it on a scale of 0 to 10?\n\nPlease pick one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Mild pain (1-3)."
+      ],
+      [
+        "bot",
+        "Thanks — quick question about breathing: which of these best describes it?\n\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact\n\nPlease pick one."
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — quick question:\n\nIs the person having a seizure, or unable to sit, stand, walk or communicate?\n\nPlease pick one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Quick question: Is there any bleeding, major trauma, or severe injury?\n\nPlease pick one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — quick question: Are you experiencing visual changes, speech difficulty, or trouble walking (ataxia / gait difficulty) alongside the headache?\n\nPlease answer \"Yes\" or \"No\"."
+      ],
+      [
+        "patient",
+        "No, I don't have any of those."
+      ],
+      [
+        "bot",
+        "Thanks — quick check: Are you confused or unusually drowsy (very sleepy) and having difficulty breathing?\n\nPlease answer \"Yes\" or \"No\"."
+      ],
+      [
+        "patient",
+        "No, I'm not confused or unusually drowsy. I'm breathing normally."
+      ],
+      [
+        "bot",
+        "You said it's mild — one more check: How severe is your headache on a 0 to 10 scale?\n\nPlease pick one:\n- Severe pain (above 7)\n- Pain score above 4\n- Mild pain (4 or below)"
+      ],
+      [
+        "patient",
+        "Mild pain (4 or below)."
+      ],
+      [
+        "bot",
+        "Quick question: Can you sit, stand and walk without support?\n\nPlease pick one:\n- Yes — can sit, stand and walk unsupported\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported"
+      ],
+      [
+        "patient",
+        "Yes — I can sit, stand and walk without support."
+      ],
+      [
+        "bot",
+        "Is there any behavioural change, an aura or one-sided (one-sided) headache, vomiting, or fever with your headache?\n\nPlease answer \"No\" if none. If \"Yes\", tell me which one(s) exactly."
+      ],
+      [
+        "patient",
+        "No, I don't have any behavioural change, aura, one-sided headache, vomiting, or fever."
+      ],
+      [
+        "bot",
+        "Quick question: Are these headache symptoms only, with none of the features asked about above?\n\nPlease answer \"Yes\" or \"No\"."
+      ],
+      [
+        "patient",
+        "Yes — it's only the headache."
+      ],
+      [
+        "bot",
+        "Level 5 - Routine\n\nLevel 5 - Routine (target: under 90 minutes). Not an emergency: a clinic or outpatient visit is suitable.\n\nKey findings: Symptoms only (headache without red flags).\n\nWould you like me to recommend nearby clinics or hospitals, or help with other questions?\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 7,
+    "name": "Sore throat, routine",
+    "expected": [
+      5
+    ],
+    "got": 4,
+    "call_999": false,
+    "turns": 16,
+    "seconds": 269.5,
+    "matched_rules": [
+      "RULE_RESP_L4_01"
+    ],
+    "verdict": "FAIL",
+    "error": null,
+    "present_condition_ids": [
+      "RULE_RESP_L4_01.C3 (Mild URTI symptoms)",
+      "RULE_RESP_L4_01.C4 (Tolerating orally)"
+    ],
+    "findings_by_turn": [
+      {
+        "turn": 1,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 2,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 3,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 15
+      },
+      {
+        "turn": 4,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 5,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 5
+      },
+      {
+        "turn": 6,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 6
+      },
+      {
+        "turn": 7,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 4
+      },
+      {
+        "turn": 8,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 9,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 10,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 11,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 12,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 10
+      },
+      {
+        "turn": 13,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 4
+      },
+      {
+        "turn": 14,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 21
+      },
+      {
+        "turn": 15,
+        "age_years": 25,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 16,
+        "age_years": 25,
+        "newly_present": [
+          "RULE_RESP_L4_01.C3 (Mild URTI symptoms)",
+          "RULE_RESP_L4_01.C4 (Tolerating orally)"
+        ],
+        "no_longer_present": [],
+        "newly_absent": 4
+      }
+    ],
+    "transcript": [
+      [
+        "patient",
+        "Sore throat and runny nose"
+      ],
+      [
+        "bot",
+        "Thanks — you have sore throat and runny nose. How old is the person (age in years)?"
+      ],
+      [
+        "patient",
+        "25 years old."
+      ],
+      [
+        "bot",
+        "Thanks — you mentioned sore throat and runny nose and age 25. One quick question:\n\nIs the person conscious, breathing normally, and able to respond to call?\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits\n\n(Please pick the single best answer.)"
+      ],
+      [
+        "patient",
+        "Yes — conscious, breathing normally and responding."
+      ],
+      [
+        "bot",
+        "You said sore throat and runny nose, age 25 — thanks. How is the breathing?\n\nChoose one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact\n\n(Please pick the single best answer.)"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted breathing is normal. Which of these best describes the breathing now?\n\n- Stridor (harsh high-pitched breathing sound)\n- Increased work of breathing and feeling tired\n- Agitation or anxiety with breathing difficulty\n- Slow breaths or poor respiratory effort\n- Breathless with change of voice\n- Rapid breaths\n- Wheeze with airway intact\n- Wheezing in a known asthmatic\n- Hyperventilation\n- Mild or minimal breathlessness\n- Comfortable, no other symptoms\n\n(Please pick the single best answer.)"
+      ],
+      [
+        "patient",
+        "Comfortable, no other symptoms."
+      ],
+      [
+        "bot",
+        "Noted you’re comfortable and breathing normally. Quick question:\n\nIs there incessant coughing, any blue (cyanotic) spells, inability to swallow, a tripod sitting position, a foreign body stuck in the airway, or a history of intubation/ICU care?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — quick question:\n\nDoes the fever come with a skin rash or blisters, any change in alertness/confusion, seizures, or is the person immunocompromised (e.g. chemotherapy, long-term steroids, HIV)?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No, not that I've noticed."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Any chest pain or other pain right now? How severe is it on a scale 0–10?\n\nChoose one:\n- Severe chest pain\n- Severe pain (8–10)\n- Moderate pain (4–7)\n- Mild pain (1–3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No pain (0)."
+      ],
+      [
+        "bot",
+        "Thanks — noted. One more quick check:\n\nIs the person having a seizure, or unable to sit, stand, walk or communicate?\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally\n\n(Please pick the single best answer.)"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "Thanks — quick follow-up: Are the symptoms only mild upper respiratory (cold-like) symptoms while the person is able to eat and drink normally?\n\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "Yes — mild cold-like symptoms and able to eat and drink normally."
+      ],
+      [
+        "bot",
+        "You said mild cold-like symptoms and able to eat/drink — thanks. Quick question:\n\nIs the person confused or unusually drowsy (lethargic) and having difficulty breathing?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — not confused or drowsy, and not having difficulty breathing."
+      ],
+      [
+        "bot",
+        "Is there any bleeding, major trauma, or severe injury?\n\nChoose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder\n\n(Please pick the single best answer.)"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — quick question: Does the fever come with any limb or joint swelling, headache, a reaction to a toxin/drug, or poor oral intake?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — not that I've noticed."
+      ],
+      [
+        "bot",
+        "Quick question: Is there an active nosebleed, difficulty swallowing, or a tracheostomy?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — not that I've noticed."
+      ],
+      [
+        "bot",
+        "Thanks — quick question to finish this part:\n\nAre you currently having heavy periods (menorrhagia) or do you have a known bleeding disorder?\n\nPlease choose one:\n- No\n- Yes — heavy periods right now\n- Yes — known bleeding disorder\n- Yes — both"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — quick question: Is there a foreign body in the ear, nose, or throat (something stuck)?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — nothing is stuck."
+      ],
+      [
+        "bot",
+        "Level 4 - Early Care\n\nAdvice: Level 4 - Early Care (target: under 60 minutes). Needs medical care soon: go to an Emergency Department or a walk-in / urgent-care clinic.\n\nKey findings: mild upper respiratory (cold-like) symptoms and tolerating oral intake; breathing normal, alert and walking.\n\nIf you want, I can help find nearby EDs or urgent-care clinics — tell me your location or postcode. If your symptoms get worse (difficulty breathing, confusion, severe pain, high fever, or any sudden deterioration), call 999 (112 from mobile) now.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 10,
+    "name": "Persistent vomiting",
+    "expected": [
+      4
+    ],
+    "got": 4,
+    "call_999": false,
+    "turns": 12,
+    "seconds": 225.2,
+    "matched_rules": [
+      "RULE_VD_L4_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "present_condition_ids": [
+      "RULE_VD_L4_01.C1 (Fully conscious but cannot take orally)",
+      "RULE_VD_L4_01.C2 (Persisting vomiting)",
+      "RULE_VD_L4_01.C3 (Unable to tolerate orally)"
+    ],
+    "findings_by_turn": [
+      {
+        "turn": 1,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 2,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 15
+      },
+      {
+        "turn": 3,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 4,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 3
+      },
+      {
+        "turn": 5,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 6,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 7,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 8,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 7
+      },
+      {
+        "turn": 9,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 5
+      },
+      {
+        "turn": 10,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 3
+      },
+      {
+        "turn": 11,
+        "age_years": 28,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 8
+      },
+      {
+        "turn": 12,
+        "age_years": 28,
+        "newly_present": [
+          "RULE_VD_L4_01.C1 (Fully conscious but cannot take orally)",
+          "RULE_VD_L4_01.C2 (Persisting vomiting)",
+          "RULE_VD_L4_01.C3 (Unable to tolerate orally)"
+        ],
+        "no_longer_present": [],
+        "newly_absent": 1
+      }
+    ],
+    "transcript": [
+      [
+        "patient",
+        "I keep vomiting"
+      ],
+      [
+        "bot",
+        "You said you keep vomiting — thank you. Quick question: is the person conscious, breathing normally, and able to respond to call?\n\nAnswers:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding"
+      ],
+      [
+        "bot",
+        "Thanks — noted you are conscious and breathing normally.\n\nHow old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 28 years old."
+      ],
+      [
+        "bot",
+        "Thanks — noted. You said you’re conscious and breathing normally before. Next question: How is the breathing?\n\nAnswers:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact\n\nPlease pick the one that fits best."
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re 28, conscious and breathing normally. Quick question about the vomiting:\n\nAre you vomiting fresh blood or dark “coffee-ground” material, or passing black/tarry stools or bloody diarrhoea?\n\nAnswers:\n- Fresh blood in stool or vomit\n- Coffee-ground vomit, black stools or bloody diarrhoea\n- No"
+      ],
+      [
+        "patient",
+        "No, there's no blood in the vomit and no black stools."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Next: Is there chest pain or other pain? How severe is it on a scale of 0 to 10?\n\nAnswers:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No pain (0)."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Next question: How many episodes of vomiting have occurred, and can you drink fluids?\n\nAnswers:\n- Persisting vomiting / diarrhoea, unable to tolerate orally\n- Single episode or small quantity, stable and tolerating orally"
+      ],
+      [
+        "patient",
+        "Persisting vomiting; I cannot keep fluids down."
+      ],
+      [
+        "bot",
+        "Sorry, the screening assistant is temporarily unavailable. Please try again in a moment. If you have any life-threatening symptoms, call 999 (or 112 from mobile) or go to the nearest Emergency Department now."
+      ],
+      [
+        "patient",
+        "I'm fully alert and I have no signs of shock."
+      ],
+      [
+        "bot",
+        "Thanks — noted you are fully alert with no signs of shock.\n\nNext question: Is there any bleeding, major trauma, or severe injury?\n\nAnswers:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re fully alert with no signs of shock.\n\nIs the person having a seizure, or unable to sit, stand, walk or communicate?\n\nAnswers:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "You said you have persistent vomiting and can’t keep fluids down. Are you unable to tolerate any fluids orally, or showing severe dehydration (dry mouth, confusion or signs of shock)?\n\nAnswers:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "Yes — I can't keep any fluids down."
+      ],
+      [
+        "bot",
+        "Noted you can't keep fluids down. \n\nIs the person on anticoagulant (blood‑thinning) medication, or is the consciousness altered?\n\nAnswers:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — I'm not on blood thinners and I'm fully alert."
+      ],
+      [
+        "bot",
+        "Level 4 - Early Care\n\nLevel 4 - Early Care (target: under 60 minutes). Needs medical care soon: go to an Emergency Department or a walk‑in / urgent‑care clinic.\n\nKey findings: unable to tolerate fluids orally; persisting vomiting; fully conscious but cannot take orally.\n\nGo to an ED or urgent-care clinic as soon as you can (within about an hour). Tell staff you have persistent vomiting and cannot keep fluids down. If your symptoms get worse (confusion, fainting, difficulty breathing, severe pain, or heavy uncontrolled bleeding), call 999 (112 from mobile) immediately.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 15,
+    "name": "Leg swollen, no weight bearing",
+    "expected": [
+      3
+    ],
+    "got": 2,
+    "call_999": false,
+    "turns": 7,
+    "seconds": 94.6,
+    "matched_rules": [
+      "RULE_CRIT_L2_01"
+    ],
+    "verdict": "FAIL",
+    "error": null,
+    "present_condition_ids": [
+      "RULE_CRIT_L2_01.C3 (Severe pain (pain score 8-10))"
+    ],
+    "findings_by_turn": [
+      {
+        "turn": 1,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 2,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 3,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 3
+      },
+      {
+        "turn": 4,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 7
+      },
+      {
+        "turn": 5,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 5
+      },
+      {
+        "turn": 6,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 5
+      },
+      {
+        "turn": 7,
+        "age_years": 40,
+        "newly_present": [
+          "RULE_CRIT_L2_01.C3 (Severe pain (pain score 8-10))"
+        ],
+        "no_longer_present": [],
+        "newly_absent": 1
+      }
+    ],
+    "transcript": [
+      [
+        "patient",
+        "My leg hurts"
+      ],
+      [
+        "bot",
+        "I’m sorry — I can help with triage. First, how old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 40 years old."
+      ],
+      [
+        "bot",
+        "Thanks — age 40 noted. Are you conscious, breathing normally, and able to respond to me?\n\nPlease choose the best answer:\n- Yes — conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes — conscious, breathing normally and responding"
+      ],
+      [
+        "bot",
+        "Thanks — noted the leg pain. Next question:\n\nIs there any bleeding, major trauma, or severe injury?\n\nPlease choose the best answer:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re conscious and there’s no major bleeding. How is your breathing?\n\nPlease choose the best answer:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Was the injury caused by a high-velocity accident, a penetrating wound (knife/gunshot), or is there active bleeding, visual/hearing impact or altered mental state after a head injury?\n\nPlease answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No"
+      ],
+      [
+        "bot",
+        "Thanks — noted. On a scale 0–10, how bad is the pain now, and is there chest pain?\n\nPlease choose the best answer:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Severe pain (8-10). No chest pain."
+      ],
+      [
+        "bot",
+        "Level 2 - Emergency (target: under 10 minutes). Go to the nearest Emergency Department immediately.\n\nKey finding: severe leg pain (pain score 8–10).\n\nIf you want, I can help find the nearest hospital now — do you want that? \n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 16,
+    "name": "Leg mildly sore",
+    "expected": [
+      5
+    ],
+    "got": 4,
+    "call_999": false,
+    "turns": 19,
+    "seconds": 329.0,
+    "matched_rules": [
+      "RULE_TRAUMA_L4_01"
+    ],
+    "verdict": "FAIL",
+    "error": null,
+    "present_condition_ids": [
+      "RULE_TRAUMA_L4_01.C8 (Pain main symptom (fall))"
+    ],
+    "findings_by_turn": [
+      {
+        "turn": 1,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 2,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 3,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 15
+      },
+      {
+        "turn": 4,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 4
+      },
+      {
+        "turn": 5,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 5
+      },
+      {
+        "turn": 6,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 3
+      },
+      {
+        "turn": 7,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 8,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 4
+      },
+      {
+        "turn": 9,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 4
+      },
+      {
+        "turn": 10,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 11,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 12,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 13,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 19
+      },
+      {
+        "turn": 14,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 15,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 16,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 17,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 1
+      },
+      {
+        "turn": 18,
+        "age_years": 40,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 11
+      },
+      {
+        "turn": 19,
+        "age_years": 40,
+        "newly_present": [
+          "RULE_TRAUMA_L4_01.C8 (Pain main symptom (fall))"
+        ],
+        "no_longer_present": [],
+        "newly_absent": 2
+      }
+    ],
+    "transcript": [
+      [
+        "patient",
+        "My leg is a bit sore"
+      ],
+      [
+        "bot",
+        "Thanks — I understand your leg is a bit sore. How old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 40."
+      ],
+      [
+        "bot",
+        "Thanks — noted you have a sore leg and are 40. Quick check: Is the person conscious, breathing normally, and able to respond to call?\n\nPlease reply with one option:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding"
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re conscious and breathing. Quick follow-up about the leg: \n\nIs there a mangled limb, amputation, ongoing haemorrhage, a fracture of a long bone, an open fracture, a dislocation, or a hand injury?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Was the injury caused by a high-velocity accident, a penetrating wound (knife/gunshot), or is there active bleeding, visual/hearing impact or altered mental state after a head injury?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — noted. How is the breathing?\n\nPlease reply with one option:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted your leg soreness. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?\n\nPlease reply with one option:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Mild pain (1-3)."
+      ],
+      [
+        "bot",
+        "Thanks — noted mild leg pain. \n\nIs it a wound or skin injury? Specifically: is there arterial bleeding, degloving, multiple penetrating wounds, nerve/tendon injury, or continuing venous bleeding?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No, there's no wound or bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re conscious, breathing normally, and have mild leg pain. \n\nIs the person having a seizure, or unable to sit, stand, walk or communicate?\n\nPlease reply with one option:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally"
+      ],
+      [
+        "bot",
+        "Thanks — quick follow-up: is there any bleeding, major trauma, or severe injury?\n\nPlease pick the best option:\n- No bleeding or minimal bleeding\n- Active vomiting or coughing of blood\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish skin with cold hands/feet\n- Bleeding from fractures, dislocations, joints or wounds\n- Expanding haematoma\n- Known bleeding disorder\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re walking and have no major bleeding. \n\nWas there a fall? From what height, and is there altered consciousness, neurological deficit, or limb injury / deformity?\n\nPlease choose one:\n- Fall greater than 6 m (adult) or greater than 3 m / twice the child's height\n- Limb injury or deformity\n- Altered consciousness or neurological deficit\n- Minor fall, mobilizing well"
+      ],
+      [
+        "patient",
+        "Minor fall, mobilizing well"
+      ],
+      [
+        "bot",
+        "Thanks — noted minor fall and you’re mobilising well. \n\nAfter a chest or abdominal injury, is there respiratory distress? Please answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Thanks — quick check: Is the wound a burn or a chemical injury? Please answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No, it's not a burn or chemical injury."
+      ],
+      [
+        "bot",
+        "Thanks — noted you had a minor fall and are mobilising well.\n\nIs the injury mild (pain is the main symptom, small fracture likely, moving fingers/toes, mobilising well)?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "Yes, it's mild and I'm walking fine."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re alert, walking and have mild leg pain after a minor fall.\n\nIs the person confused or unusually drowsy (lethargic) and having difficulty breathing? Please answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No, I'm alert and breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — noted. \n\nFor a head or neck injury: is there retrograde amnesia (cannot remember the injury), neck pain, a scalp wound only, or a brief loss of consciousness?\n\nPlease answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No, not that I've noticed."
+      ],
+      [
+        "bot",
+        "Thanks — noted you’re walking and it’s a mild injury. \n\nIs there a problem related to a cast, splint or other immobilisation? Please answer: Yes or No."
+      ],
+      [
+        "patient",
+        "No, not that I've noticed."
+      ],
+      [
+        "bot",
+        "Thanks — noted. One more quick question to clear up a few things:\n\nIs there any amputation, dislocation, open fracture, nerve/tendon injury, hand injury, limb deformity, or continuing venous bleeding?\n\nReply with:\n- No\n- Yes — and which of these: (pick one or more) amputation / dislocation / open fracture / nerve or tendon injury / hand injury / limb deformity / continuing venous bleeding"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Quick question: Are you currently having heavy periods (menorrhagia) or do you have a known bleeding disorder?\n\nPlease reply with one option:\n- No\n- Heavy periods (menorrhagia)\n- Known bleeding disorder\n- Both"
+      ],
+      [
+        "patient",
+        "No."
+      ],
+      [
+        "bot",
+        "Level 4 - Early Care\n\nYou have been classified as Level 4 - Early Care (target: under 60 minutes). Needs medical care soon: go to an Emergency Department or a walk-in / urgent-care clinic.\n\nKey findings:\n- Pain is the main symptom after a minor fall.\n- You are alert, walking and breathing normally with only mild leg pain.\n\nAdvice:\n- Seek medical assessment within about 60 minutes at an Emergency Department or an urgent-care clinic.\n- Avoid strenuous activity with the injured leg. Rest, elevate if comfortable, and use simple over-the-counter pain relief if you normally take it and have no contraindications.\n- If you develop increasing pain, swelling, numbness, changes in colour, inability to move the leg or walk, fever, or new worrying symptoms — return for urgent assessment or call 999.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  },
+  {
+    "scenario": 19,
+    "name": "Chronic back pain",
+    "expected": [
+      5
+    ],
+    "got": 5,
+    "call_999": false,
+    "turns": 13,
+    "seconds": 197.8,
+    "matched_rules": [
+      "RULE_LBP_L5_01"
+    ],
+    "verdict": "PASS",
+    "error": null,
+    "present_condition_ids": [
+      "RULE_LBP_L5_01.C1 (Chronic symptoms)",
+      "RULE_LBP_L5_01.C2 (No associated symptoms)"
+    ],
+    "findings_by_turn": [
+      {
+        "turn": 1,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 2,
+        "age_years": null,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 3,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 0
+      },
+      {
+        "turn": 4,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 7
+      },
+      {
+        "turn": 5,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 4
+      },
+      {
+        "turn": 6,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 4
+      },
+      {
+        "turn": 7,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 8,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 8
+      },
+      {
+        "turn": 9,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 3
+      },
+      {
+        "turn": 10,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 5
+      },
+      {
+        "turn": 11,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 6
+      },
+      {
+        "turn": 12,
+        "age_years": 45,
+        "newly_present": [],
+        "no_longer_present": [],
+        "newly_absent": 2
+      },
+      {
+        "turn": 13,
+        "age_years": 45,
+        "newly_present": [
+          "RULE_LBP_L5_01.C1 (Chronic symptoms)",
+          "RULE_LBP_L5_01.C2 (No associated symptoms)"
+        ],
+        "no_longer_present": [],
+        "newly_absent": 3
+      }
+    ],
+    "transcript": [
+      [
+        "patient",
+        "I have back pain"
+      ],
+      [
+        "bot",
+        "Thanks — I understand you have back pain. How old are you (in years)?"
+      ],
+      [
+        "patient",
+        "I'm 45 years old."
+      ],
+      [
+        "bot",
+        "Thanks — age 45 noted.\n\nIs the person conscious, breathing normally, and able to respond to call? Please choose one:\n- Yes - conscious, breathing normally and responding\n- Cardiac arrest\n- Not breathing\n- Unresponsive\n- Not responding to call\n- Confused, agitated or disoriented\n- Altered mental state or not fully conscious\n- Obvious neurological deficits"
+      ],
+      [
+        "patient",
+        "Yes - conscious, breathing normally and responding"
+      ],
+      [
+        "bot",
+        "Thanks — noted. Next: Is there any bleeding, major trauma, or severe injury? Please choose one:\n- No bleeding or minimal bleeding\n- Arterial limb bleeding\n- Active uncontrolled bleeding\n- Massive vaginal bleeding\n- Severe facial injury\n- Severe pelvic injury\n- Major trauma with shock\n- Pale, bluish (cyanosed) skin with cold hands/feet\n- Active vomiting or coughing of blood\n- Bleeding from fractures, dislocations, joints or wounds\n- Heavy periods (menorrhagia)\n- ENT (nose/ear/throat) bleeding\n- Expanding haematoma (swelling with bleeding under the skin)\n- Known bleeding disorder"
+      ],
+      [
+        "patient",
+        "No bleeding or minimal bleeding."
+      ],
+      [
+        "bot",
+        "Thanks — noted. How is the breathing? Please choose one:\n- Breathing normally\n- Severe respiratory distress\n- Abnormal breathing sounds\n- Excessive work of breathing with sweating\n- Cannot speak / one-word replies only\n- Short phrases only\n- Difficulty to breathe\n- Agitated or anxious because of breathing difficulty\n- Wheeze or expiratory rhonchi with airway intact"
+      ],
+      [
+        "patient",
+        "Breathing normally."
+      ],
+      [
+        "bot",
+        "Thanks — quick question: Is the person having a seizure, or unable to sit, stand, walk or communicate? Please choose one:\n- Ongoing seizures\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported\n- Cannot communicate\n- Alert, walking and talking normally"
+      ],
+      [
+        "patient",
+        "Alert, walking and talking normally."
+      ],
+      [
+        "bot",
+        "You said you have back pain. Is there chest pain or other pain? How severe is it on a scale of 0 to 10? Please choose one:\n- Severe chest pain\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "No, I don't have chest pain or any other pain, not that I've noticed. The back pain is long-standing and nothing new."
+      ],
+      [
+        "bot",
+        "Thanks — noted. Quick question: Is the person confused or unusually drowsy (lethargic) and having difficulty breathing?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — I'm not confused or unusually drowsy and I'm breathing normally."
+      ],
+      [
+        "bot",
+        "Does the back pain come with abdominal pain, a neurological deficit (numbness, weakness), or loss of urinary / bowel control? Please answer:\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — I don't have abdominal pain, numbness, or any loss of bladder or bowel control."
+      ],
+      [
+        "bot",
+        "Thanks — noted.\n\nQuick check: Are you fully awake/alert, able to speak and able to sit, stand and walk without support? Please choose one:\n- Alert, can sit/stand/walk without help\n- Not fully conscious / very drowsy\n- Cannot communicate\n- Cannot sit or stand unsupported\n- Cannot stand or walk unsupported"
+      ],
+      [
+        "patient",
+        "Alert, can sit/stand/walk without help."
+      ],
+      [
+        "bot",
+        "Thanks — noted. On a scale of 0–10 for the back pain right now, which fits best?\n- Severe pain (8-10)\n- Moderate pain (4-7)\n- Mild pain (1-3)\n- No pain (0)"
+      ],
+      [
+        "patient",
+        "Mild pain (1-3)."
+      ],
+      [
+        "bot",
+        "Quick question: Do you have a known bleeding disorder (for example haemophilia) or a history of abnormal bleeding?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — not that I've noticed."
+      ],
+      [
+        "bot",
+        "Thanks — noted.\n\nIs the pain colicky (waves), after blunt trauma or a fall, or is the person elderly?\n- Yes\n- No"
+      ],
+      [
+        "patient",
+        "No — it's long-standing, not after a fall, and I'm not elderly."
+      ],
+      [
+        "bot",
+        "Level 5 - Routine\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999."
+      ]
+    ],
+    "run": 1
+  }
+]

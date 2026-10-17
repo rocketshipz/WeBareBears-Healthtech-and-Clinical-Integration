@@ -13,18 +13,18 @@ def test_models():
     settings = get_settings()
     print("=" * 60)
     print("MedicTri AI Architecture Validation")
-    print(f"Main Agent Model (Groq):    {settings.GROQ_MODEL_NAME}")
+    print(f"Main Agent Model (Azure):   {settings.OPENAI_MODEL_NAME}")
     print(f"Embedding Model (Gemini):   {settings.GEMINI_EMBEDDING_MODEL}")
     print("=" * 60)
 
-    # 1. Test Main Agent LLM (Groq)
-    print("\n[1/2] Testing Groq Main Agent LLM...")
+    # 1. Test Main Agent LLM (Azure OpenAI)
+    print("\n[1/2] Testing Azure OpenAI Main Agent LLM...")
     try:
         llm = get_llm()
         response = llm.invoke("Briefly state your purpose as a medical triage assistant.")
-        print(f" Groq LLM Response:\n{response.content.strip()}\n")
+        print(f" Azure OpenAI LLM Response:\n{response.content.strip()}\n")
     except Exception as e:
-        print(f" Groq LLM failed: {e}\n")
+        print(f" Azure OpenAI LLM failed: {e}\n")
 
     # 2. Test Embedding Model (Gemini)
     print("[2/2] Testing Gemini Embedding Model...")
