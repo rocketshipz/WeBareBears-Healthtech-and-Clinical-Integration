@@ -162,6 +162,16 @@ class TriageSession:
     last_output: Optional[Dict[str, Any]] = None  # structured reply of the latest turn
     # Consecutive turns ending with nothing left to ask and nothing matched (the agent is fishing for symptoms).
     stalled_turns: int = 0
+    # The logged-in user who started this screening (None if anonymous). Only they may continue it.
+    owner_id: Optional[str] = None
+    # The user's own words for their main problem: the message in which a complaint was first recorded
+    # (a complaint category or a danger sign), so a greeting like "hi" never becomes the symptom.
+    chief_complaint: Optional[str] = None
+    # Short summary of the main symptom for the report, written once the screening is classified.
+    main_symptom: Optional[str] = None
+
+    def has_complaint(self) -> bool:
+        return bool(self.findings["categories"] or self.findings["present_condition_ids"])
 
     def merge_findings(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Merge new tool-call findings into the session; later answers correct earlier ones."""
@@ -210,11 +220,16 @@ class MedicalTriageAgent:
     def has_session(self, session_id: Optional[str]) -> bool:
         return bool(session_id) and session_id in self._sessions
 
+    def session_owner(self, session_id: Optional[str]) -> Optional[str]:
+        session = self._sessions.get(session_id) if session_id else None
+        return session.owner_id if session else None
+
     def get_session(self, session_id: Optional[str], context: Optional[Dict[str, Any]] = None) -> TriageSession:
         """Return the existing session or start a new one with the system prompt."""
         if session_id and session_id in self._sessions:
             return self._sessions[session_id]
-        session = TriageSession(session_id=session_id or str(uuid.uuid4()))
+        session = TriageSession(session_id=session_id or str(uuid.uuid4()),
+                                owner_id=(context or {}).get("patient_id"))
         system_prompt = TRIAGE_SYSTEM_PROMPT
         if context:
             system_prompt += f"\n\nActive Patient Context: {context}"
@@ -314,6 +329,7 @@ class MedicalTriageAgent:
         session = self.get_session(session_id, context)
         messages = session.messages
         messages.append(HumanMessage(content=message))
+        had_complaint = session.has_complaint()
 
         try:
             self._record_selection(session, message, selected_options)
@@ -354,6 +370,8 @@ class MedicalTriageAgent:
             result = session.triage_result or {}
             nothing_left = result.get("status") == "insufficient_information" and not result.get("missing_information")
             session.stalled_turns = session.stalled_turns + 1 if nothing_left else 0
+            if session.chief_complaint is None and not had_complaint and session.has_complaint():
+                session.chief_complaint = message
 
         except Exception as e:
             logger.error(f"[MedicalTriageAgent] Agent invocation error: {e}")

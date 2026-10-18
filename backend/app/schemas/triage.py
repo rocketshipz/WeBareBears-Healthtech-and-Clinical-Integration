@@ -57,8 +57,9 @@ class TriageResponse(BaseModel):
 class TriageChatRequest(BaseModel):
     """Payload for conversational interaction with the Medical Triage Agent."""
     message: str = Field(..., description="User query or message")
-    session_id: Optional[str] = Field(None, description="Conversation session ID")
-    patient_id: Optional[str] = Field(None, description="Patient ID if available")
+    session_id: Optional[str] = Field(None, max_length=64, description="Conversation session ID")
+    patient_id: Optional[str] = Field(
+        None, description="Ignored: the profile comes from the login token (Authorization: Bearer ...)")
     selected_options: Optional[List[str]] = Field(
         None, description="Option(s) picked from the previous selection, exactly as offered (several if multi_select)")
     note: Optional[str] = Field(
@@ -76,7 +77,22 @@ class TriageChatResponse(BaseModel):
     suggested_options: List[str] = Field(
         default_factory=list,
         description="Options matching what the user already mentioned: shown pre-selected, the user still confirms")
+    chief_complaint: Optional[str] = Field(
+        None, description="The user's own words for their main problem (the message where a complaint was first "
+                          "identified); null until then")
+    main_symptom: Optional[str] = Field(
+        None, description="Short plain summary of the main symptom for the report, set once the screening is "
+                          "classified (falls back to chief_complaint)")
     reply: str = Field(..., description="Plain text of the turn (the question for a selection); kept for compatibility")
     session_id: Optional[str] = None
+    report_id: Optional[str] = Field(
+        None, description="Id of the stored triage report (= session_id), set once a logged-in screening is classified")
+    subject: Optional[str] = Field(
+        None, description="Who the screening is for: 'self', 'other', or null if not known (agent mode)")
     assessment: Optional[TriageAssessment] = None
     recommended_hospitals: List[HospitalRecommendation] = Field(default_factory=list)
+
+
+class ReportSubjectRequest(BaseModel):
+    """Link a triage report to the account of the person it is about, by their IC number."""
+    ic: str = Field(..., max_length=20, description="The person's IC number (with or without dashes)")

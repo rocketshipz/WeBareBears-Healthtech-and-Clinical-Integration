@@ -5,6 +5,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../services/triage_chat_service.dart';
 import '../theme.dart';
 import 'home_page.dart';
 import 'hospital_routing.dart';
@@ -311,7 +312,18 @@ class TriageReportData {
 class TriageReportPage extends StatelessWidget {
   final TriageReportData report;
 
-  const TriageReportPage({super.key, required this.report});
+  /// Id of the report stored on the server (null when not logged in).
+  final String? storedReportId;
+
+  /// The screening was said to be for someone else.
+  final bool forSomeoneElse;
+
+  const TriageReportPage({
+    super.key,
+    required this.report,
+    this.storedReportId,
+    this.forSomeoneElse = false,
+  });
 
   Map<String, String> get _profile => profileData.value;
 
@@ -444,10 +456,21 @@ class TriageReportPage extends StatelessWidget {
                       ),
                     ),
 
+                    if (storedReportId != null) ...[
+                      const SizedBox(height: 22),
+                      FadeSlideIn(
+                        index: 4,
+                        child: _SubjectLinkCard(
+                          reportId: storedReportId!,
+                          initiallyOpen: forSomeoneElse,
+                        ),
+                      ),
+                    ],
+
                     const SizedBox(height: 24),
 
                     FadeSlideIn(
-                      index: 4,
+                      index: 5,
                       child: PrimaryButton(
                         label: 'Hospital routing',
                         icon: Icons.navigation_outlined,
@@ -602,6 +625,122 @@ class TriageReportPage extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           LocalizedText(label, style: AppText.caption),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// SCREENING FOR SOMEONE ELSE  (link the report to their account by IC)
+// ============================================================
+
+class _SubjectLinkCard extends StatefulWidget {
+  final String reportId;
+  final bool initiallyOpen;
+
+  const _SubjectLinkCard({required this.reportId, required this.initiallyOpen});
+
+  @override
+  State<_SubjectLinkCard> createState() => _SubjectLinkCardState();
+}
+
+class _SubjectLinkCardState extends State<_SubjectLinkCard> {
+  final TextEditingController _icController = TextEditingController();
+  late bool _open = widget.initiallyOpen;
+  bool _saving = false;
+  bool _linked = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _icController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _link() async {
+    final ic = _icController.text.trim();
+    if (ic.isEmpty || _saving) return;
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    final error = await TriageChatService.linkReportSubject(widget.reportId, ic);
+    if (!mounted) return;
+    setState(() {
+      _saving = false;
+      _linked = error == null;
+      _error = error;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_open) {
+      return Center(
+        child: TextButton(
+          onPressed: () => setState(() => _open = true),
+          child: LocalizedText(
+            'This screening was for someone else?',
+            style: AppText.style(14, FontWeight.w600, AppColors.teal),
+          ),
+        ),
+      );
+    }
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: cardDecoration(radius: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LocalizedText('Screening for someone else', style: AppText.heading),
+          const SizedBox(height: 6),
+          LocalizedText(
+            'If the person has a TriageMY account, enter their IC number. '
+            'The hospital can then find this report when they check in.',
+            style: AppText.body,
+          ),
+          const SizedBox(height: 14),
+          if (_linked)
+            Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: AppColors.green, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: LocalizedText(
+                    'Report linked to their account.',
+                    style: AppText.bodyStrong,
+                  ),
+                ),
+              ],
+            )
+          else ...[
+            TextField(
+              controller: _icController,
+              enabled: !_saving,
+              keyboardType: TextInputType.number,
+              style: AppText.input,
+              decoration: appInputDecoration(
+                hint: 'IC number, e.g. 600202-02-2222',
+                icon: Icons.badge_outlined,
+              ),
+              onSubmitted: (_) => _link(),
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: 8),
+              LocalizedText(
+                _error!,
+                style: AppText.style(13, FontWeight.w500, AppColors.red),
+              ),
+            ],
+            const SizedBox(height: 14),
+            PrimaryButton(
+              label: _saving ? 'Linking...' : 'Link to their account',
+              icon: Icons.link_rounded,
+              onPressed: _saving ? null : _link,
+            ),
+          ],
         ],
       ),
     );

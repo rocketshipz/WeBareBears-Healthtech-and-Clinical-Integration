@@ -1,4 +1,4 @@
-"""Staff-only patient lookup and authenticated patient report storage."""
+"""Staff login and staff-only patient lookup."""
 import secrets
 import json
 from datetime import datetime, timedelta, timezone
@@ -6,32 +6,17 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, Header, HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field
-from sqlalchemy import Column, DateTime, ForeignKey, JSON, String, Text, func
 
-from app.api.routes.auth import get_auth_service
-from app.core.database import Base, get_db_session, get_engine
-from app.models.user import User
+from app.core.database import get_db_session
 from app.models.user_information import UserInformation
 from app.models.staff import StaffAccount
+from app.repositories.triage_report_repository import TriageReportRepository
 from app.services.auth_service import _verify_password, _hash_password
 from app.services.hospital_identity import staff_hospital
+from app.services.triage_report_service import find_user_by_ic, normalize_ic
 
 router = APIRouter(tags=["Patient registration"])
 _staff_sessions = {}
-
-
-class SavedReport(Base):
-    __tablename__ = "patient_triage_reports"
-    id = Column(String(64), primary_key=True)
-    user_id = Column(String(50), ForeignKey("users.id"), nullable=False, index=True)
-    report = Column(JSON, nullable=True)
-    # Keep the original report fields populated for existing database constraints.
-    report_id = Column(String(64), nullable=True)
-    main_symptom = Column(Text, nullable=True)
-    reported_severity = Column(Text, nullable=True)
-    danger_signs = Column(Text, nullable=True)
-    duration = Column(Text, nullable=True)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
 
 class StaffLogin(BaseModel):
@@ -42,15 +27,6 @@ class StaffLogin(BaseModel):
 class PasswordChange(BaseModel):
     current_password: str
     new_password: str = Field(min_length=8, max_length=128)
-
-
-class ReportInput(BaseModel):
-    symptom: str = Field(max_length=2000)
-    severity: str = Field(max_length=100)
-    duration: str = Field(max_length=200)
-    danger_signs: list[str] = Field(default_factory=list, max_length=50)
-    level: int = Field(ge=1, le=5)
-    submitted_at: datetime
 
 
 def require_staff(authorization: str = Header(default="")):
@@ -113,34 +89,14 @@ def change_password(request: PasswordChange, identity=Depends(require_staff),
     return {'message': 'Password changed successfully.'}
 
 
-@router.post("/triage/reports")
-def save_report(request: ReportInput, authorization: str = Header(default=""),
-                session=Depends(get_db_session), auth=Depends(get_auth_service)):
-    user = auth.get_user_by_token(authorization.removeprefix("Bearer "))
-    if not user:
-        raise HTTPException(401, "Please log in to save your report.")
-    if session is None:
-        raise HTTPException(503, "Database unavailable.")
-    SavedReport.__table__.create(get_engine(), checkfirst=True)
-    report_id = secrets.token_hex(16)
-    report = SavedReport(id=report_id, report_id=report_id, user_id=user["id"],
-                         report=jsonable_encoder(request), main_symptom=request.symptom,
-                         reported_severity=request.severity, danger_signs=json.dumps(request.danger_signs),
-                         duration=request.duration)
-    session.add(report)
-    session.commit()
-    return {"id": report.id}
-
-
 @router.get("/admin/patients", dependencies=[Depends(require_staff)])
 def lookup_patient(ic: str, session=Depends(get_db_session)):
-    normalized = ic.replace("-", "").replace(" ", "")
-    if len(normalized) != 12 or not normalized.isascii() or not normalized.isdigit():
+    normalized = normalize_ic(ic)
+    if normalized is None:
         raise HTTPException(422, "Enter a valid 12-digit IC number.")
     if session is None:
         raise HTTPException(503, "Database unavailable.")
-    user = session.query(User).filter(
-        func.replace(func.replace(User.ic, "-", ""), " ", "") == normalized).first()
+    user = find_user_by_ic(session, normalized)
     if user is None:
         raise HTTPException(404, "No registered user found for this IC number.")
     info = session.get(UserInformation, user.id)
@@ -148,9 +104,7 @@ def lookup_patient(ic: str, session=Depends(get_db_session)):
         raise HTTPException(404, "This user's profile is missing.")
     profile = {c.name: getattr(info, c.name) for c in UserInformation.__table__.columns}
     profile.update(user.to_dict(), age=info.age)
-    SavedReport.__table__.create(get_engine(), checkfirst=True)
-    report = session.query(SavedReport).filter_by(user_id=user.id).order_by(
-        SavedReport.created_at.desc(), SavedReport.id.desc()).first()
+    report = TriageReportRepository(session).latest_for_patient(user.id)
     return {"profile": jsonable_encoder(profile),
-            "report_id": report.id if report else None,
+            "report_id": report.session_id if report else None,
             "triage": report.report if report else None}

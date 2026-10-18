@@ -19,7 +19,20 @@ class TriageChatReply {
   /// Options matching what the user already mentioned: shown pre-selected so
   /// they confirm with one tap.
   final List<String> suggestedOptions;
+
+  /// The user's own words for their main problem, once the backend has
+  /// identified one (null for greetings like "hi").
+  final String? chiefComplaint;
+
+  /// Short summary of the main symptom, set once the screening has a result.
+  final String? mainSymptom;
   final String? sessionId;
+
+  /// Id of the stored report (= session id), once a logged-in screening has a result.
+  final String? reportId;
+
+  /// Who the screening is for: 'self', 'other', or null when not known.
+  final String? subject;
   final TriageAssessmentData? assessment;
 
   TriageChatReply({
@@ -30,7 +43,11 @@ class TriageChatReply {
     this.multiSelect = false,
     this.exclusiveOptions = const [],
     this.suggestedOptions = const [],
+    this.chiefComplaint,
+    this.mainSymptom,
     required this.sessionId,
+    this.reportId,
+    this.subject,
     required this.assessment,
   });
 
@@ -51,7 +68,11 @@ class TriageChatReply {
           List<String>.from(json['exclusive_options'] ?? const []),
       suggestedOptions:
           List<String>.from(json['suggested_options'] ?? const []),
+      chiefComplaint: json['chief_complaint'] as String?,
+      mainSymptom: json['main_symptom'] as String?,
       sessionId: json['session_id'] as String?,
+      reportId: json['report_id'] as String?,
+      subject: json['subject'] as String?,
       assessment: json['assessment'] == null
           ? null
           : TriageAssessmentData.fromJson(
@@ -112,5 +133,25 @@ class TriageChatService {
     }
     final body = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
     return TriageChatReply.fromJson(body['data'] as Map<String, dynamic>);
+  }
+
+  /// Links a stored report to the account of the person it was for, by IC.
+  /// Returns null on success, or a message to show.
+  static Future<String?> linkReportSubject(String reportId, String ic) async {
+    try {
+      final res = await http
+          .put(
+            Uri.parse('${ApiService.baseUrl}/triage/reports/$reportId/subject'),
+            headers: ApiService.defaultHeaders,
+            body: jsonEncode({'ic': ic}),
+          )
+          .timeout(const Duration(seconds: 20));
+      if (res.statusCode == 200) return null;
+      final body = jsonDecode(utf8.decode(res.bodyBytes));
+      final detail = body is Map ? body['detail'] : null;
+      return detail is String ? detail : 'Could not link the report. Please try again.';
+    } catch (_) {
+      return 'Could not reach the server. Please try again.';
+    }
   }
 }
