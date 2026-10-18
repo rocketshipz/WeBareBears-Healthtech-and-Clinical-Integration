@@ -5,16 +5,48 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../theme.dart';
 import 'scan_result.dart';
+import 'patient_profile_card.dart';
+import 'diagnosis_card.dart';
+import 'sync_banner.dart';
 import 'admin_store.dart';
 import 'admin_widgets.dart';
 import 'admin_i18n.dart';
 
 /// Where nurses log a patient's progress, one stage at a time.
 /// Mirrors the timeline patients and families see in the app.
-class PatientDetailPage extends StatelessWidget {
+class PatientDetailPage extends StatefulWidget {
   final Visit visit;
 
   const PatientDetailPage({super.key, required this.visit});
+
+  @override
+  State<PatientDetailPage> createState() => _PatientDetailPageState();
+}
+
+class _PatientDetailPageState extends State<PatientDetailPage> {
+  Visit get visit => widget.visit;
+  bool showProfile = false;
+  final scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  void selectSection(bool profile) {
+    FocusScope.of(context).unfocus();
+    setState(() => showProfile = profile);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && scrollController.hasClients) {
+        scrollController.jumpTo(0);
+      }
+    });
+  }
+
+  bool get consultationComplete => visit.steps.any(
+    (step) => step.id == 'doctor' && step.status == StepStatus.done,
+  );
 
   // ------------------------------------------------------------
   // ACTIONS
@@ -38,7 +70,10 @@ class PatientDetailPage extends StatelessWidget {
       adminStore.advance(visit, outcome: outcome);
 
       if (context.mounted) {
-        showAppSnack(context, tr('Visit completed: {outcome}.', {'outcome': trText(outcome)}));
+        showAppSnack(
+          context,
+          tr('Visit completed: {outcome}.', {'outcome': trText(outcome)}),
+        );
       }
       return;
     }
@@ -91,6 +126,8 @@ class PatientDetailPage extends StatelessWidget {
       builder: (sheetContext) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _CustomTestInput(visit: visit),
+          const SizedBox(height: 16),
           Text(tr('Add a test'), style: AppText.heading),
           const SizedBox(height: 4),
           Text(
@@ -99,7 +136,10 @@ class PatientDetailPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           if (available.isEmpty)
-            Text(tr('All available tests are already added.'), style: AppText.body)
+            Text(
+              tr('All available tests are already added.'),
+              style: AppText.body,
+            )
           else
             for (final t in available)
               SheetOption(
@@ -170,11 +210,12 @@ class PatientDetailPage extends StatelessWidget {
             animation: adminStore,
             builder: (context, _) {
               return SingleChildScrollView(
+                controller: scrollController,
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 600),
+                    constraints: const BoxConstraints(maxWidth: 960),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -195,29 +236,88 @@ class PatientDetailPage extends StatelessWidget {
                         ),
 
                         const SizedBox(height: 22),
+                        const StaffSyncBanner(),
 
                         FadeSlideIn(index: 1, child: _header(context)),
 
-                        if (visit.triage != null) ...[
-                          const SizedBox(height: 16),
-                          FadeSlideIn(index: 1, child: _triageCard()),
-                        ],
-
-                        const SizedBox(height: 16),
-
-                        FadeSlideIn(index: 2, child: _actionCard(context)),
-
-                        const SizedBox(height: 26),
-
-                        FadeSlideIn(index: 3, child: _timeline(context)),
-
-                        const SizedBox(height: 26),
-
-                        FadeSlideIn(index: 4, child: _familyCard(context)),
-
-                        const SizedBox(height: 26),
-
-                        FadeSlideIn(index: 5, child: _activityLog()),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          child: SegmentedButton<bool>(
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.resolveWith(
+                                (states) =>
+                                    states.contains(WidgetState.selected)
+                                    ? AppColors.darkTeal
+                                    : Colors.white,
+                              ),
+                              foregroundColor: WidgetStateProperty.resolveWith(
+                                (states) =>
+                                    states.contains(WidgetState.selected)
+                                    ? Colors.white
+                                    : AppColors.darkTeal,
+                              ),
+                            ),
+                            segments: const [
+                              ButtonSegment(
+                                value: false,
+                                label: Text('Timeline'),
+                                icon: Icon(Icons.timeline_rounded),
+                              ),
+                              ButtonSegment(
+                                value: true,
+                                label: Text('Profile'),
+                                icon: Icon(Icons.person_outline_rounded),
+                              ),
+                            ],
+                            selected: {showProfile},
+                            onSelectionChanged: (values) =>
+                                selectSection(values.first),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Offstage(
+                          offstage: !showProfile,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (visit.profile.isNotEmpty)
+                                PatientProfileCard(profile: visit.profile)
+                              else
+                                Text(
+                                  'No saved profile details available.',
+                                  style: AppText.body,
+                                ),
+                              if (visit.triage != null) ...[
+                                const SizedBox(height: 16),
+                                _triageCard(),
+                              ],
+                            ],
+                          ),
+                        ),
+                        Offstage(
+                          offstage: showProfile,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _actionCard(context),
+                              const SizedBox(height: 26),
+                              _timeline(context),
+                              if (!adminStore.repo.isDemo &&
+                                  consultationComplete) ...[
+                                const SizedBox(height: 24),
+                                DiagnosisCard(
+                                  key: ValueKey(visit.id),
+                                  visitId: visit.id,
+                                ),
+                              ],
+                              const SizedBox(height: 26),
+                              _familyCard(context),
+                              const SizedBox(height: 26),
+                              _activityLog(),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -285,7 +385,7 @@ class PatientDetailPage extends StatelessWidget {
               tr('{n} yrs', {'n': visit.age}),
               trText(visit.sex),
               if (visit.ic.isNotEmpty) visit.ic,
-            ].join('  ·  '),
+            ].join('  \u00B7  '),
             style: AppText.caption,
           ),
           const SizedBox(height: 12),
@@ -298,7 +398,9 @@ class PatientDetailPage extends StatelessWidget {
                 color: AppColors.teal,
               ),
               const SizedBox(width: 8),
-              Expanded(child: Text(trText(visit.complaint), style: AppText.body)),
+              Expanded(
+                child: Text(trText(visit.complaint), style: AppText.body),
+              ),
             ],
           ),
           const SizedBox(height: 6),
@@ -310,72 +412,39 @@ class PatientDetailPage extends StatelessWidget {
                 color: AppColors.teal,
               ),
               const SizedBox(width: 8),
-              Expanded(child: Text(trText(visit.department), style: AppText.body)),
+              Expanded(
+                child: Text(trText(visit.department), style: AppText.body),
+              ),
             ],
           ),
-          if (_clinicalChips().isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Wrap(spacing: 6, runSpacing: 6, children: _clinicalChips()),
-          ],
         ],
       ),
     );
   }
 
-  List<Widget> _clinicalChips() {
-    Widget chip(String text, {bool amber = false}) => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color: amber ? const Color(0xFFFFF4D6) : AppColors.field,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Text(
-            text,
-            style: AppText.style(
-              11.5,
-              FontWeight.w700,
-              amber ? const Color(0xFF9A6E00) : AppColors.grey,
-            ),
-          ),
-        );
-
-    bool has(String v) => v.trim().isNotEmpty && v.trim() != 'None';
-
-    return [
-      if (has(visit.allergies)) chip(tr('Allergy: {x}', {'x': trText(visit.allergies)}), amber: true),
-      if (has(visit.conditions)) chip(trText(visit.conditions)),
-      if (has(visit.bloodType)) chip(tr('Blood type {x}', {'x': visit.bloodType})),
-      if (has(visit.medication)) chip(tr('Medication: {x}', {'x': trText(visit.medication)})),
-    ];
-  }
-
-  // ------------------------------------------------------------
-  // TRIAGE REPORT FROM THE PATIENT APP
-  // ------------------------------------------------------------
-
   Widget _triageCard() {
     final t = visit.triage!;
 
     Widget row(String k, String v, {Color? color}) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(flex: 4, child: Text(k, style: AppText.caption)),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 6,
-                child: Text(
-                  v,
-                  textAlign: TextAlign.right,
-                  style: color == null
-                      ? AppText.bodyStrong
-                      : AppText.style(14, FontWeight.w700, color),
-                ),
-              ),
-            ],
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(flex: 4, child: Text(k, style: AppText.caption)),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 6,
+            child: Text(
+              v,
+              textAlign: TextAlign.right,
+              style: color == null
+                  ? AppText.bodyStrong
+                  : AppText.style(14, FontWeight.w700, color),
+            ),
           ),
-        );
+        ],
+      ),
+    );
 
     return Container(
       width: double.infinity,
@@ -393,13 +462,18 @@ class PatientDetailPage extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(tr('Triage report (patient app)'),
-                    style: AppText.heading),
+                child: Text(
+                  tr('Triage report (patient app)'),
+                  style: AppText.heading,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 2),
-          Text(tr('Submitted {ago}', {'ago': agoText(t.submittedAt)}), style: AppText.caption),
+          Text(
+            tr('Submitted {ago}', {'ago': agoText(t.submittedAt)}),
+            style: AppText.caption,
+          ),
           const SizedBox(height: 8),
           const Divider(height: 1, color: AppColors.border),
           row(tr('Outcome'), t.zoneLabel, color: t.acuity.color),
@@ -408,7 +482,9 @@ class PatientDetailPage extends StatelessWidget {
           row(tr('Duration'), trText(t.duration)),
           row(
             tr('Danger signs'),
-            t.dangerSigns.isEmpty ? tr('None reported') : t.dangerSigns.map(trText).join(', '),
+            t.dangerSigns.isEmpty
+                ? tr('None reported')
+                : t.dangerSigns.map(trText).join(', '),
             color: t.dangerSigns.isEmpty ? null : AppColors.red,
           ),
         ],
@@ -437,10 +513,7 @@ class PatientDetailPage extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(
-                  Icons.check_circle_rounded,
-                  color: AppColors.green,
-                ),
+                const Icon(Icons.check_circle_rounded, color: AppColors.green),
                 const SizedBox(width: 8),
                 Text(
                   tr('Visit completed'),
@@ -449,7 +522,12 @@ class PatientDetailPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            Text(visit.outcome == null ? tr('All stages are done.') : trText(visit.outcome!), style: AppText.body),
+            Text(
+              visit.outcome == null
+                  ? tr('All stages are done.')
+                  : trText(visit.outcome!),
+              style: AppText.body,
+            ),
             if (visit.canUndo) ...[
               const SizedBox(height: 10),
               _undoButton(context),
@@ -481,11 +559,7 @@ class PatientDetailPage extends StatelessWidget {
               Expanded(
                 child: Text(
                   step.statusText,
-                  style: AppText.style(
-                    18,
-                    FontWeight.w700,
-                    AppColors.darkTeal,
-                  ),
+                  style: AppText.style(18, FontWeight.w700, AppColors.darkTeal),
                 ),
               ),
             ],
@@ -493,9 +567,7 @@ class PatientDetailPage extends StatelessWidget {
           const SizedBox(height: 14),
           PrimaryButton(
             label: step.actionLabel,
-            icon: waiting
-                ? Icons.play_arrow_rounded
-                : Icons.check_rounded,
+            icon: waiting ? Icons.play_arrow_rounded : Icons.check_rounded,
             onPressed: () => _advance(context),
           ),
           if (step.isTest && step.status != StepStatus.waiting) ...[
@@ -503,8 +575,9 @@ class PatientDetailPage extends StatelessWidget {
             SecondaryButton(
               label: step.results.isEmpty
                   ? tr('Scan results document')
-                  : tr('Scan another document ({n} uploaded)',
-                      {'n': step.results.length}),
+                  : tr('Scan another document ({n} uploaded)', {
+                      'n': step.results.length,
+                    }),
               onPressed: () => _scan(context, step),
             ),
           ],
@@ -557,8 +630,9 @@ class PatientDetailPage extends StatelessWidget {
     final tests = firstTest < 0
         ? const <VisitStep>[]
         : steps.sublist(firstTest, lastTest + 1);
-    final after =
-        firstTest < 0 ? const <VisitStep>[] : steps.sublist(lastTest + 1);
+    final after = firstTest < 0
+        ? const <VisitStep>[]
+        : steps.sublist(lastTest + 1);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -605,7 +679,9 @@ class PatientDetailPage extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          tr('Tap a stage to edit it. Drag unfinished tests to reorder them. Patients see this timeline live.'),
+          tr(
+            'Tap a stage to edit it. Drag unfinished tests to reorder them. Patients see this timeline live.',
+          ),
           style: AppText.caption,
         ),
         const SizedBox(height: 14),
@@ -672,7 +748,8 @@ class PatientDetailPage extends StatelessWidget {
     required int index,
     required Widget child,
   }) {
-    final touch = !kIsWeb &&
+    final touch =
+        !kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.android ||
             defaultTargetPlatform == TargetPlatform.iOS);
 
@@ -744,8 +821,8 @@ class PatientDetailPage extends StatelessWidget {
                         active
                             ? AppColors.darkTeal
                             : done
-                                ? AppColors.textDark
-                                : AppColors.grey,
+                            ? AppColors.textDark
+                            : AppColors.grey,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -910,7 +987,10 @@ class PatientDetailPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(tr('Progress tracking link'), style: AppText.bodyStrong),
+                    Text(
+                      tr('Progress tracking link'),
+                      style: AppText.bodyStrong,
+                    ),
                     Text(
                       visit.familySharing
                           ? tr('Link is active')
@@ -938,7 +1018,11 @@ class PatientDetailPage extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.link_rounded, size: 18, color: AppColors.teal),
+                  const Icon(
+                    Icons.link_rounded,
+                    size: 18,
+                    color: AppColors.teal,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -983,30 +1067,40 @@ class PatientDetailPage extends StatelessWidget {
             PrimaryButton(
               label: visit.patientPhone.isEmpty
                   ? tr('Send via WhatsApp')
-                  : tr('Send to patient ({phone})', {'phone': visit.patientPhone}),
+                  : tr('Send to patient ({phone})', {
+                      'phone': visit.patientPhone,
+                    }),
               icon: Icons.send_rounded,
               color: const Color(0xFF1FA855),
               onPressed: () => _sendWhatsApp(context),
             ),
             const SizedBox(height: 12),
             Text(
-              tr('Shows live progress only (stages and times). No name, IC or '
-                  'medical details. The link stops working 2 hours after the visit ends.'),
+              tr(
+                'Shows live progress only (stages and times). No name, IC or '
+                'medical details. The link stops working 2 hours after the visit ends.',
+              ),
               style: AppText.caption,
             ),
             const SizedBox(height: 8),
             Pressable(
               onTap: () {
                 adminStore.regenerateShareLink(visit);
-                showAppSnack(context, tr('New link created. The old link no longer works.'));
+                showAppSnack(
+                  context,
+                  tr('New link created. The old link no longer works.'),
+                );
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.refresh_rounded,
-                        size: 16, color: AppColors.red),
+                    const Icon(
+                      Icons.refresh_rounded,
+                      size: 16,
+                      color: AppColors.red,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       tr('Revoke and create a new link'),
@@ -1066,23 +1160,27 @@ class PatientDetailPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     entries[i].undone
-                                        ? tr('{x} (undone)', {'x': trText(entries[i].text)})
+                                        ? tr('{x} (undone)', {
+                                            'x': trText(entries[i].text),
+                                          })
                                         : trText(entries[i].text),
-                                    style: AppText.style(
-                                      13,
-                                      FontWeight.w600,
-                                      entries[i].undone
-                                          ? AppColors.grey
-                                          : AppColors.textDark,
-                                    ).copyWith(
-                                      decoration: entries[i].undone
-                                          ? TextDecoration.lineThrough
-                                          : null,
-                                    ),
+                                    style:
+                                        AppText.style(
+                                          13,
+                                          FontWeight.w600,
+                                          entries[i].undone
+                                              ? AppColors.grey
+                                              : AppColors.textDark,
+                                        ).copyWith(
+                                          decoration: entries[i].undone
+                                              ? TextDecoration.lineThrough
+                                              : null,
+                                        ),
                                   ),
                                   Text(
                                     tr('by {x}', {
-                                      'x': '${trText(entries[i].staffName)} · '
+                                      'x':
+                                          '${trText(entries[i].staffName)} \u00B7 '
                                           '${entries[i].staffId}',
                                     }),
                                     style: AppText.caption,
@@ -1116,7 +1214,10 @@ class _OutcomeSheet extends StatelessWidget {
       children: [
         Text(tr('Discharge / admission decision'), style: AppText.heading),
         const SizedBox(height: 4),
-        Text(tr('Choose the final outcome of this visit.'), style: AppText.caption),
+        Text(
+          tr('Choose the final outcome of this visit.'),
+          style: AppText.caption,
+        ),
         const SizedBox(height: 16),
         SheetOption(
           icon: Icons.home_outlined,
@@ -1134,7 +1235,8 @@ class _OutcomeSheet extends StatelessWidget {
           icon: Icons.local_shipping_outlined,
           color: AppColors.yellow,
           title: tr('Transferred to another facility'),
-          onTap: () => Navigator.pop(context, 'Transferred to another facility'),
+          onTap: () =>
+              Navigator.pop(context, 'Transferred to another facility'),
         ),
       ],
     );
@@ -1152,10 +1254,12 @@ class _StepSheet extends StatefulWidget {
 }
 
 class _StepSheetState extends State<_StepSheet> {
-  late final TextEditingController noteController =
-      TextEditingController(text: widget.step.note);
-  late final TextEditingController nameController =
-      TextEditingController(text: widget.step.name);
+  late final TextEditingController noteController = TextEditingController(
+    text: widget.step.note,
+  );
+  late final TextEditingController nameController = TextEditingController(
+    text: widget.step.name,
+  );
 
   @override
   void dispose() {
@@ -1251,8 +1355,8 @@ class _StepSheetState extends State<_StepSheet> {
                 icon: Icons.picture_as_pdf_outlined,
                 title: r.fileName,
                 subtitle:
-                    '${tr(r.pages == 1 ? '{n} page' : '{n} pages', {'n': r.pages})} · '
-                    '${fmtTime(r.uploadedAt)} · ${r.staffName} (${r.staffId})',
+                    '${tr(r.pages == 1 ? '{n} page' : '{n} pages', {'n': r.pages})} \u00B7 '
+                    '${fmtTime(r.uploadedAt)} \u00B7 ${r.staffName} (${r.staffId})',
                 onTap: () {
                   Navigator.push(
                     context,
@@ -1264,8 +1368,10 @@ class _StepSheetState extends State<_StepSheet> {
               ),
           const SizedBox(height: 4),
           if (step.status == StepStatus.waiting)
-            Text(tr('Start the test before uploading results.'),
-                style: AppText.caption)
+            Text(
+              tr('Start the test before uploading results.'),
+              style: AppText.caption,
+            )
           else
             SecondaryButton(
               label: tr('Scan results document'),
@@ -1274,10 +1380,8 @@ class _StepSheetState extends State<_StepSheet> {
                 nav.pop();
                 nav.push(
                   MaterialPageRoute(
-                    builder: (_) => ScanResultPage(
-                      visit: widget.visit,
-                      step: step,
-                    ),
+                    builder: (_) =>
+                        ScanResultPage(visit: widget.visit, step: step),
                   ),
                 );
               },
@@ -1336,4 +1440,56 @@ class _StepSheetState extends State<_StepSheet> {
       ),
     );
   }
+}
+
+class _CustomTestInput extends StatefulWidget {
+  final Visit visit;
+  const _CustomTestInput({required this.visit});
+  @override
+  State<_CustomTestInput> createState() => _CustomTestInputState();
+}
+
+class _CustomTestInputState extends State<_CustomTestInput> {
+  final controller = TextEditingController();
+  String? error;
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  void add() {
+    final name = controller.text.trim();
+    final id = VisitStep.slug(name);
+    if (name.isEmpty || id.isEmpty) {
+      setState(() => error = 'Enter a test name.');
+      return;
+    }
+    if (widget.visit.steps.any((step) => step.id == id)) {
+      setState(() => error = 'This test or stage is already in the visit.');
+      return;
+    }
+    adminStore.addTest(widget.visit, name);
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text('Custom test', style: AppText.heading),
+      const SizedBox(height: 12),
+      TextField(
+        controller: controller,
+        maxLength: 100,
+        onSubmitted: (_) => add(),
+        decoration: appInputDecoration(
+          hint: 'Enter test name',
+          icon: Icons.science_outlined,
+        ).copyWith(errorText: error),
+      ),
+      const SizedBox(height: 12),
+      PrimaryButton(label: 'Add custom test', icon: Icons.add, onPressed: add),
+    ],
+  );
 }

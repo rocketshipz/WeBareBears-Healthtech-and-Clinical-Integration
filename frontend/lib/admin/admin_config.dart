@@ -1,13 +1,5 @@
-/// Build-time settings for the hospital side.
-///
-/// Pass them when running, so no keys are stored in the code:
-///
-///   flutter run -t lib/main_admin.dart -d chrome \
-///     --dart-define=SUPABASE_URL=https://xxxx.supabase.co \
-///     --dart-define=SUPABASE_ANON_KEY=your-anon-key
-///
-/// Without them the app runs in DEMO mode (sample data, nothing is saved).
-/// Only ever use the public "anon" key here, never the service_role key.
+/// Optional tracking-site settings. Clinical data uses the authenticated backend
+/// API by default; Flutter does not need Supabase credentials or demo flags.
 class AdminConfig {
   static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
   static const String supabaseAnonKey =

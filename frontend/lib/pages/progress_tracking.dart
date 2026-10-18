@@ -1,46 +1,151 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import '../theme.dart';
 import 'notifications_page.dart';
+import '../services/api_service.dart';
+import '../services/auth_service.dart';
+import '../admin/admin_models.dart';
+import '../admin/visit_codec.dart';
+import '../admin/patient_profile_card.dart';
 
 class ProgressTrackingPage extends StatefulWidget {
   const ProgressTrackingPage({super.key});
-
   @override
-  State<ProgressTrackingPage> createState() =>
-      _ProgressTrackingPageState();
+  State<ProgressTrackingPage> createState() => _ProgressTrackingPageState();
 }
 
-class _ProgressTrackingPageState
-    extends State<ProgressTrackingPage> {
+class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
+  Timer? timer;
+  bool loading = false;
+  String? error;
+  String? selectedId;
+  List<Map<String, dynamic>> visits = [];
   bool showingFamily = false;
+  bool viewingFamily = false;
+  bool sharingSaving = false;
 
-  String selectedPatientName = 'You';
-  String selectedRelationship = 'Progress';
-  String selectedDepartment = 'Emergency Department';
-  String selectedQueue = 'A128';
-  String selectedStatus = 'Waiting for X-ray';
+  @override
+  void initState() {
+    super.initState();
+    load();
+    timer = Timer.periodic(const Duration(seconds: 5), (_) => load());
+  }
 
-  // ============================================================
-  // NAVIGATION / ACTIONS
-  // ============================================================
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> load() async {
+    if (loading) return;
+    final token = AuthService.token;
+    final familyRequest = showingFamily || viewingFamily;
+    if (token == null) {
+      if (mounted) {
+        setState(() {
+          visits = [];
+          error = 'Please log in to view your progress.';
+        });
+      }
+      return;
+    }
+    setState(() => loading = true);
+    try {
+      final response = await http
+          .get(
+            Uri.parse(
+              '${ApiService.baseUrl}/progress/${familyRequest ? 'family' : 'visits'}',
+            ),
+            headers: ApiService.defaultHeaders,
+          )
+          .timeout(const Duration(seconds: 20));
+      if (response.statusCode != 200) {
+        throw Exception('Could not load progress. Please try again.');
+      }
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      if (!mounted ||
+          token != AuthService.token ||
+          familyRequest != (showingFamily || viewingFamily)) {
+        return;
+      }
+      setState(() {
+        visits = [
+          for (final visit in data['visits']) Map<String, dynamic>.from(visit),
+        ];
+        if (!visits.any((v) => v['id'] == selectedId)) {
+          selectedId = visits.isEmpty ? null : visits.first['id'];
+        }
+        error = null;
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => error =
+              'Could not refresh progress. Check your connection and retry.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  Future<void> toggleSharing(String id, bool value) async {
+    setState(() => sharingSaving = true);
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiService.baseUrl}/progress/visits/$id/sharing'),
+            headers: ApiService.defaultHeaders,
+            body: jsonEncode({'enabled': value}),
+          )
+          .timeout(const Duration(seconds: 20));
+      if (response.statusCode != 200) throw Exception('Sharing update failed.');
+      await load();
+    } catch (_) {
+      if (mounted) {
+        showAppSnack(context, 'Could not update sharing. Please retry.');
+      }
+    } finally {
+      if (mounted) setState(() => sharingSaving = false);
+    }
+  }
+
+  Map<String, dynamic>? get rawVisit =>
+      visits.where((v) => v['id'] == selectedId).firstOrNull;
+  Visit? get currentVisit => rawVisit == null ? null : decodeVisit(rawVisit!);
+  String get selectedPatientName =>
+      viewingFamily ? currentVisit?.name ?? 'Patient' : 'You';
+  String get selectedRelationship =>
+      viewingFamily ? 'Family progress' : 'Progress';
+  String get selectedDepartment => currentVisit?.department ?? '';
+  String get selectedQueue => currentVisit?.queueNo ?? '';
+  String get selectedStatus => currentVisit?.statusText ?? '';
 
   void _showMyProgress() {
+    if (loading) return;
     setState(() {
       showingFamily = false;
-
-      selectedPatientName = 'You';
-      selectedRelationship = 'Progress';
-      selectedDepartment = 'Emergency Department';
-      selectedQueue = 'A128';
-      selectedStatus = 'Waiting for X-ray';
+      viewingFamily = false;
+      visits = [];
+      selectedId = null;
     });
+    load();
   }
 
   void _showFamily() {
+    if (loading) return;
     setState(() {
       showingFamily = true;
+      viewingFamily = false;
+      visits = [];
+      selectedId = null;
     });
+    load();
   }
 
   void _openFamilyProgress({
@@ -51,22 +156,16 @@ class _ProgressTrackingPageState
     required String status,
   }) {
     setState(() {
+      selectedId = visits.firstWhere((v) => v['queue_no'] == queue)['id'];
       showingFamily = false;
-
-      selectedPatientName = name;
-      selectedRelationship = relationship;
-      selectedDepartment = department;
-      selectedQueue = queue;
-      selectedStatus = status;
+      viewingFamily = true;
     });
   }
 
   void _openNotifications() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const NotificationsPage(),
-      ),
+      MaterialPageRoute(builder: (_) => const NotificationsPage()),
     );
   }
 
@@ -86,85 +185,125 @@ class _ProgressTrackingPageState
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
 
-            padding: const EdgeInsets.fromLTRB(
-              20,
-              16,
-              20,
-              32,
-            ),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
 
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 440,
-                ),
+                constraints: const BoxConstraints(maxWidth: 440),
 
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
 
                   children: [
-                    FadeSlideIn(
-                      index: 0,
-                      child: _buildHeader(),
-                    ),
+                    FadeSlideIn(index: 0, child: _buildHeader()),
 
                     const SizedBox(height: 28),
 
-                    FadeSlideIn(
-                      index: 1,
-                      child: _buildTitle(),
-                    ),
+                    FadeSlideIn(index: 1, child: _buildTitle()),
 
                     const SizedBox(height: 22),
 
-                    FadeSlideIn(
-                      index: 2,
-                      child: _buildToggle(),
-                    ),
+                    FadeSlideIn(index: 2, child: _buildToggle()),
 
                     const SizedBox(height: 24),
 
-                    if (showingFamily)
-                      FadeSlideIn(
-                        index: 3,
-                        child: _buildFamilySection(),
-                      )
-                    else ...[
-                      FadeSlideIn(
-                        index: 3,
-                        child: _buildPatientCard(),
+                    if (loading && visits.isEmpty)
+                      const Center(child: CircularProgressIndicator()),
+                    if (error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Text(
+                          error!,
+                          style: const TextStyle(color: AppColors.red),
+                        ),
                       ),
+                    if (!loading &&
+                        visits.isEmpty &&
+                        !showingFamily &&
+                        error == null)
+                      Text(
+                        'Your progress will appear here once hospital staff check you in.',
+                        style: AppText.body,
+                      ),
+                    if (showingFamily)
+                      FadeSlideIn(index: 3, child: _buildFamilySection())
+                    else if (currentVisit != null) ...[
+                      if (visits.length > 1 && !viewingFamily) ...[
+                        DropdownButtonFormField<String>(
+                          key: ValueKey(selectedId),
+                          initialValue: selectedId,
+                          decoration: appInputDecoration(
+                            hint: 'Select visit',
+                            icon: Icons.history,
+                          ),
+                          isExpanded: true,
+                          items: [
+                            for (final v in visits)
+                              DropdownMenuItem(
+                                value: v['id'] as String,
+                                child: Text(
+                                  '${v['queue_no']} · ${v['hospital']}',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                          onChanged: (value) =>
+                              setState(() => selectedId = value),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      FadeSlideIn(index: 3, child: _buildPatientCard()),
 
                       const SizedBox(height: 28),
 
                       FadeSlideIn(
                         index: 4,
-                        child: Text(
-                          'Visit progress',
-                          style: AppText.heading,
-                        ),
+                        child: Text('Visit progress', style: AppText.heading),
                       ),
 
                       const SizedBox(height: 12),
 
-                      FadeSlideIn(
-                        index: 5,
-                        child: _buildProgressTimeline(),
-                      ),
+                      FadeSlideIn(index: 5, child: _buildProgressTimeline()),
 
+                      if (rawVisit?['diagnosis'] != null) ...[
+                        const SizedBox(height: 24),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(18),
+                          decoration: cardDecoration(radius: 22),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Diagnosis and treatment',
+                                style: AppText.heading,
+                              ),
+                              for (final entry in {
+                                'diagnosis': 'Diagnosis',
+                                'treatment_notes': 'Treatment',
+                                'medications': 'Medications',
+                                'follow_up_instructions': 'Follow-up',
+                              }.entries) ...[
+                                const SizedBox(height: 12),
+                                Text(entry.value, style: AppText.caption),
+                                Text(
+                                  PatientProfileCard.format(
+                                    rawVisit!['diagnosis'][entry.key],
+                                  ),
+                                  style: AppText.bodyStrong,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 24),
 
-                      FadeSlideIn(
-                        index: 6,
-                        child: _buildAccessInfo(),
-                      ),
+                      FadeSlideIn(index: 6, child: _buildAccessInfo()),
 
                       const SizedBox(height: 18),
 
-                      FadeSlideIn(
-                        index: 7,
-                        child: _buildDisclaimer(),
-                      ),
+                      FadeSlideIn(index: 7, child: _buildDisclaimer()),
                     ],
                   ],
                 ),
@@ -186,12 +325,15 @@ class _ProgressTrackingPageState
         const Expanded(
           child: Align(
             alignment: Alignment.centerLeft,
-            child: BrandWordmark(
-              size: 32,
-            ),
+            child: BrandWordmark(size: 32),
           ),
         ),
 
+        IconButton(
+          onPressed: loading ? null : load,
+          tooltip: 'Refresh progress',
+          icon: const Icon(Icons.refresh_rounded),
+        ),
         Pressable(
           onTap: _openNotifications,
 
@@ -199,9 +341,7 @@ class _ProgressTrackingPageState
             width: 42,
             height: 42,
 
-            decoration: cardDecoration(
-              radius: 14,
-            ),
+            decoration: cardDecoration(radius: 14),
 
             child: Stack(
               clipBehavior: Clip.none,
@@ -227,10 +367,7 @@ class _ProgressTrackingPageState
                       color: AppColors.red,
                       shape: BoxShape.circle,
 
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 1.5,
-                      ),
+                      border: Border.all(color: Colors.white, width: 1.5),
                     ),
                   ),
                 ),
@@ -251,10 +388,7 @@ class _ProgressTrackingPageState
       crossAxisAlignment: CrossAxisAlignment.start,
 
       children: [
-        Text(
-          'Progress Tracking',
-          style: AppText.display,
-        ),
+        Text('Progress Tracking', style: AppText.display),
 
         const SizedBox(height: 8),
 
@@ -275,17 +409,11 @@ class _ProgressTrackingPageState
       padding: const EdgeInsets.all(4),
 
       decoration: BoxDecoration(
-        color: Colors.white.withValues(
-          alpha: 0.75,
-        ),
+        color: Colors.white.withValues(alpha: 0.75),
 
-        borderRadius: BorderRadius.circular(
-          16,
-        ),
+        borderRadius: BorderRadius.circular(16),
 
-        border: Border.all(
-          color: AppColors.border,
-        ),
+        border: Border.all(color: AppColors.border),
       ),
 
       child: Row(
@@ -324,20 +452,14 @@ class _ProgressTrackingPageState
       onTap: onTap,
 
       child: AnimatedContainer(
-        duration: const Duration(
-          milliseconds: 180,
-        ),
+        duration: const Duration(milliseconds: 180),
 
         height: 46,
 
         decoration: BoxDecoration(
-          color: selected
-              ? AppColors.darkTeal
-              : Colors.transparent,
+          color: selected ? AppColors.darkTeal : Colors.transparent,
 
-          borderRadius: BorderRadius.circular(
-            13,
-          ),
+          borderRadius: BorderRadius.circular(13),
         ),
 
         child: Row(
@@ -348,9 +470,7 @@ class _ProgressTrackingPageState
               icon,
               size: 18,
 
-              color: selected
-                  ? Colors.white
-                  : AppColors.grey,
+              color: selected ? Colors.white : AppColors.grey,
             ),
 
             const SizedBox(width: 7),
@@ -361,9 +481,7 @@ class _ProgressTrackingPageState
               style: AppText.style(
                 13,
                 FontWeight.w700,
-                selected
-                    ? Colors.white
-                    : AppColors.grey,
+                selected ? Colors.white : AppColors.grey,
               ),
             ),
           ],
@@ -380,13 +498,9 @@ class _ProgressTrackingPageState
     return Container(
       width: double.infinity,
 
-      padding: const EdgeInsets.all(
-        18,
-      ),
+      padding: const EdgeInsets.all(18),
 
-      decoration: cardDecoration(
-        radius: 22,
-      ),
+      decoration: cardDecoration(radius: 22),
 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,10 +515,7 @@ class _ProgressTrackingPageState
                 decoration: BoxDecoration(
                   color: AppColors.paleTeal,
 
-                  borderRadius:
-                      BorderRadius.circular(
-                    15,
-                  ),
+                  borderRadius: BorderRadius.circular(15),
                 ),
 
                 child: const Icon(
@@ -418,51 +529,37 @@ class _ProgressTrackingPageState
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
 
                   children: [
-                    Text(
-                      selectedPatientName,
-                      style: AppText.heading,
-                    ),
+                    Text(selectedPatientName, style: AppText.heading),
 
                     const SizedBox(height: 2),
 
-                    Text(
-                      selectedRelationship,
-                      style: AppText.caption,
-                    ),
+                    Text(selectedRelationship, style: AppText.caption),
                   ],
                 ),
               ),
 
               Container(
-                padding:
-                    const EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 10,
                   vertical: 6,
                 ),
 
                 decoration: BoxDecoration(
-                  color:
-                      const Color(0xFFEAF7EF),
+                  color: const Color(0xFFEAF7EF),
 
-                  borderRadius:
-                      BorderRadius.circular(
-                    30,
-                  ),
+                  borderRadius: BorderRadius.circular(30),
                 ),
 
                 child: Text(
-                  'Active visit',
+                  currentVisit!.isComplete ? 'Completed visit' : 'Active visit',
 
                   style: AppText.style(
                     11,
                     FontWeight.w700,
-                    const Color(
-                      0xFF287749,
-                    ),
+                    const Color(0xFF287749),
                   ),
                 ),
               ),
@@ -474,24 +571,24 @@ class _ProgressTrackingPageState
           Container(
             width: double.infinity,
 
-            padding: const EdgeInsets.all(
-              14,
-            ),
+            padding: const EdgeInsets.all(14),
 
             decoration: BoxDecoration(
               color: AppColors.paleTeal,
 
-              borderRadius:
-                  BorderRadius.circular(
-                16,
-              ),
+              borderRadius: BorderRadius.circular(16),
             ),
 
             child: Column(
               children: [
                 _summaryRow(
-                  icon: Icons
-                      .confirmation_number_outlined,
+                  icon: Icons.local_hospital_outlined,
+                  label: 'Hospital',
+                  value: currentVisit!.hospital,
+                ),
+                const SizedBox(height: 12),
+                _summaryRow(
+                  icon: Icons.confirmation_number_outlined,
                   label: 'Queue number',
                   value: selectedQueue,
                 ),
@@ -499,8 +596,7 @@ class _ProgressTrackingPageState
                 const SizedBox(height: 12),
 
                 _summaryRow(
-                  icon: Icons
-                      .local_hospital_outlined,
+                  icon: Icons.local_hospital_outlined,
                   label: 'Department',
                   value: selectedDepartment,
                 ),
@@ -508,8 +604,7 @@ class _ProgressTrackingPageState
                 const SizedBox(height: 12),
 
                 _summaryRow(
-                  icon:
-                      Icons.schedule_rounded,
+                  icon: Icons.schedule_rounded,
                   label: 'Current status',
                   value: selectedStatus,
                 ),
@@ -528,20 +623,11 @@ class _ProgressTrackingPageState
   }) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: AppColors.teal,
-        ),
+        Icon(icon, size: 18, color: AppColors.teal),
 
         const SizedBox(width: 9),
 
-        Expanded(
-          child: Text(
-            label,
-            style: AppText.caption,
-          ),
-        ),
+        Expanded(child: Text(label, style: AppText.caption)),
 
         Flexible(
           child: Text(
@@ -558,73 +644,31 @@ class _ProgressTrackingPageState
   // FAMILY SECTION
   // ============================================================
 
-  Widget _buildFamilySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-
-      children: [
-        Text(
-          'Family members',
-          style: AppText.heading,
-        ),
-
-        const SizedBox(height: 6),
-
-        Text(
-          'View progress for people who have approved you as an emergency contact.',
-          style: AppText.body,
-        ),
-
-        const SizedBox(height: 18),
-
+  Widget _buildFamilySection() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text('Family progress', style: AppText.heading),
+      const SizedBox(height: 12),
+      if (!loading && visits.isEmpty)
+        Text('No shared family visits', style: AppText.body),
+      for (final data in visits) ...[
         _familyCard(
-          name: 'Siti Aminah',
-          relationship: 'Mother',
-          initials: 'SA',
-          status: 'Active visit',
-          currentStage:
-              'Blood test completed',
-          department:
-              'Emergency Department',
-          queue: 'B204',
+          name: decodeVisit(data).name,
+          relationship: 'Emergency contact',
+          initials: decodeVisit(data).name.isEmpty
+              ? '?'
+              : decodeVisit(data).name.substring(0, 1),
+          status: decodeVisit(data).isComplete ? 'Completed' : 'Active visit',
+          currentStage: decodeVisit(data).statusText,
+          department: decodeVisit(data).department,
+          queue: decodeVisit(data).queueNo,
           active: true,
         ),
-
         const SizedBox(height: 12),
-
-        _familyCard(
-          name: 'Adam Hakim',
-          relationship: 'Child',
-          initials: 'AH',
-          status: 'Active visit',
-          currentStage:
-              'Waiting for doctor consultation',
-          department:
-              'Paediatric Department',
-          queue: 'P112',
-          active: true,
-        ),
-
-        const SizedBox(height: 12),
-
-        _familyCard(
-          name: 'Ahmad Rahman',
-          relationship: 'Father',
-          initials: 'AR',
-          status: 'No active visit',
-          currentStage:
-              'No current hospital visit',
-          department: '-',
-          queue: '-',
-          active: false,
-        ),
-
-        const SizedBox(height: 26),
-
-        _buildFamilyNote(),
       ],
-    );
-  }
+      _buildFamilyNote(),
+    ],
+  );
 
   Widget _familyCard({
     required String name,
@@ -652,13 +696,9 @@ class _ProgressTrackingPageState
       child: Container(
         width: double.infinity,
 
-        padding: const EdgeInsets.all(
-          16,
-        ),
+        padding: const EdgeInsets.all(16),
 
-        decoration: cardDecoration(
-          radius: 20,
-        ),
+        decoration: cardDecoration(radius: 20),
 
         child: Row(
           children: [
@@ -669,14 +709,9 @@ class _ProgressTrackingPageState
               alignment: Alignment.center,
 
               decoration: BoxDecoration(
-                color: active
-                    ? AppColors.paleTeal
-                    : AppColors.background,
+                color: active ? AppColors.paleTeal : AppColors.background,
 
-                borderRadius:
-                    BorderRadius.circular(
-                  15,
-                ),
+                borderRadius: BorderRadius.circular(15),
               ),
 
               child: Text(
@@ -685,9 +720,7 @@ class _ProgressTrackingPageState
                 style: AppText.style(
                   15,
                   FontWeight.w700,
-                  active
-                      ? AppColors.darkTeal
-                      : AppColors.grey,
+                  active ? AppColors.darkTeal : AppColors.grey,
                 ),
               ),
             ),
@@ -696,58 +729,34 @@ class _ProgressTrackingPageState
 
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
                   Row(
                     children: [
-                      Expanded(
-                        child: Text(
-                          name,
-                          style:
-                              AppText.bodyStrong,
-                        ),
-                      ),
+                      Expanded(child: Text(name, style: AppText.bodyStrong)),
 
                       Container(
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 9,
                           vertical: 5,
                         ),
 
-                        decoration:
-                            BoxDecoration(
+                        decoration: BoxDecoration(
                           color: active
-                              ? const Color(
-                                  0xFFEAF7EF,
-                                )
-                              : const Color(
-                                  0xFFF1F4F4,
-                                ),
+                              ? const Color(0xFFEAF7EF)
+                              : const Color(0xFFF1F4F4),
 
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            20,
-                          ),
+                          borderRadius: BorderRadius.circular(20),
                         ),
 
                         child: Text(
                           status,
 
-                          style:
-                              AppText.style(
+                          style: AppText.style(
                             10,
                             FontWeight.w600,
-                            active
-                                ? const Color(
-                                    0xFF287749,
-                                  )
-                                : AppColors
-                                    .grey,
+                            active ? const Color(0xFF287749) : AppColors.grey,
                           ),
                         ),
                       ),
@@ -756,10 +765,7 @@ class _ProgressTrackingPageState
 
                   const SizedBox(height: 2),
 
-                  Text(
-                    relationship,
-                    style: AppText.caption,
-                  ),
+                  Text(relationship, style: AppText.caption),
 
                   const SizedBox(height: 8),
 
@@ -769,19 +775,14 @@ class _ProgressTrackingPageState
                     style: AppText.style(
                       12,
                       FontWeight.w600,
-                      active
-                          ? AppColors.darkTeal
-                          : AppColors.grey,
+                      active ? AppColors.darkTeal : AppColors.grey,
                     ),
                   ),
 
                   if (active) ...[
                     const SizedBox(height: 2),
 
-                    Text(
-                      department,
-                      style: AppText.caption,
-                    ),
+                    Text(department, style: AppText.caption),
                   ],
                 ],
               ),
@@ -805,31 +806,19 @@ class _ProgressTrackingPageState
     return Container(
       width: double.infinity,
 
-      padding: const EdgeInsets.all(
-        16,
-      ),
+      padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: Colors.white.withValues(
-          alpha: 0.70,
-        ),
+        color: Colors.white.withValues(alpha: 0.70),
 
-        borderRadius:
-            BorderRadius.circular(
-          18,
-        ),
+        borderRadius: BorderRadius.circular(18),
       ),
 
       child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
-          const Icon(
-            Icons.shield_outlined,
-            color: AppColors.teal,
-            size: 22,
-          ),
+          const Icon(Icons.shield_outlined, color: AppColors.teal, size: 22),
 
           const SizedBox(width: 12),
 
@@ -849,81 +838,35 @@ class _ProgressTrackingPageState
   // ============================================================
 
   Widget _buildProgressTimeline() {
+    final steps = currentVisit!.steps;
     return Container(
       width: double.infinity,
-
-      padding: const EdgeInsets.fromLTRB(
-        18,
-        20,
-        18,
-        6,
-      ),
-
-      decoration: cardDecoration(
-        radius: 22,
-      ),
-
+      padding: const EdgeInsets.fromLTRB(18, 20, 18, 6),
+      decoration: cardDecoration(radius: 22),
       child: Column(
         children: [
-          _progressStep(
-            title:
-                'Registration completed',
-            time: '8:12 AM',
-            status: 'Done',
-            state:
-                VisitProgressState.completed,
-            showLine: true,
-          ),
-
-          _progressStep(
-            title:
-                'Triage completed',
-            time: '8:25 AM',
-            status: 'Done',
-            state:
-                VisitProgressState.completed,
-            showLine: true,
-          ),
-
-          _progressStep(
-            title:
-                'Blood test completed',
-            time: '9:15 AM',
-            status: 'Done',
-            state:
-                VisitProgressState.completed,
-            showLine: true,
-          ),
-
-          _progressStep(
-            title:
-                'X-ray in queue',
-            time: '9:30 AM',
-            status: 'In progress',
-            state:
-                VisitProgressState.current,
-            showLine: true,
-          ),
-
-          _progressStep(
-            title:
-                'Doctor consultation pending',
-            time: '-',
-            status: 'Waiting',
-            state:
-                VisitProgressState.pending,
-            showLine: true,
-          ),
-
-          _progressStep(
-            title:
-                'Discharge / admission decision pending',
-            time: '-',
-            status: 'Waiting',
-            state:
-                VisitProgressState.pending,
-            showLine: false,
-          ),
+          for (var i = 0; i < steps.length; i++)
+            _progressStep(
+              title: steps[i].name,
+              time: steps[i].completedAt == null && steps[i].startedAt == null
+                  ? '-'
+                  : PatientProfileCard.timestamp(
+                      (steps[i].completedAt ?? steps[i].startedAt)!
+                          .toUtc()
+                          .toIso8601String(),
+                    ),
+              status: switch (steps[i].status) {
+                StepStatus.done => 'Done',
+                StepStatus.inProgress => 'In progress',
+                StepStatus.waiting => 'Waiting',
+              },
+              state: switch (steps[i].status) {
+                StepStatus.done => VisitProgressState.completed,
+                StepStatus.inProgress => VisitProgressState.current,
+                StepStatus.waiting => VisitProgressState.pending,
+              },
+              showLine: i < steps.length - 1,
+            ),
         ],
       ),
     );
@@ -936,51 +879,37 @@ class _ProgressTrackingPageState
     required VisitProgressState state,
     required bool showLine,
   }) {
-    final bool completed =
-        state ==
-            VisitProgressState.completed;
+    final bool completed = state == VisitProgressState.completed;
 
-    final bool current =
-        state ==
-            VisitProgressState.current;
+    final bool current = state == VisitProgressState.current;
 
     Color markerColor;
     Color badgeBackground;
     Color badgeText;
 
     if (completed) {
-      markerColor =
-          const Color(0xFF3BA96B);
+      markerColor = const Color(0xFF3BA96B);
 
-      badgeBackground =
-          const Color(0xFFEAF7EF);
+      badgeBackground = const Color(0xFFEAF7EF);
 
-      badgeText =
-          const Color(0xFF287749);
+      badgeText = const Color(0xFF287749);
     } else if (current) {
-      markerColor =
-          AppColors.darkTeal;
+      markerColor = AppColors.darkTeal;
 
-      badgeBackground =
-          AppColors.paleTeal;
+      badgeBackground = AppColors.paleTeal;
 
-      badgeText =
-          AppColors.darkTeal;
+      badgeText = AppColors.darkTeal;
     } else {
-      markerColor =
-          const Color(0xFFBBC7C7);
+      markerColor = const Color(0xFFBBC7C7);
 
-      badgeBackground =
-          const Color(0xFFF1F4F4);
+      badgeBackground = const Color(0xFFF1F4F4);
 
-      badgeText =
-          AppColors.grey;
+      badgeText = AppColors.grey;
     }
 
     return IntrinsicHeight(
       child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
           SizedBox(
@@ -993,16 +922,11 @@ class _ProgressTrackingPageState
                   height: 30,
 
                   decoration: BoxDecoration(
-                    color: completed
-                        ? markerColor
-                        : Colors.white,
+                    color: completed ? markerColor : Colors.white,
 
                     shape: BoxShape.circle,
 
-                    border: Border.all(
-                      color: markerColor,
-                      width: 2,
-                    ),
+                    border: Border.all(color: markerColor, width: 2),
                   ),
 
                   child: completed
@@ -1012,22 +936,18 @@ class _ProgressTrackingPageState
                           size: 18,
                         )
                       : current
-                          ? Center(
-                              child:
-                                  Container(
-                                width: 13,
-                                height: 13,
+                      ? Center(
+                          child: Container(
+                            width: 13,
+                            height: 13,
 
-                                decoration:
-                                    const BoxDecoration(
-                                  color: AppColors
-                                      .darkTeal,
-                                  shape: BoxShape
-                                      .circle,
-                                ),
-                              ),
-                            )
-                          : null,
+                            decoration: const BoxDecoration(
+                              color: AppColors.darkTeal,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        )
+                      : null,
                 ),
 
                 if (showLine)
@@ -1035,16 +955,10 @@ class _ProgressTrackingPageState
                     child: Container(
                       width: 2,
 
-                      margin:
-                          const EdgeInsets
-                              .symmetric(
-                        vertical: 3,
-                      ),
+                      margin: const EdgeInsets.symmetric(vertical: 3),
 
                       color: completed
-                          ? const Color(
-                              0xFF9BD8B5,
-                            )
+                          ? const Color(0xFF9BD8B5)
                           : AppColors.border,
                     ),
                   ),
@@ -1056,20 +970,14 @@ class _ProgressTrackingPageState
 
           Expanded(
             child: Padding(
-              padding:
-                  const EdgeInsets.only(
-                bottom: 22,
-              ),
+              padding: const EdgeInsets.only(bottom: 22),
 
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
                   Row(
-                    crossAxisAlignment:
-                        CrossAxisAlignment
-                            .start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
 
                     children: [
                       Expanded(
@@ -1079,62 +987,39 @@ class _ProgressTrackingPageState
                           style: current
                               ? AppText.style(
                                   14,
-                                  FontWeight
-                                      .w700,
-                                  AppColors
-                                      .darkTeal,
+                                  FontWeight.w700,
+                                  AppColors.darkTeal,
                                 )
-                              : AppText
-                                  .bodyStrong,
+                              : AppText.bodyStrong,
                         ),
                       ),
 
-                      const SizedBox(
-                        width: 8,
-                      ),
+                      const SizedBox(width: 8),
 
                       Container(
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 6,
                         ),
 
-                        decoration:
-                            BoxDecoration(
-                          color:
-                              badgeBackground,
+                        decoration: BoxDecoration(
+                          color: badgeBackground,
 
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            30,
-                          ),
+                          borderRadius: BorderRadius.circular(30),
                         ),
 
                         child: Text(
                           status,
 
-                          style:
-                              AppText.style(
-                            10,
-                            FontWeight.w600,
-                            badgeText,
-                          ),
+                          style: AppText.style(10, FontWeight.w600, badgeText),
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(
-                    height: 4,
-                  ),
+                  const SizedBox(height: 4),
 
-                  Text(
-                    time,
-                    style: AppText.caption,
-                  ),
+                  Text(time, style: AppText.caption),
                 ],
               ),
             ),
@@ -1152,17 +1037,12 @@ class _ProgressTrackingPageState
     return Container(
       width: double.infinity,
 
-      padding: const EdgeInsets.all(
-        16,
-      ),
+      padding: const EdgeInsets.all(16),
 
-      decoration: cardDecoration(
-        radius: 20,
-      ),
+      decoration: cardDecoration(radius: 20),
 
       child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
           Container(
@@ -1172,10 +1052,7 @@ class _ProgressTrackingPageState
             decoration: BoxDecoration(
               color: AppColors.paleTeal,
 
-              borderRadius:
-                  BorderRadius.circular(
-                14,
-              ),
+              borderRadius: BorderRadius.circular(14),
             ),
 
             child: const Icon(
@@ -1189,14 +1066,10 @@ class _ProgressTrackingPageState
 
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
 
               children: [
-                Text(
-                  'Family visibility',
-                  style: AppText.bodyStrong,
-                ),
+                Text('Family visibility', style: AppText.bodyStrong),
 
                 const SizedBox(height: 3),
 
@@ -1207,6 +1080,13 @@ class _ProgressTrackingPageState
               ],
             ),
           ),
+          if (!viewingFamily)
+            Switch(
+              value: currentVisit!.familySharing,
+              onChanged: sharingSaving
+                  ? null
+                  : (value) => toggleSharing(currentVisit!.id, value),
+            ),
         ],
       ),
     );
@@ -1220,24 +1100,16 @@ class _ProgressTrackingPageState
     return Container(
       width: double.infinity,
 
-      padding: const EdgeInsets.all(
-        16,
-      ),
+      padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: Colors.white.withValues(
-          alpha: 0.70,
-        ),
+        color: Colors.white.withValues(alpha: 0.70),
 
-        borderRadius:
-            BorderRadius.circular(
-          18,
-        ),
+        borderRadius: BorderRadius.circular(18),
       ),
 
       child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
           const Icon(
@@ -1265,10 +1137,4 @@ class _ProgressTrackingPageState
 // PROGRESS STATES
 // ============================================================
 
-enum VisitProgressState {
-  completed,
-  current,
-  pending,
-}
-
-
+enum VisitProgressState { completed, current, pending }

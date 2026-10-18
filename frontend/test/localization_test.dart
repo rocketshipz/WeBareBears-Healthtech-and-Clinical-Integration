@@ -20,6 +20,8 @@ void main() {
   ) async {
     await tester.pumpWidget(const TriageMYApp());
     await tester.pump();
+    await tester.tap(find.text('Normal user'));
+    await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     expect(find.text('Welcome back'), findsOneWidget);
     await AppLanguage.instance.select('ms');

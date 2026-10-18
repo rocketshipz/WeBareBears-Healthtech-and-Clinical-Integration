@@ -99,3 +99,43 @@ async def test_auth_flow(nationality):
         )
         assert me_res.status_code == 200
         assert me_res.json()["data"]["email"] == test_email
+
+        # Registration creates exactly one linked demographics row.
+        from app.core.database import get_session_factory
+        from app.models.user import User
+        from app.models.user_information import UserInformation
+        user_id = reg_data["data"]["user"]["id"]
+        with get_session_factory()() as session:
+            assert session.get(User, user_id).name == "Test User"
+            assert session.get(UserInformation, user_id).nationality == nationality
+
+        headers = {"Authorization": f"Bearer {token}"}
+        for weight, allergy in [(60.5, "Penicillin"), (62.0, "Peanuts")]:
+            save = await client.put("/api/auth/profile", headers=headers, json={
+                "weight_kg": weight, "allergies": [{"substance": allergy}],
+                "preferred_language": "Bahasa Melayu", "location_consent": True,
+            })
+            assert save.status_code == 200, save.text
+            loaded = await client.get("/api/auth/profile", headers=headers)
+            assert loaded.status_code == 200
+            assert float(loaded.json()["data"]["weight_kg"]) == weight
+            assert loaded.json()["data"]["allergies"] == [{"substance": allergy}]
+            with get_session_factory()() as session:
+                record = session.get(UserInformation, user_id)
+                assert float(record.weight_kg) == weight
+                assert record.allergies == [{"substance": allergy}]
+                assert session.query(UserInformation).filter_by(user_id=user_id).count() == 1
+                assert session.get(User, user_id).name == "Test User"
+
+        # A separate login reads the same persisted profile.
+        other_token = login_phone_res.json()["data"]["token"]
+        refreshed = await client.get("/api/auth/profile", headers={"Authorization": f"Bearer {other_token}"})
+        assert float(refreshed.json()["data"]["weight_kg"]) == 62.0
+        locked = await client.put("/api/auth/profile", headers=headers, json={"name": "Changed"})
+        assert locked.status_code == 422
+        invalid = await client.put("/api/auth/profile", headers=headers, json={"weight_kg": -1})
+        assert invalid.status_code == 422
+        unauthenticated = await client.get("/api/auth/profile")
+        assert unauthenticated.status_code == 401
+        invalid_token = await client.put("/api/auth/profile", headers={"Authorization": "Bearer invalid"}, json={})
+        assert invalid_token.status_code == 401

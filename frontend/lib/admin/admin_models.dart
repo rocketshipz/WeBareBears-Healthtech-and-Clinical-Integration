@@ -220,37 +220,37 @@ class VisitStep {
   }
 
   static VisitStep registration() => VisitStep(
-        id: 'registration',
-        name: 'Registration',
-        icon: Icons.assignment_ind_outlined,
-      );
+    id: 'registration',
+    name: 'Registration',
+    icon: Icons.assignment_ind_outlined,
+  );
 
   static VisitStep triage() => VisitStep(
-        id: 'triage',
-        name: 'Triage',
-        icon: Icons.monitor_heart_outlined,
-      );
+    id: 'triage',
+    name: 'Triage',
+    icon: Icons.monitor_heart_outlined,
+  );
 
   static VisitStep doctor() => VisitStep(
-        id: 'doctor',
-        name: 'Doctor consultation',
-        icon: Icons.medical_services_outlined,
-      );
+    id: 'doctor',
+    name: 'Doctor consultation',
+    icon: Icons.medical_services_outlined,
+  );
 
   static VisitStep discharge() => VisitStep(
-        id: 'discharge',
-        name: 'Discharge / admission decision',
-        icon: Icons.exit_to_app_rounded,
-      );
+    id: 'discharge',
+    name: 'Discharge / admission decision',
+    icon: Icons.exit_to_app_rounded,
+  );
 
   static String slug(String s) => s.toLowerCase().replaceAll(' ', '_');
 
   static VisitStep test(String name) => VisitStep(
-        id: slug(name),
-        name: name,
-        icon: testCatalog[name] ?? Icons.science_outlined,
-        isTest: true,
-      );
+    id: slug(name),
+    name: name,
+    icon: testCatalog[name] ?? Icons.science_outlined,
+    isTest: true,
+  );
 
   /// Rebuilds a step coming from the database.
   static VisitStep fromKey({
@@ -359,26 +359,26 @@ class TriageSummary {
       tr('{zone} Zone · Level {level}', {'zone': acuity.label, 'level': level});
 
   Map<String, dynamic> toJson() => {
-        'symptom': symptom,
-        'severity': severity,
-        'duration': duration,
-        'danger_signs': dangerSigns,
-        'level': level,
-        'submitted_at': submittedAt.toUtc().toIso8601String(),
-      };
+    'symptom': symptom,
+    'severity': severity,
+    'duration': duration,
+    'danger_signs': dangerSigns,
+    'level': level,
+    'submitted_at': submittedAt.toUtc().toIso8601String(),
+  };
 
   factory TriageSummary.fromJson(Map<String, dynamic> j) => TriageSummary(
-        symptom: (j['symptom'] ?? 'Not specified').toString(),
-        severity: (j['severity'] ?? 'Not specified').toString(),
-        duration: (j['duration'] ?? 'Not specified').toString(),
-        dangerSigns: ((j['danger_signs'] ?? const []) as List)
-            .map((e) => e.toString())
-            .toList(),
-        level: (j['level'] as num?)?.toInt() ?? 4,
-        submittedAt: j['submitted_at'] == null
-            ? DateTime.now()
-            : DateTime.parse(j['submitted_at'].toString()).toLocal(),
-      );
+    symptom: (j['symptom'] ?? 'Not specified').toString(),
+    severity: (j['severity'] ?? 'Not specified').toString(),
+    duration: (j['duration'] ?? 'Not specified').toString(),
+    dangerSigns: ((j['danger_signs'] ?? const []) as List)
+        .map((e) => e.toString())
+        .toList(),
+    level: (j['level'] as num?)?.toInt() ?? 4,
+    submittedAt: j['submitted_at'] == null
+        ? DateTime.now()
+        : DateTime.parse(j['submitted_at'].toString()).toLocal(),
+  );
 }
 
 // ============================================================
@@ -396,6 +396,7 @@ class IncomingPatient {
   final String allergies;
   final String conditions;
   final String medication;
+
   /// The patient's own phone number; the tracking link is sent here.
   final String phone;
   final String emergencyPhone;
@@ -426,9 +427,11 @@ class IncomingPatient {
 
 class Visit {
   final String id;
-  final String queueNo;
+  String queueNo;
+  int version;
   final String? patientId;
   final String? triageReportId;
+  final String? assignedStaffId;
 
   String name;
   String ic;
@@ -439,11 +442,13 @@ class Visit {
 
   final String department;
   final String hospital;
+  final String? hospitalId;
   final DateTime arrivedAt;
   final List<VisitStep> steps;
   final List<LogEntry> log = [];
 
   // clinical info carried over from the patient's profile
+  Map<String, dynamic> profile;
   String bloodType;
   String allergies;
   String conditions;
@@ -465,6 +470,7 @@ class Visit {
   Visit({
     String? id,
     required this.queueNo,
+    this.version = 0,
     required this.name,
     required this.ic,
     required this.age,
@@ -474,21 +480,24 @@ class Visit {
     required this.department,
     required this.hospital,
     required this.arrivedAt,
+    this.hospitalId,
     required this.steps,
     String? shareToken,
     this.patientId,
     this.triageReportId,
+    this.assignedStaffId,
     this.triage,
     this.bloodType = '',
     this.allergies = '',
     this.conditions = '',
     this.medication = '',
+    this.profile = const {},
     this.familySharing = false,
     this.patientPhone = '',
     this.outcome,
     this.completedAt,
-  })  : id = id ?? newId(),
-        shareToken = shareToken ?? newShareToken();
+  }) : id = id ?? newId(),
+       shareToken = shareToken ?? newShareToken();
 
   String get shareLink => AdminConfig.shareLink(shareToken);
 
@@ -524,6 +533,9 @@ class Visit {
 
   /// Copies fresh data from the server into this (already displayed) object.
   void updateFrom(Visit o) {
+    queueNo = o.queueNo;
+    version = o.version;
+    profile = o.profile;
     name = o.name;
     ic = o.ic;
     age = o.age;
@@ -555,6 +567,7 @@ class StaffMember {
   final String name;
   final String role;
   final String hospital;
+  final String? hospitalId;
   final String department;
 
   const StaffMember({
@@ -563,6 +576,7 @@ class StaffMember {
     required this.role,
     required this.hospital,
     required this.department,
+    this.hospitalId,
   });
 
   /// "Aina Hassan (N-1021)"

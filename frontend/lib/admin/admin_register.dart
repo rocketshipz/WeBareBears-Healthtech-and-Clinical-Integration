@@ -2,380 +2,210 @@ import 'package:flutter/material.dart';
 
 import '../theme.dart';
 import 'admin_store.dart';
-import 'admin_widgets.dart';
-import 'admin_i18n.dart';
+import 'patient_lookup.dart';
+import 'patient_profile_card.dart';
 
-/// Registers a patient who has arrived and starts their queue / progress tracking.
 class RegisterPatientPage extends StatefulWidget {
   final ValueChanged<Visit> onRegistered;
-
   const RegisterPatientPage({super.key, required this.onRegistered});
-
   @override
   State<RegisterPatientPage> createState() => _RegisterPatientPageState();
 }
 
 class _RegisterPatientPageState extends State<RegisterPatientPage> {
-  final nameController = TextEditingController();
   final icController = TextEditingController();
-  final ageController = TextEditingController();
-  final complaintController = TextEditingController();
-  final phoneController = TextEditingController();
-
-  String sex = 'Female';
-  Acuity acuity = Acuity.green;
-  final Set<String> tests = {};
-
+  Map<String, dynamic>? patient;
+  bool loading = false;
+  String? error;
+  Acuity? assessedZone;
   @override
   void dispose() {
-    nameController.dispose();
     icController.dispose();
-    ageController.dispose();
-    complaintController.dispose();
-    phoneController.dispose();
     super.dispose();
   }
 
-  bool saving = false;
-
-  Future<void> _submit() async {
-    final name = nameController.text.trim();
-    final complaint = complaintController.text.trim();
-    final age = int.tryParse(ageController.text.trim());
-
-    if (name.isEmpty || complaint.isEmpty || age == null) {
-      showAppSnack(
-        context,
-        tr('Please enter the patient\'s name, age and main complaint.'),
-      );
+  Future<void> _lookup() async {
+    if (loading) return;
+    final ic = icController.text.replaceAll(RegExp(r'[-\s]'), '');
+    if (!RegExp(r'^\d{12}$').hasMatch(ic)) {
+      setState(() {
+        patient = null;
+        error = 'Enter a valid 12-digit IC number.';
+      });
       return;
     }
-
-    final phone = phoneController.text.trim();
-    final phoneDigits = phone.replaceAll(RegExp(r'[^0-9]'), '');
-
-    if (phoneDigits.length < 9 || phoneDigits.length > 13) {
-      showAppSnack(
-        context,
-        tr('Please enter the patient\'s phone number, e.g. 0123456789.'),
-      );
-      return;
-    }
-
-    // keep the catalog order so steps are consistent
-    final orderedTests = VisitStep.testCatalog.keys
-        .where((t) => tests.contains(t))
-        .toList();
-
-    setState(() => saving = true);
-
-    final Visit visit;
-
-    try {
-      visit = await adminStore.registerPatient(
-        name: name,
-        ic: icController.text.trim(),
-        age: age,
-        sex: sex,
-        complaint: complaint,
-        acuity: acuity,
-        tests: orderedTests,
-        patientPhone: phone,
-      );
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => saving = false);
-      showAppSnack(context, tr('Could not register the patient. Please try again.'));
-      return;
-    }
-
-    if (!mounted) return;
-
-    nameController.clear();
-    icController.clear();
-    ageController.clear();
-    complaintController.clear();
-    phoneController.clear();
-
     setState(() {
-      saving = false;
-      sex = 'Female';
-      acuity = Acuity.green;
-      tests.clear();
+      loading = true;
+      error = null;
+      patient = null;
+      assessedZone = null;
     });
+    try {
+      final result = await PatientLookup.request('/admin/patients?ic=$ic');
+      if (mounted) setState(() => patient = result);
+    } catch (e) {
+      if (mounted) {
+        setState(() => error = e.toString().replaceFirst('Exception: ', ''));
+      }
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
 
-    showAppSnack(context, tr('{queue} registered.', {'queue': visit.queueNo}));
-    widget.onRegistered(visit);
+  Future<void> _register() async {
+    final data = patient;
+    if (data == null || loading) return;
+    final profile = Map<String, dynamic>.from(data['profile'] as Map);
+    if (adminStore.active.any((v) => v.patientId == profile['id'])) {
+      showAppSnack(context, 'This patient is already in the queue.');
+      return;
+    }
+    final triage = data['triage'] == null
+        ? null
+        : TriageSummary.fromJson(
+            Map<String, dynamic>.from(data['triage'] as Map),
+          );
+    if (triage == null && assessedZone == null) {
+      showAppSnack(context, 'Select the nurse-assessed zone before check-in.');
+      return;
+    }
+    setState(() => loading = true);
+    try {
+      final visit = await adminStore.registerPatient(
+        name: profile['name']?.toString() ?? 'Patient',
+        ic: profile['ic'].toString(),
+        age: (profile['age'] as num).toInt(),
+        sex: profile['sex_at_birth']?.toString() ?? 'Unspecified',
+        complaint: triage?.symptom ?? 'Awaiting nurse assessment',
+        acuity: triage?.acuity ?? assessedZone!,
+        tests: const [],
+        patientPhone: profile['phone']?.toString() ?? '',
+        profile: profile,
+        triage: triage,
+        triageReportId: data['report_id'] as String?,
+      );
+      if (!mounted) return;
+      setState(() {
+        patient = null;
+        icController.clear();
+      });
+      widget.onRegistered(visit);
+    } catch (e) {
+      if (mounted) {
+        setState(() => error = e.toString().replaceFirst('Exception: ', ''));
+      }
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: GradientBackground(
-        child: SafeArea(
-          bottom: false,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const FadeSlideIn(
-                      index: 0,
-                      child: Row(
-                        children: [
-                          BrandWordmark(size: 28),
-                          SizedBox(width: 10),
-                          StaffTag(),
-                        ],
+  Widget build(BuildContext context) => Scaffold(
+    body: GradientBackground(
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 960),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const BrandWordmark(size: 28),
+                  const SizedBox(height: 26),
+                  Text('Patient Check-In', style: AppText.display),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Enter the patient IC to retrieve their profile and latest saved triage report.',
+                    style: AppText.body,
+                  ),
+                  const SizedBox(height: 22),
+                  TextField(
+                    controller: icController,
+                    enabled: !loading,
+                    keyboardType: TextInputType.number,
+                    onSubmitted: (_) => _lookup(),
+                    onChanged: (_) => setState(() {
+                      patient = null;
+                      error = null;
+                    }),
+                    decoration: appInputDecoration(
+                      hint: 'IC number, e.g. 000101-00-0000',
+                      icon: Icons.badge_outlined,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  PrimaryButton(
+                    label: loading ? 'Loading...' : 'Find patient',
+                    icon: Icons.search,
+                    onPressed: loading ? null : _lookup,
+                  ),
+                  if (error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text(
+                        error!,
+                        style: const TextStyle(color: AppColors.red),
                       ),
                     ),
-
-                    const SizedBox(height: 26),
-
-                    FadeSlideIn(
-                      index: 1,
-                      child: Column(
+                  if (patient != null) ...[
+                    const SizedBox(height: 20),
+                    PrimaryButton(
+                      label: loading ? 'Checking in...' : 'Check in patient',
+                      icon: Icons.arrow_forward,
+                      onPressed:
+                          loading ||
+                              (patient!['triage'] == null &&
+                                  assessedZone == null)
+                          ? null
+                          : _register,
+                    ),
+                    const SizedBox(height: 20),
+                    PatientProfileCard(
+                      profile: Map<String, dynamic>.from(
+                        patient!['profile'] as Map,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (patient!['triage'] == null)
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(tr('Register patient'), style: AppText.display),
-                          const SizedBox(height: 6),
                           Text(
-                            tr('For walk-ins. Patients who used the TriageMY app appear '
-                                'under Incoming in the queue, with their details already filled in.'),
+                            'No saved report. Select the nurse-assessed zone before check-in.',
                             style: AppText.body,
                           ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 22),
-
-                    // PATIENT DETAILS
-                    FadeSlideIn(
-                      index: 2,
-                      child: _card(
-                        title: tr('Patient details'),
-                        children: [
-                          fieldLabel(tr('Full name')),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: nameController,
-                            style: AppText.input,
-                            textCapitalization: TextCapitalization.words,
-                            textInputAction: TextInputAction.next,
-                            decoration: appInputDecoration(
-                              hint: tr('Patient name'),
-                              icon: Icons.person_outline_rounded,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          fieldLabel(tr('IC / ID number (optional)')),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: icController,
-                            style: AppText.input,
-                            textInputAction: TextInputAction.next,
-                            decoration: appInputDecoration(
-                              hint: tr('e.g. 000101-00-0000'),
-                              icon: Icons.badge_outlined,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          fieldLabel(tr('Age')),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: ageController,
-                            style: AppText.input,
-                            keyboardType: TextInputType.number,
-                            decoration: appInputDecoration(
-                              hint: tr('Years'),
-                              icon: Icons.cake_outlined,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          fieldLabel(tr('Sex')),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
                           Wrap(
                             spacing: 8,
                             children: [
-                              for (final s in const ['Female', 'Male'])
-                                SelectChip(
-                                  label: tr(s),
-                                  selected: sex == s,
-                                  onTap: () => setState(() => sex = s),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          fieldLabel(tr('Main complaint')),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: complaintController,
-                            style: AppText.input,
-                            textCapitalization: TextCapitalization.sentences,
-                            decoration: appInputDecoration(
-                              hint: tr('e.g. Chest pain'),
-                              icon: Icons.healing_outlined,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // ZONE
-                    FadeSlideIn(
-                      index: 3,
-                      child: _card(
-                        title: tr('Triage zone'),
-                        subtitle: tr('Can be changed later after nurse triage.'),
-                        children: [
-                          Row(
-                            children: [
-                              for (final a in Acuity.values) ...[
-                                Expanded(child: _zoneTile(a)),
-                                if (a != Acuity.values.last)
-                                  const SizedBox(width: 8),
-                              ],
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // TESTS
-                    FadeSlideIn(
-                      index: 4,
-                      child: _card(
-                        title: tr('Tests required'),
-                        subtitle: tr('Optional. More can be added during the visit.'),
-                        children: [
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              for (final t in VisitStep.testCatalog.keys)
-                                SelectChip(
-                                  label: tr(t),
-                                  selected: tests.contains(t),
-                                  onTap: () => setState(() {
-                                    if (!tests.remove(t)) tests.add(t);
-                                  }),
+                              for (final zone in Acuity.values)
+                                ChoiceChip(
+                                  label: Text('${zone.label} zone'),
+                                  selected: assessedZone == zone,
+                                  onSelected: loading
+                                      ? null
+                                      : (_) =>
+                                            setState(() => assessedZone = zone),
                                 ),
                             ],
                           ),
                         ],
+                      )
+                    else
+                      PatientProfileCard(
+                        title: 'Latest triage report',
+                        profile: Map<String, dynamic>.from(
+                          patient!['triage'] as Map,
+                        ),
                       ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // PATIENT CONTACT
-                    FadeSlideIn(
-                      index: 5,
-                      child: _card(
-                        title: tr('Patient phone number'),
-                        subtitle:
-                            tr('Required. The live tracking link is sent to this number.'),
-                        children: [
-                          TextField(
-                            controller: phoneController,
-                            style: AppText.input,
-                            keyboardType: TextInputType.phone,
-                            decoration: appInputDecoration(
-                              hint: tr('e.g. 0123456789'),
-                              icon: Icons.phone_outlined,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    FadeSlideIn(
-                      index: 6,
-                      child: PrimaryButton(
-                        label: saving ? tr('Registering...') : tr('Register & start queue'),
-                        icon: Icons.arrow_forward_rounded,
-                        onPressed: saving ? null : _submit,
-                      ),
-                    ),
                   ],
-                ),
+                ],
               ),
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _zoneTile(Acuity a) {
-    final selected = acuity == a;
-    final color = a.color;
-
-    return Pressable(
-      onTap: () => setState(() => acuity = a),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: selected ? color.withValues(alpha: 0.10) : AppColors.field,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? color : Colors.transparent,
-            width: 1.5,
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 14,
-              height: 14,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              a.label,
-              style: AppText.style(14, FontWeight.w700, AppColors.textDark),
-            ),
-            Text(a.description, style: AppText.caption),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _card({
-    required String title,
-    String? subtitle,
-    required List<Widget> children,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: cardDecoration(radius: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: AppText.heading),
-          if (subtitle != null) ...[
-            const SizedBox(height: 2),
-            Text(subtitle, style: AppText.caption),
-          ],
-          const SizedBox(height: 14),
-          ...children,
-        ],
-      ),
-    );
-  }
+    ),
+  );
 }
