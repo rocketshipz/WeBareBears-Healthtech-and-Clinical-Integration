@@ -26,6 +26,26 @@ def get_auth_service() -> AuthService:
     return _auth_service
 
 
+def get_optional_user(
+    authorization: Optional[str] = Header(None),
+    service: AuthService = Depends(get_auth_service),
+) -> Optional[dict]:
+    """The logged-in user for a `Bearer <token>` header, or None (no header, or unknown / expired token)."""
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+    return service.get_user_by_token(authorization.split(" ", 1)[1])
+
+
+def get_current_user(user: Optional[dict] = Depends(get_optional_user)) -> dict:
+    """Like get_optional_user, but 401 when not logged in."""
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing, invalid or expired session token.",
+        )
+    return user
+
+
 @router.post(
     "/send-code",
     response_model=APIResponse[SendCodeResponse],
