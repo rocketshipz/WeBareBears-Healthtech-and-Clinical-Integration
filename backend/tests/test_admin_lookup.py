@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -10,6 +10,7 @@ from app.models.staff import StaffAccount
 from app.services.auth_service import _hash_password
 from app.models.user import User
 from app.models.user_information import UserInformation
+from app.models.triage_report import SavedReport
 
 
 @pytest.mark.asyncio
@@ -42,22 +43,26 @@ async def test_staff_lookup_requires_auth_and_returns_profile_and_latest_report(
         lookup = await client.get("/api/admin/patients?ic=001010101234", headers=headers)
         assert lookup.status_code == 200
         assert lookup.json()["triage"] is None
-        for symptom in ["Headache", "Chest pain"]:
-            saved = await client.post("/api/triage/reports", headers=patient_headers, json={
-                "symptom": symptom, "severity": "Severe", "duration": "1 hour",
-                "danger_signs": ["Shortness of breath"], "level": 1,
-                "submitted_at": "2026-10-18T10:00:00Z",
-            })
-            assert saved.status_code == 200
+        with get_session_factory()() as session:
+            for session_id, symptom, when in [("session-old", "Headache", "2026-10-18T09:00:00+00:00"),
+                                              ("session-new", "Chest pain", "2026-10-18T10:00:00+00:00")]:
+                session.add(SavedReport(session_id=session_id, user_id="lookup-patient", subject="self",
+                                        main_symptom=symptom, reported_severity="Level 2 - Emergency",
+                                        danger_signs="None reported", report={"symptom": symptom, "level": 2},
+                                        created_at=datetime.fromisoformat(when),
+                                        updated_at=datetime.fromisoformat(when)))
+            session.commit()
         lookup = await client.get("/api/admin/patients?ic=001010-10-1234", headers=headers)
         data = lookup.json()
         assert data["profile"]["emergency_contact_name"] == "Family Contact"
         assert data["profile"]["allergies"] == [{"substance": "Penicillin"}]
         assert "password_hash" not in data["profile"]
         assert data["triage"]["symptom"] == "Chest pain"
+        assert data["report_id"] == "session-new"
         assert (await client.get("/api/admin/patients?ic=not-an-ic", headers=headers)).status_code == 422
         assert (await client.get("/api/admin/patients?ic=999999999999", headers=headers)).status_code == 404
-        assert (await client.post("/api/triage/reports", json={})).status_code in (401, 422)
+        # Clients can no longer post their own report (and level).
+        assert (await client.post("/api/triage/reports", headers=patient_headers, json={})).status_code in (404, 405)
     auth._active_sessions.pop("patient-test-token")
 
 

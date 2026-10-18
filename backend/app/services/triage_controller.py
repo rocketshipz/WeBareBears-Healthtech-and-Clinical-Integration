@@ -177,10 +177,15 @@ class HybridTriageController:
     def has_session(self, session_id: Optional[str]) -> bool:
         return bool(session_id) and session_id in self._sessions
 
+    def session_owner(self, session_id: Optional[str]) -> Optional[str]:
+        session = self._sessions.get(session_id) if session_id else None
+        return session.owner_id if session else None
+
     def get_session(self, session_id: Optional[str], context: Optional[Dict[str, Any]] = None) -> HybridSession:
         if session_id and session_id in self._sessions:
             return self._sessions[session_id]
         session = HybridSession(session_id=session_id or str(uuid.uuid4()),
+                                owner_id=(context or {}).get("patient_id"),
                                 profile=dict((context or {}).get("profile") or {}))
         self._sessions[session.session_id] = session
         return session
@@ -330,6 +335,7 @@ class HybridTriageController:
         question = None
         if pending and pending["kind"] in QUESTION_STEPS and options:
             question = {"text": (session.last_output or {}).get("question"), "options": options}
+        said, had_complaint = message, session.has_complaint()
         placing = not session.findings["categories"] or (pending or {}).get("kind") == "other_symptoms"
         if placing and session.facts:
             message = f"{message} (Earlier they said: {'; '.join(session.facts)})"
@@ -365,6 +371,8 @@ class HybridTriageController:
             "present_condition_ids": present,
             "absent_condition_ids": absent,
         })
+        if session.chief_complaint is None and not had_complaint and session.has_complaint():
+            session.chief_complaint = said  # their own words, not a greeting like "hi"
         facts = [str(f)[:80] for f in data.get("facts") or [] if str(f).strip()]
         session.facts = list(dict.fromkeys(session.facts + facts))[-12:]
         session.checked_ids = list(dict.fromkeys(session.checked_ids + sorted(allowed)))

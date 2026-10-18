@@ -424,3 +424,15 @@ def test_something_mentioned_earlier_is_pre_selected_when_its_question_comes():
     assert noisy not in session.findings["present_condition_ids"]  # still needs the person's tap
     session = controller.run_session("Yes", session_id="s", selected_options=["Yes"])
     assert noisy in session.findings["present_condition_ids"]
+
+
+def test_chief_complaint_is_the_message_that_described_the_problem_not_a_greeting():
+    def extract(payload):
+        return {"categories": [TRAUMA]} if "ankle" in payload["message"] else {}
+    controller = controller_with(FakeLLM(extract))
+    session = controller.run_session("hi", session_id="s")
+    assert session.chief_complaint is None and session.pending["kind"] == "complaint"
+    session = controller.run_session("I twisted my ankle playing futsal", session_id="s")
+    assert session.chief_complaint == "I twisted my ankle playing futsal"
+    session = controller.run_session("30", session_id="s")  # later messages never replace it
+    assert session.chief_complaint == "I twisted my ankle playing futsal"

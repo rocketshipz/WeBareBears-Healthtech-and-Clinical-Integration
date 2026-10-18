@@ -77,6 +77,9 @@ def test_triage_chat_queries_the_profile_once_per_new_session(monkeypatch):
         def has_session(self, sid):
             return sid in self.sessions
 
+        def session_owner(self, sid):
+            return "u1"
+
         def run_session(self, message, context=None, session_id=None, selected_options=None, note=None):
             contexts.append(context)
             self.sessions.add("s1")
@@ -130,3 +133,43 @@ def test_history_only_counts_in_the_screened_categories():
     assert res["at_least_level"] is None  # a sprained ankle does not become Level 4
     res = engine.evaluate(categories=[TRAUMA], age_years=70, history_condition_ids=["RULE_TRAUMA_L4_01.C3"])
     assert res["at_least_level"] == 4  # anticoagulant use is a Trauma rule
+
+
+def test_each_user_gets_only_their_own_profile_and_session(monkeypatch):
+    """Two logged-in users: each screening gets its own user's profile, nobody can continue another user's
+    screening, and a patient_id in the request body is ignored."""
+    from app.api.routes import triage as route
+    from app.api.routes.auth import get_auth_service
+    from app.main import app
+    from app.services.triage_controller import HybridTriageController
+    from tests.test_triage_controller import FakeLLM
+
+    profiles = {"u1": {"age": 40, "sex_at_birth": "female"}, "u2": {"age": 25, "sex_at_birth": "male"}}
+    monkeypatch.setattr(route, "load_profile", lambda pid: dict(profiles.get(pid, {})))
+    controller = HybridTriageController()
+    controller._llm = FakeLLM(lambda payload: {"categories": [TRAUMA]} if payload["categories"] else {})
+    app.dependency_overrides[route.get_triage_agent] = lambda: controller
+    tokens = get_auth_service()._active_sessions
+    tokens["tok1"], tokens["tok2"] = {"id": "u1"}, {"id": "u2"}
+    try:
+        client = TestClient(app)
+
+        def chat(token=None, **body):
+            headers = {"Authorization": f"Bearer {token}"} if token else {}
+            return client.post("/api/triage/chat", json={"message": "I hurt my arm", **body}, headers=headers)
+
+        s1 = chat("tok1").json()["data"]["session_id"]
+        s2 = chat("tok2").json()["data"]["session_id"]
+        assert controller._sessions[s1].owner_id == "u1" and controller._sessions[s1].findings["age_years"] == 40
+        assert controller._sessions[s2].owner_id == "u2" and controller._sessions[s2].findings["age_years"] == 25
+        # Continuing someone else's screening (or continuing it logged out) is refused.
+        assert chat("tok2", session_id=s1).status_code == 403
+        assert chat(None, session_id=s1).status_code == 403
+        assert chat("tok1", session_id=s1).status_code == 200
+        # Without a login, a patient_id in the body never loads that person's profile.
+        anon = chat(None, patient_id="u1").json()["data"]["session_id"]
+        assert controller._sessions[anon].owner_id is None and controller._sessions[anon].profile == {}
+    finally:
+        app.dependency_overrides.clear()
+        tokens.pop("tok1", None)
+        tokens.pop("tok2", None)

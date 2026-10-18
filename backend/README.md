@@ -95,8 +95,9 @@ To generate a hash locally, run from `backend`:
 ```
 Store the resulting hash in `staff_login.password_hash`. The old `ADMIN_STAFF_ID` / `ADMIN_STAFF_PASSWORD` environment variables are no longer used.
 Patient lookup is staff-only: `GET /api/admin/patients?ic=...`.
-Patients completing triage now save reports through `POST /api/triage/reports` using their own login session.
-Older reports generated before this change are not stored; complete triage again to make one available.
+Triage reports are saved by the server: once a logged-in screening on `POST /api/triage/chat` is classified, it is stored in `patient_triage_reports`, keyed by the triage `session_id`, built from the rules engine result (clients cannot post a report or level).
+If the screening was for someone else, the user can link it to that person's account with `PUT /api/triage/reports/{session_id}/subject` (`{"ic": "..."}`), so staff find it when that person checks in.
+Existing databases: run `python migrate_triage_reports.py` once (renames `id` to `session_id`, adds `subject`, `subject_user_id`, `updated_at`; keeps existing rows).
 The admin queue and progress now use the authenticated API and the three existing Supabase patient tables. They persist across app restarts.
 
 Staff starter passwords default to `triagemy123` (PBKDF2 hashed). Run `python setup_staff_passwords.py` once to configure the database default and repair uninitialized passwords. Existing valid hashes are preserved. Staff can change their password from Account > Change password by entering their current password and confirming a new one.

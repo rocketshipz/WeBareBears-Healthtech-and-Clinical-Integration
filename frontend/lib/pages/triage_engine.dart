@@ -1,6 +1,7 @@
 import '../localization.dart';
 import 'package:flutter/material.dart';
 
+import '../services/auth_service.dart';
 import '../services/triage_chat_service.dart';
 import '../theme.dart';
 import 'triage_report.dart';
@@ -24,27 +25,33 @@ class _TriagePageState extends State<TriagePage> {
 
   final List<_ChatMessage> _messages = [
     // The backend applies the account owner's saved health profile unless told
-    // the screening is for someone else.
-    const _ChatMessage(
-      'Please note: this screening is for you, the account owner, by default, '
-      'and uses your saved health profile (such as your age). If you are doing '
-      'it on behalf of someone else, please tell me who it is for (for example, '
-      '"this is for my mother, she is 70").',
-      fromUser: false,
-    ),
+    // the screening is for someone else. Naming the logged-in user shows whose
+    // profile is in use.
+    _ChatMessage(_ownerNotice(), fromUser: false),
     const _ChatMessage(
       'Hi, I will ask a few questions to understand your condition. '
       'What is the main problem you are experiencing?',
       fromUser: false,
     ),
   ];
+  static String _ownerNotice() {
+    final name = (AuthService.currentUser?['name'] as String?)?.trim() ?? '';
+    final you = name.isEmpty ? 'you, the account owner' : 'you, $name (the account owner)';
+    return 'Please note: this screening is for $you by default, and uses your '
+        'saved health profile (such as your age). If you are doing it on behalf '
+        'of someone else, please tell me who it is for (for example, "this is '
+        'for my mother, she is 70").';
+  }
+
   final TextEditingController _textController = TextEditingController();
   // Optional extra details typed under the answer options.
   final TextEditingController _noteController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   String? _sessionId;
-  String? _firstComplaint;
+  String? _firstComplaint; // fallback only: the user's first message
+  String? _chiefComplaint; // the main problem, as identified by the backend
+  String? _mainSymptom; // its short summary, written once there is a result
   String? _lastSent;
   List<String>? _lastSelected;
   String? _lastNote;
@@ -99,6 +106,8 @@ class _TriagePageState extends State<TriagePage> {
       if (!mounted) return;
       setState(() {
         _sessionId = reply.sessionId ?? _sessionId;
+        _chiefComplaint = reply.chiefComplaint ?? _chiefComplaint;
+        _mainSymptom = reply.mainSymptom ?? _mainSymptom;
         _current = reply;
         _loading = false;
         _messages.add(_ChatMessage(reply.text, fromUser: false));
@@ -114,7 +123,7 @@ class _TriagePageState extends State<TriagePage> {
         }
       });
       _scrollToEnd();
-      if (reply.assessment != null) _openReport(reply.assessment!);
+      if (reply.assessment != null) _openReport(reply);
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -124,13 +133,16 @@ class _TriagePageState extends State<TriagePage> {
     }
   }
 
-  void _openReport(TriageAssessmentData a) {
+  void _openReport(TriageChatReply reply) {
+    final a = reply.assessment!;
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => TriageReportPage(
+          storedReportId: reply.reportId,
+          forSomeoneElse: reply.subject == 'other',
           report: TriageReportData(
-            symptom: _firstComplaint,
+            symptom: _mainSymptom ?? _chiefComplaint ?? _firstComplaint,
             severity: a.urgencyDescription,
             duration: null,
             dangerSigns: a.primaryConcerns,

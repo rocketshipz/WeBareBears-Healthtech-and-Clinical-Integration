@@ -8,12 +8,13 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field
 from sqlalchemy import func, text, or_
 
-from app.api.routes.admin import SavedReport, require_staff
+from app.api.routes.admin import require_staff
 from app.api.routes.auth import get_auth_service
 from app.core.database import get_db_session
 from app.models.staff import StaffAccount
 from app.models.user import User
 from app.models.user_information import UserInformation
+from app.models.triage_report import SavedReport
 from app.models.progress import PatientProgress, PatientTestTracking, PatientDiagnosisTreatment
 from app.models.hospital_directory import HospitalDirectory
 from app.services.hospital_identity import staff_hospital
@@ -211,9 +212,11 @@ def write_visit(visit_id: str, request: VisitWrite, staff=Depends(staff_account)
         session.add(visit)
     if request.triage_report_id:
         report = session.get(SavedReport, request.triage_report_id)
-        if report is None or report.user_id != user.id:
+        # The report is about this patient: linked to them by IC, or their own screening not for someone else.
+        if report is None or not (report.subject_user_id == user.id
+                                  or (report.user_id == user.id and report.subject != 'other')):
             raise HTTPException(422, 'Triage report does not belong to this patient.')
-        visit.triage_report_id = report.id
+        visit.triage_report_id = report.session_id
         visit.triage_level = report.report.get('level')
     if not all(step.status == 'done' for step in request.steps):
         other_active = session.query(PatientProgress).filter(
