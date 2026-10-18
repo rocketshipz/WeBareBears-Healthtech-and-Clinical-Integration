@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     OPENAI_BASE_URL: Optional[str] = None
     OPENAI_TEMPERATURE: float = 0.0
 
+    # /triage/chat engine: "agent" (LLM tool-calling loop) or "hybrid" (code runs the screening; the LLM only
+    # reads free text and phrases replies). See app/services/triage_controller.py.
+    TRIAGE_MODE: str = "agent"
+
     # Embedding Model Configuration (Google Gemini)
     GEMINI_API_KEY: Optional[str] = None
     GOOGLE_API_KEY: Optional[str] = None

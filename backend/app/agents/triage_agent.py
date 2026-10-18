@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import uuid
 from dataclasses import dataclass, field
 from typing import List, Optional, Any, Dict
@@ -19,6 +20,29 @@ logger = logging.getLogger(__name__)
 MAX_TOOL_ROUNDS = 6
 
 _SUPERSEDED = '{"superseded":"see the latest evaluate_triage_rules result"}'
+
+# Reply when the LLM provider's content filter refuses the user's message (most often self-harm wording).
+_FILTERED_REPLY = (
+    "I'm sorry you're going through this, and I'm glad you reached out. If you are thinking about hurting "
+    "yourself or are in danger, please call 999 now (112 from a mobile phone) or go to the nearest Emergency "
+    "Department. If you can, stay with someone you trust until you get help. You are not alone."
+)
+_FILTERED_PLACEHOLDER = (
+    "[The user's previous message could not be processed. It may have described a mental health crisis. "
+    "Urgent advice to call 999 or go to the nearest Emergency Department has already been given. "
+    "Continue the screening: ask for anything you still need, such as age.]"
+)
+PSYCHIATRIC_CATEGORY = "Psychiatric & Behavioural"
+_SELF_HARM_FILTERED = re.compile(r"""['"]self_harm['"]\s*:\s*\{\s*['"]filtered['"]\s*:\s*True""")
+
+# After this many turns with nothing left to ask and nothing matched, the agent must stop fishing for symptoms.
+STALL_LIMIT = 2
+_STALL_NOTE = (
+    "App note: nothing in the screened categories matched and the user has already been asked about other "
+    "symptoms. Do NOT ask about other symptoms again. If the user's latest message reports a new symptom, add "
+    "its category and re-evaluate. Otherwise stop now: say the screening could not assign a level, and advise "
+    "prompt in-person medical assessment (call 999 if any danger sign appears)."
+)
 
 _FINDING_LISTS = ("categories", "present_condition_ids", "absent_condition_ids",
                   "history_condition_ids", "answered_question_ids")
@@ -80,24 +104,13 @@ def parse_structured_reply(text: str, triage_result: Optional[Dict[str, Any]] = 
             # The KB question these options came from (the one offering the most of them).
             source = max(suggested, key=lambda q: len(set(options) & set(q.get("answers", []))))
             if source.get("question_id") and set(options) & set(source.get("answers", [])):
-                reply["question_id"] = source["question_id"]
                 # The KB question has none_answers / multi_select; fall back to the suggestion if unknown.
                 source = get_triage_rules_engine().questions_by_id.get(source["question_id"], source)
-                answers = source.get("answers", [])
                 # The LLM sometimes sends only an acknowledgement: make sure the question itself is shown.
                 if "?" not in question and source.get("text") and source["text"].lower() not in question.lower():
                     reply["question"] = f"{question} {source['text']}".strip()
-                # Options not picked are recorded as absent, so always offer the question's full KB list.
-                options[:] = list(answers)
-                # Always offer a way to say "none": the question's own none answers, else "None of these".
-                nones = source.get("none_answers") or [a for a in answers if a in NONE_ANSWERS or a == "No"]
-                if not nones and len(answers) > 2:
-                    nones = [NONE_ANSWERS[0]]
-                options.extend(a for a in nones if a not in options)
-                if source.get("multi_select"):
-                    reply["multi_select"] = True
-                    # Ticking one of these clears the others (and vice versa).
-                    reply["exclusive_options"] = [a for a in options if a in nones] + [NOT_SURE]
+                reply.update(kb_selection(source))
+                return reply
             options.append(NOT_SURE)
             return reply
         if question:
@@ -107,6 +120,25 @@ def parse_structured_reply(text: str, triage_result: Optional[Dict[str, Any]] = 
 
 
 NOT_SURE = "Not sure"
+
+
+def kb_selection(question: Dict[str, Any]) -> Dict[str, Any]:
+    """Options the app offers for a KB question: {response, question_id, multi_select?, exclusive_options?}."""
+    answers = question.get("answers", [])
+    # Options not picked are recorded as absent, so always offer the question's full KB list.
+    options = list(answers)
+    # Always offer a way to say "none": the question's own none answers, else "None of these".
+    nones = question.get("none_answers") or [a for a in answers if a in NONE_ANSWERS or a == "No"]
+    if not nones and len(answers) > 2:
+        nones = [NONE_ANSWERS[0]]
+    options.extend(a for a in nones if a not in options)
+    reply = {"response": options, "question_id": question["question_id"]}
+    if question.get("multi_select"):
+        reply["multi_select"] = True
+        # Ticking one of these clears the others (and vice versa).
+        reply["exclusive_options"] = [a for a in options if a in nones] + [NOT_SURE]
+    options.append(NOT_SURE)
+    return reply
 
 
 def selection_findings(last_output: Optional[Dict[str, Any]], message: str,
@@ -128,6 +160,8 @@ class TriageSession:
     findings: Dict[str, Any] = field(default_factory=lambda: {k: [] for k in _FINDING_LISTS} | {"age_years": None})
     triage_result: Optional[Dict[str, Any]] = None
     last_output: Optional[Dict[str, Any]] = None  # structured reply of the latest turn
+    # Consecutive turns ending with nothing left to ask and nothing matched (the agent is fishing for symptoms).
+    stalled_turns: int = 0
 
     def merge_findings(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Merge new tool-call findings into the session; later answers correct earlier ones."""
@@ -172,6 +206,9 @@ class MedicalTriageAgent:
                 logger.warning(f"Could not bind tools to LLM (placeholder mode): {e}")
                 self._agent_runnable = llm
         return self._agent_runnable
+
+    def has_session(self, session_id: Optional[str]) -> bool:
+        return bool(session_id) and session_id in self._sessions
 
     def get_session(self, session_id: Optional[str], context: Optional[Dict[str, Any]] = None) -> TriageSession:
         """Return the existing session or start a new one with the system prompt."""
@@ -229,6 +266,16 @@ class MedicalTriageAgent:
         result = self._invoke_tool(session, evaluate_triage_rules.name, findings)
         session.messages.append(ToolMessage(content=result, tool_call_id=call_id))
 
+    @staticmethod
+    def _drop_filtered_turn(session: TriageSession, message: str) -> None:
+        """Remove this turn's messages, replacing the refused user message with a neutral placeholder."""
+        messages = session.messages
+        for i in range(len(messages) - 1, -1, -1):
+            if isinstance(messages[i], HumanMessage) and messages[i].content == message:
+                del messages[i:]
+                break
+        messages.append(HumanMessage(content=_FILTERED_PLACEHOLDER))
+
     def _invoke_llm(self, runnable, messages: List[BaseMessage]):
         """Invoke the LLM, retrying once if the provider rejects a malformed tool call (e.g. JSON with comments)."""
         try:
@@ -254,18 +301,24 @@ class MedicalTriageAgent:
         context: Optional[Dict[str, Any]] = None,
         session_id: Optional[str] = None,
         selected_options: Optional[List[str]] = None,
+        note: Optional[str] = None,
     ) -> TriageSession:
         """Run one turn and return the session (reply is the last message; triage_result is set if evaluated).
 
         `selected_options`: the option(s) the user picked from the previous selection (several for multi_select).
+        `note`: optional extra details typed alongside the pick.
         """
         logger.info(f"[MedicalTriageAgent] Processing query: '{message[:60]}...'")
+        if note and note.strip():
+            message = f"{message}\nMore details: {note.strip()}"
         session = self.get_session(session_id, context)
         messages = session.messages
         messages.append(HumanMessage(content=message))
 
         try:
             self._record_selection(session, message, selected_options)
+            if session.stalled_turns >= STALL_LIMIT:
+                messages.append(SystemMessage(content=_STALL_NOTE))
             runnable = self._get_runnable()
             final_reply = ""
 
@@ -298,9 +351,22 @@ class MedicalTriageAgent:
                 )
                 messages.append(AIMessage(content=final_reply))
             session.last_output = parse_structured_reply(final_reply, session.triage_result)
+            result = session.triage_result or {}
+            nothing_left = result.get("status") == "insufficient_information" and not result.get("missing_information")
+            session.stalled_turns = session.stalled_turns + 1 if nothing_left else 0
 
         except Exception as e:
             logger.error(f"[MedicalTriageAgent] Agent invocation error: {e}")
+            if "content_filter" in str(e):
+                # The provider refused the user's message (e.g. self-harm wording). Never answer that with
+                # "service unavailable": give the urgent advice, and drop the message so the session still works.
+                self._drop_filtered_turn(session, message)
+                if _SELF_HARM_FILTERED.search(str(e)):
+                    # Screen the matching category; the person still confirms the KB items themselves.
+                    session.merge_findings({"categories": [PSYCHIATRIC_CATEGORY]})
+                messages.append(AIMessage(content=_FILTERED_REPLY))
+                session.last_output = {"type": "text", "question": None, "response": _FILTERED_REPLY}
+                return session
             error_reply = (
                 "Sorry, the screening assistant is temporarily unavailable. Please try again in a moment. "
                 "If you have any life-threatening symptoms, call 999 (or 112 from mobile) or go to the "

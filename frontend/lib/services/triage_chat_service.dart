@@ -15,6 +15,10 @@ class TriageChatReply {
   /// Several options can be ticked; [exclusiveOptions] can only be ticked alone.
   final bool multiSelect;
   final List<String> exclusiveOptions;
+
+  /// Options matching what the user already mentioned: shown pre-selected so
+  /// they confirm with one tap.
+  final List<String> suggestedOptions;
   final String? sessionId;
   final TriageAssessmentData? assessment;
 
@@ -25,6 +29,7 @@ class TriageChatReply {
     required this.options,
     this.multiSelect = false,
     this.exclusiveOptions = const [],
+    this.suggestedOptions = const [],
     required this.sessionId,
     required this.assessment,
   });
@@ -44,6 +49,8 @@ class TriageChatReply {
       multiSelect: json['multi_select'] == true,
       exclusiveOptions:
           List<String>.from(json['exclusive_options'] ?? const []),
+      suggestedOptions:
+          List<String>.from(json['suggested_options'] ?? const []),
       sessionId: json['session_id'] as String?,
       assessment: json['assessment'] == null
           ? null
@@ -85,6 +92,7 @@ class TriageChatService {
     String? sessionId,
     String? patientId,
     List<String>? selectedOptions,
+    String? note,
   }) async {
     final res = await http
         .post(
@@ -95,6 +103,7 @@ class TriageChatService {
             'session_id': ?sessionId,
             'patient_id': ?patientId,
             'selected_options': ?selectedOptions,
+            'note': ?note,
           }),
         )
         .timeout(const Duration(seconds: 60));

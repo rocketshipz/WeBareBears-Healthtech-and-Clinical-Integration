@@ -23,6 +23,15 @@ class _TriagePageState extends State<TriagePage> {
   static const int _maxButtonOptions = 4;
 
   final List<_ChatMessage> _messages = [
+    // The backend applies the account owner's saved health profile unless told
+    // the screening is for someone else.
+    const _ChatMessage(
+      'Please note: this screening is for you, the account owner, by default, '
+      'and uses your saved health profile (such as your age). If you are doing '
+      'it on behalf of someone else, please tell me who it is for (for example, '
+      '"this is for my mother, she is 70").',
+      fromUser: false,
+    ),
     const _ChatMessage(
       'Hi, I will ask a few questions to understand your condition. '
       'What is the main problem you are experiencing?',
@@ -30,12 +39,15 @@ class _TriagePageState extends State<TriagePage> {
     ),
   ];
   final TextEditingController _textController = TextEditingController();
+  // Optional extra details typed under the answer options.
+  final TextEditingController _noteController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   String? _sessionId;
   String? _firstComplaint;
   String? _lastSent;
   List<String>? _lastSelected;
+  String? _lastNote;
   TriageChatReply? _current; // null until the first reply = free-text prompt
   String? _dropdownValue;
   final Set<String> _checked = {}; // ticked options of a multi-select question
@@ -45,6 +57,7 @@ class _TriagePageState extends State<TriagePage> {
   @override
   void dispose() {
     _textController.dispose();
+    _noteController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -52,17 +65,23 @@ class _TriagePageState extends State<TriagePage> {
   bool get _isSelection => _current?.isSelection ?? false;
 
   /// [selected]: the option(s) picked from the current selection, sent so the
-  /// backend can record them exactly.
-  Future<void> _send(String message, {List<String>? selected}) async {
+  /// backend can record them exactly. [note]: extra details typed under the
+  /// options (defaults to the note box when options were picked).
+  Future<void> _send(String message, {List<String>? selected, String? note}) async {
     final text = message.trim();
     if (text.isEmpty || _loading) return;
+    note = (note ?? (selected != null ? _noteController.text : '')).trim();
 
     setState(() {
-      _messages.add(_ChatMessage(text, fromUser: true));
+      _messages.add(
+        _ChatMessage(note!.isEmpty ? text : '$text\n$note', fromUser: true),
+      );
       _firstComplaint ??= text;
       _lastSent = text;
       _lastSelected = selected;
+      _lastNote = note;
       _textController.clear();
+      _noteController.clear();
       _dropdownValue = null;
       _checked.clear();
       _loading = true;
@@ -75,6 +94,7 @@ class _TriagePageState extends State<TriagePage> {
         text,
         sessionId: _sessionId,
         selectedOptions: selected,
+        note: note.isEmpty ? null : note,
       );
       if (!mounted) return;
       setState(() {
@@ -82,6 +102,16 @@ class _TriagePageState extends State<TriagePage> {
         _current = reply;
         _loading = false;
         _messages.add(_ChatMessage(reply.text, fromUser: false));
+        // Pre-select what the user already mentioned; they still confirm it.
+        final suggested = reply.suggestedOptions
+            .where(reply.options.contains)
+            .toList();
+        if (reply.multiSelect) {
+          _checked.addAll(suggested);
+        } else if (suggested.isNotEmpty &&
+            reply.options.length > _maxButtonOptions) {
+          _dropdownValue = suggested.first;
+        }
       });
       _scrollToEnd();
       if (reply.assessment != null) _openReport(reply.assessment!);
@@ -190,14 +220,77 @@ class _TriagePageState extends State<TriagePage> {
                 borderRadius: BorderRadius.circular(18),
               )
             : cardDecoration(radius: 18),
-        child: Text(
-          m.text,
-          style: m.fromUser
-              ? AppText.style(14, FontWeight.w500, Colors.white, height: 1.4)
-              : AppText.body,
-        ),
+        child: m.fromUser
+            ? Text(
+                m.text,
+                style: AppText.style(14, FontWeight.w500, Colors.white, height: 1.4),
+              )
+            : Text.rich(TextSpan(style: AppText.body, children: _questionSpans(m.text))),
       ),
     );
+  }
+
+  /// Answer instructions ("Tick all that apply.", "About the injury: tick all
+  /// that apply.", Malay "Tandakan ..." / "Pilih ...").
+  static final _instruction = RegExp(
+    r'^(tick|choose|select|pick|tandakan|pilih)\b|tick all that apply|choose one',
+    caseSensitive: false,
+  );
+
+  /// Bot text with every question and answer instruction in bold, so they stand
+  /// out from the conversational text around them.
+  static List<TextSpan> _questionSpans(String text) {
+    const bold = TextStyle(fontWeight: FontWeight.w700);
+    final spans = <TextSpan>[];
+    for (final sentence in _sentences(text)) {
+      final body = sentence.trimRight();
+      final trailing = sentence.substring(body.length);
+      if (body.endsWith('?') || _instruction.hasMatch(body.trimLeft())) {
+        spans.add(TextSpan(text: body, style: bold));
+        if (trailing.isNotEmpty) spans.add(TextSpan(text: trailing));
+      } else {
+        spans.add(TextSpan(text: sentence));
+      }
+    }
+    return spans;
+  }
+
+  /// Splits text into sentences, each keeping its trailing whitespace. A sentence
+  /// ends at a line break, or at . ! ? followed by whitespace and a capital letter,
+  /// digit or bracket/quote (so "e.g. a finger" stays in one sentence).
+  static List<String> _sentences(String text) {
+    final sentences = <String>[];
+    final startOfNext = RegExp(r'''[A-Z0-9("'“]''');
+    var start = 0;
+    var i = 0;
+    while (i < text.length) {
+      final c = text[i];
+      var end = -1;
+      if (c == '\n') {
+        end = i + 1;
+      } else if ('.!?'.contains(c)) {
+        var j = i + 1;
+        while (j < text.length && text[j] == ' ') {
+          j++;
+        }
+        if (j == text.length || text[j] == '\n') {
+          end = j;
+        } else if (j > i + 1 && startOfNext.hasMatch(text[j])) {
+          end = j;
+        }
+      }
+      if (end != -1) {
+        while (end < text.length && text[end] == '\n') {
+          end++;
+        }
+        sentences.add(text.substring(start, end));
+        start = i = end;
+      } else {
+        i++;
+      }
+    }
+    if (start < text.length) sentences.add(text.substring(start));
+    return sentences;
   }
 
   Widget _typingIndicator() {
@@ -249,7 +342,7 @@ class _TriagePageState extends State<TriagePage> {
         _messages.removeLast();
       }
     });
-    _send(last, selected: _lastSelected);
+    _send(last, selected: _lastSelected, note: _lastNote);
   }
 
   // ============================================================
@@ -260,13 +353,19 @@ class _TriagePageState extends State<TriagePage> {
     final Widget content;
     if (_isSelection) {
       final options = _current!.options;
+      final Widget picker;
       if (_current!.multiSelect) {
-        content = _checkboxList(options);
+        picker = _checkboxList(options);
       } else {
-        content = options.length <= _maxButtonOptions
+        picker = options.length <= _maxButtonOptions
             ? _optionButtons(options)
             : _optionDropdown(options);
       }
+      content = Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [_noteBox(), const SizedBox(height: 10), picker],
+      );
     } else {
       content = _textBox();
     }
@@ -283,13 +382,39 @@ class _TriagePageState extends State<TriagePage> {
   }
 
   Widget _optionButtons(List<String> options) {
+    final suggested = _current?.suggestedOptions ?? const <String>[];
     return Wrap(
       spacing: 10,
       runSpacing: 10,
       children: [
         for (final o in options)
-          _option(text: o, onTap: () => _send(o, selected: [o])),
+          _option(
+            text: o,
+            suggested: suggested.contains(o),
+            onTap: () => _send(o, selected: [o]),
+          ),
       ],
+    );
+  }
+
+  /// Optional extra details, sent with whichever option is picked.
+  Widget _noteBox() {
+    return TextField(
+      controller: _noteController,
+      minLines: 1,
+      maxLines: 3,
+      style: AppText.style(13, FontWeight.w500, AppColors.textDark),
+      decoration: InputDecoration(
+        isDense: true,
+        hintText: 'Anything else to add? (optional)',
+        filled: true,
+        fillColor: AppColors.field,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: AppColors.border),
+        ),
+      ),
     );
   }
 
@@ -433,7 +558,13 @@ class _TriagePageState extends State<TriagePage> {
   // SINGLE-SELECT OPTION BUTTON (sized to its label)
   // ============================================================
 
-  Widget _option({required String text, required VoidCallback onTap}) {
+  /// [suggested]: matches what the user already mentioned, so it is shown
+  /// highlighted for a one-tap confirmation.
+  Widget _option({
+    required String text,
+    required VoidCallback onTap,
+    bool suggested = false,
+  }) {
     return Pressable(
       onTap: onTap,
       child: Container(
@@ -442,7 +573,9 @@ class _TriagePageState extends State<TriagePage> {
         decoration: BoxDecoration(
           color: AppColors.field,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
+          border: suggested
+              ? Border.all(color: AppColors.darkTeal, width: 2)
+              : Border.all(color: AppColors.border),
         ),
         child: Text(
           text,

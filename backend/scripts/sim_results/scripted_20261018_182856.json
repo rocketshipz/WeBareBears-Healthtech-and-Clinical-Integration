@@ -1,0 +1,53 @@
+{
+  "summary": {
+    "scenarios": 5,
+    "engine_oracle_accuracy": 1.0
+  },
+  "results": [
+    {
+      "scenario": 34,
+      "name": "PROFILE self: sprained ankle",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 35,
+      "name": "PROFILE other: dad's chest pain",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 36,
+      "name": "PROFILE self: mild headache",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 9,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 37,
+      "name": "PROFILE unclear: fever+headache",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 38,
+      "name": "PROFILE other: child with cold",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 14,
+      "oracle_unscripted": []
+    }
+  ]
+}

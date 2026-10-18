@@ -1,0 +1,305 @@
+{
+  "summary": {
+    "scenarios": 33,
+    "engine_oracle_accuracy": 1.0
+  },
+  "results": [
+    {
+      "scenario": 1,
+      "name": "Cough with a cold",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 2,
+      "name": "SAFETY stridor",
+      "run": 1,
+      "expected": 1,
+      "oracle_level": 1,
+      "oracle_questions": 3,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 3,
+      "name": "Wheezy asthmatic, can talk",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 11,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 4,
+      "name": "Child with a cold",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 14,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 5,
+      "name": "Sprained ankle, mild pain",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 6,
+      "name": "Sprained ankle, pain 5/10",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 7,
+      "name": "Ankle after a minor fall",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 8,
+      "name": "Dislocated shoulder",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 9,
+      "name": "Head knock with memory loss",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 10,
+      "name": "Small cut, mild",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 11,
+      "name": "SAFETY severe chest pain now",
+      "run": 1,
+      "expected": 2,
+      "oracle_level": 2,
+      "oracle_questions": 4,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 12,
+      "name": "Mild chest pain for 2 days",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 13,
+      "name": "Mild headache only",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 9,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 14,
+      "name": "SAFETY thunderclap headache",
+      "run": 1,
+      "expected": 2,
+      "oracle_level": 2,
+      "oracle_questions": 4,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 15,
+      "name": "Abdominal pain 6/10",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 16,
+      "name": "Elderly, mild abdominal pain",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 17,
+      "name": "Vomited once",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 8,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 18,
+      "name": "Persistent vomiting",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 19,
+      "name": "Black stools",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 20,
+      "name": "Fever with headache",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 21,
+      "name": "Infant 2 months with fever",
+      "run": 1,
+      "expected": 2,
+      "oracle_level": 2,
+      "oracle_questions": 8,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 22,
+      "name": "SAFETY ongoing seizure",
+      "run": 1,
+      "expected": 2,
+      "oracle_level": 2,
+      "oracle_questions": 3,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 23,
+      "name": "SAFETY not breathing",
+      "run": 1,
+      "expected": 1,
+      "oracle_level": 1,
+      "oracle_questions": 1,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 24,
+      "name": "SAFETY massive vaginal bleeding",
+      "run": 1,
+      "expected": 1,
+      "oracle_level": 1,
+      "oracle_questions": 3,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 25,
+      "name": "SAFETY tongue swelling",
+      "run": 1,
+      "expected": 2,
+      "oracle_level": 2,
+      "oracle_questions": 5,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 26,
+      "name": "Itchy bite, local only",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 27,
+      "name": "Small burn on the hand",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 28,
+      "name": "Dizziness only",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 29,
+      "name": "SAFETY chemical in the eye",
+      "run": 1,
+      "expected": 2,
+      "oracle_level": 2,
+      "oracle_questions": 5,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 30,
+      "name": "Thoughts of self-harm",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 31,
+      "name": "Chronic back pain",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 32,
+      "name": "Mild palpitations",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 33,
+      "name": "Early pregnancy bleeding",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 8,
+      "oracle_unscripted": []
+    }
+  ]
+}

@@ -1,0 +1,2999 @@
+{
+  "summary": {
+    "scenarios": 17,
+    "engine_oracle_accuracy": 1.0,
+    "agent_exact_accuracy": 0.941,
+    "agent_within_one_level": 0.941,
+    "agent_matches_oracle": 0.941,
+    "classified_rate": 0.941,
+    "over_triage": 0,
+    "under_triage": 0,
+    "no_result": 1,
+    "safety_recall_level_1_2": 0.667,
+    "errors": 0,
+    "tokens_total": 206595,
+    "tokens_input": 184838,
+    "tokens_output": 21757,
+    "tokens_avg_per_test": 12153,
+    "tokens_max_test": 20896,
+    "tokens_min_test": 4312,
+    "tokens_avg_per_turn": 1167,
+    "llm_calls_avg_per_test": 13.7,
+    "turns_avg": 10.4,
+    "seconds_avg": 23.0,
+    "unscripted_questions": 1,
+    "unattributed_selections": 10,
+    "confusion_expected_vs_agent": {
+      "L1": {
+        "L1": 1,
+        "none": 1
+      },
+      "L2": {
+        "L2": 1
+      },
+      "L3": {
+        "L3": 5
+      },
+      "L4": {
+        "L4": 5
+      },
+      "L5": {
+        "L5": 4
+      }
+    }
+  },
+  "results": [
+    {
+      "scenario": 39,
+      "name": "TYPED answers: sprained ankle",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": [],
+      "agent": {
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 5,
+        "turns": 14,
+        "seconds": 43.1,
+        "error": null,
+        "llm_calls": 21,
+        "input_tokens": 16670,
+        "output_tokens": 3038,
+        "total_tokens": 19708,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_TRAUMA_L5_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "sprained my ankle, I'm 21",
+            "selected": null,
+            "bot": "Thanks — I understand. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — yes, got that. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You chose “None of these.” Where or how was the person hurt? Tick all that apply.",
+            "options": [
+              "Head, face or neck",
+              "Chest, abdomen or pelvis (hips)",
+              "Arm, leg, hand or foot",
+              "A fall",
+              "A cut, wound, burn or other skin injury",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "it's my foot, the ankle",
+            "selected": null,
+            "bot": "You said it's your foot, the ankle. Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — you said they are alert, walking and talking normally. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "just mild, maybe 2 out of 10",
+            "selected": null,
+            "bot": "Thanks — you said it's mild, about 2 out of 10. When did the chest pain start?",
+            "options": [
+              "New onset starting within less than 6 hours",
+              "Started more than 6 hours ago",
+              "Chest pain is reducing",
+              "No further pain",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You chose “None of these.” Is the chest pain still ongoing, and how strong is it (0 to 10)?",
+            "options": [
+              "Ongoing and high (severe, 8-10)",
+              "Ongoing and moderate (4-7)",
+              "Persisting mild pain (1-3)",
+              "No longer in pain",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — None of these. Are you experiencing profuse sweating alongside the chest pain?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "You said no. About the arm, leg, hand or foot injury: tick all that apply.",
+            "options": [
+              "Badly crushed or mangled",
+              "Arm or leg cut off (above the wrist or ankle)",
+              "Finger, toe or part of the hand / foot cut off",
+              "Bleeding that will not stop",
+              "Possible broken thigh bone or upper-arm bone",
+              "Bone showing through the skin",
+              "A joint looks out of place (dislocated)",
+              "Numbness, tingling, or cannot move a finger / toe properly",
+              "Problem with a cast or splint",
+              "The injury is to the hand",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You chose “None of these.” Is the limb cold, painful and dusky (discoloured)?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. Do any of these apply? Tick all that apply.",
+            "options": [
+              "Swelling all over the body, not only the painful area (generalized oedema)",
+              "Cannot put any weight on the leg",
+              "Child: cannot move a joint fully",
+              "Child: a joint is red, hot or swollen (inflamed)",
+              "Child: fever with the limb problem",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You said “None of these.” Which best describes the arm, leg, hand or foot injury now?",
+            "options": [
+              "Painful and might be a small broken bone (e.g. a finger or toe), but can still move the fingers / toes",
+              "Mild - can still use it or put weight on it, and it does not look broken",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "it's mild, I can still walk on it",
+            "selected": null,
+            "bot": "Thanks — I understand it’s mild and you can still walk on it. Are both legs swollen (bilateral lower limb oedema)? (For a child: is the swelling tender to touch?)",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. Thank you for answering. Here is the result of the screening.\n\nLevel 5 - Routine (target: under 90 minutes). Not an emergency: a clinic or outpatient visit is suitable.\n\nWhat you reported: Mild symptoms; Unlikely fractures.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 40,
+      "name": "MALAY: fever + headache",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": [],
+      "agent": {
+        "malay_replies": "6/7",
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 3,
+        "turns": 7,
+        "seconds": 25.0,
+        "error": null,
+        "llm_calls": 11,
+        "input_tokens": 9855,
+        "output_tokens": 1982,
+        "total_tokens": 11837,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_FEVER_L3_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "Saya demam dan sakit kepala sejak semalam, umur 30",
+            "selected": null,
+            "bot": "Terima kasih — Saya nampak anda berumur 30 dan mengalami demam serta sakit kepala sejak semalam. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Anda berkata “None of these”. Adakah orang itu mengalami sawan, atau tidak dapat duduk, berdiri, berjalan atau berkomunikasi?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Terima kasih — Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "sakit sikit je, dalam 2/10",
+            "selected": null,
+            "bot": "Terima kasih — sakit kepala tu sekitar 2/10. Adakah sakit kepala bermula dengan sangat tiba-tiba, atau disertai sakit/kekejangan leher, perubahan kesedaran atau gejala neurologi lain?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Anda pilih “No”. Demam disertai ruam kulit atau lepuh, perubahan kesedaran, sawan, atau keadaan kebal tubuh (contoh: kemoterapi, steroid, HIV)?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Terima kasih — Thank you for answering. Here is the result of the screening.\n\nTahap 3 - Urgent (sasaran: di bawah 30 minit). Memerlukan penilaian perubatan segera: pergi ke Jabatan Kecemasan.\n\nApa yang anda laporkan: Sakit kepala.\n\nIni adalah saringan awal, bukan diagnosis perubatan. Ia tidak menggantikan penilaian oleh profesional penjagaan kesihatan. Jika simptom menjadi lebih teruk, hubungi 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 41,
+      "name": "MULTI-FACT opening message",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": [],
+      "agent": {
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 3,
+        "turns": 8,
+        "seconds": 14.7,
+        "error": null,
+        "llm_calls": 9,
+        "input_tokens": 7332,
+        "output_tokens": 588,
+        "total_tokens": 7920,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_CRIT_L3_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "twisted my ankle playing futsal, pain is about 6/10, I'm 24, no bleeding",
+            "selected": null,
+            "bot": "Thanks — I’m sorry about your ankle. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — noted that they're conscious, breathing normally and responding. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You chose “None of these.” Where or how was the person hurt? Tick all that apply.",
+            "options": [
+              "Head, face or neck",
+              "Chest, abdomen or pelvis (hips)",
+              "Arm, leg, hand or foot",
+              "A fall",
+              "A cut, wound, burn or other skin injury",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Arm, leg, hand or foot",
+            "selected": [
+              "Arm, leg, hand or foot"
+            ],
+            "bot": "Got it — arm, leg, hand or foot. Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — you said they are alert, walking and talking normally. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Moderate pain (4-7)",
+            "selected": [
+              "Moderate pain (4-7)"
+            ],
+            "bot": "Got it — moderate pain. About the arm, leg, hand or foot injury: tick all that apply.",
+            "options": [
+              "Badly crushed or mangled",
+              "Arm or leg cut off (above the wrist or ankle)",
+              "Finger, toe or part of the hand / foot cut off",
+              "Bleeding that will not stop",
+              "Possible broken thigh bone or upper-arm bone",
+              "Bone showing through the skin",
+              "A joint looks out of place (dislocated)",
+              "Numbness, tingling, or cannot move a finger / toe properly",
+              "Problem with a cast or splint",
+              "The injury is to the hand",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You chose “None of these.” Is the limb cold, painful and dusky (discoloured)?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Got it. Thank you for answering. Here is the result of the screening.\n\nLevel 3 - Urgent (target: under 30 minutes). Needs urgent medical assessment: go to an Emergency Department.\n\nWhat you reported: Pain score 4-7.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 42,
+      "name": "NOT SURE on the first-look list",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 14,
+      "oracle_unscripted": [
+        "Q_CRIT_02A"
+      ],
+      "agent": {
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 4,
+        "turns": 11,
+        "seconds": 24.4,
+        "error": null,
+        "llm_calls": 15,
+        "input_tokens": 11121,
+        "output_tokens": 1474,
+        "total_tokens": 12595,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_RESP_L4_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 3,
+        "transcript": [
+          {
+            "patient": "I'm coughing, I'm 30",
+            "selected": null,
+            "bot": "Thanks — I hear you're coughing and 30 years old. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — I understand they're conscious, breathing normally and responding. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Not sure",
+            "selected": [
+              "Not sure"
+            ],
+            "bot": "Not sure — Is this happening: Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)?",
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. Is this happening: Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder?",
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks for telling me. Is this happening: Pale or bluish skin with cold hands and feet?",
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Got it — thank you. Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — you're alert, walking and talking. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No pain (0)",
+            "selected": [
+              "No pain (0)"
+            ],
+            "bot": "You said: “No pain (0)”. Do any of these apply?",
+            "options": [
+              "Non-stop coughing fits, unable to catch breath between them",
+              "Blue lips or skin (cyanotic spells)",
+              "Unable to swallow",
+              "Has to sit leaning forward on the hands to breathe (tripod position)",
+              "Something stuck in the airway",
+              "Has needed a breathing tube or ICU care for breathing before",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You said “None of these.” Is there difficulty in swallowing, a swallowed foreign body, poor feeding, or symptoms linked to overdose, drugs, allergy or injury?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. Are the symptoms only mild upper respiratory (cold-like) symptoms while tolerating oral intake?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes",
+            "selected": [
+              "Yes"
+            ],
+            "bot": "Thanks. Thank you for answering. Here is the result of the screening.\n\nLevel 4 - Early Care (target: under 60 minutes). Needs medical care soon: go to an Emergency Department or a walk-in / urgent-care clinic.\n\nWhat you reported: Tolerating orally; Mild URTI symptoms.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 43,
+      "name": "DON'T KNOW to a yes/no follow-up",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 14,
+      "oracle_unscripted": [
+        "Q_CRIT_02A"
+      ],
+      "agent": {
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 4,
+        "turns": 17,
+        "seconds": 35.2,
+        "error": null,
+        "llm_calls": 22,
+        "input_tokens": 15981,
+        "output_tokens": 1923,
+        "total_tokens": 17904,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_RESP_L4_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 2,
+        "transcript": [
+          {
+            "patient": "I'm coughing, I'm 30",
+            "selected": null,
+            "bot": "Thanks — I hear you're coughing and are 30. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Not sure",
+            "selected": [
+              "Not sure"
+            ],
+            "bot": "Thanks — is this happening: Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)?",
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "patient": "I don't know",
+            "selected": null,
+            "bot": "Thanks — I’ll help you check this. Is this happening: Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder?",
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. Is this happening: Pale or bluish skin with cold hands and feet?",
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "You said No. Which of these describe the breathing right now? Tick all that apply.",
+            "options": [
+              "Struggling badly to breathe (severe breathing distress)",
+              "Harsh, high-pitched, gurgling or snoring noise with every breath (not just a cough, phlegm or blocked nose)",
+              "Working very hard to breathe and sweating",
+              "Too breathless to speak, or only one word at a time",
+              "Can only speak in short phrases because of breathlessness",
+              "Difficulty breathing, but can speak in sentences",
+              "Agitated or anxious because of breathing difficulty",
+              "Whistling or wheezy breathing, but can still talk normally",
+              "Breathing normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Breathing normally",
+            "selected": [
+              "Breathing normally"
+            ],
+            "bot": "Thanks — you said they are breathing normally. Is the person confused or unusually drowsy (lethargic) and having difficulty breathing?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks. Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — you say they're alert, walking and talking normally. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No pain (0)",
+            "selected": [
+              "No pain (0)"
+            ],
+            "bot": "You said no pain (0). Which of these describe the breathing problem?",
+            "options": [
+              "Stridor - harsh, high-pitched noise when breathing in",
+              "Increased work of breathing and feeling tired",
+              "Agitation or anxiety with breathing difficulty",
+              "Slow breaths or poor respiratory effort",
+              "Breathless with change of voice",
+              "Rapid breaths",
+              "Wheezing, but able to talk in sentences",
+              "Wheezing in a known asthmatic",
+              "Hyperventilation",
+              "Mild or minimal breathlessness",
+              "Comfortable, no other symptoms",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You chose “None of these.” Do any of these apply?",
+            "options": [
+              "Non-stop coughing fits, unable to catch breath between them",
+              "Blue lips or skin (cyanotic spells)",
+              "Unable to swallow",
+              "Has to sit leaning forward on the hands to breathe (tripod position)",
+              "Something stuck in the airway",
+              "Has needed a breathing tube or ICU care for breathing before",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Got it — None of these. Is the shortness of breath accompanied by ongoing chest pain?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Got it. Is there an abnormal noise with every breath, such as a harsh high-pitched sound, gurgling or snoring? (A cough, phlegm you can cough up, or a blocked nose does not count.)",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. Is the person in respiratory distress (struggling to breathe)?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "No — Is there difficulty in swallowing, a swallowed foreign body, poor feeding, or symptoms linked to overdose, drugs, allergy or injury?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — Are the symptoms only mild upper respiratory (cold-like) symptoms while tolerating oral intake?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes",
+            "selected": [
+              "Yes"
+            ],
+            "bot": "Got it. Thank you for answering. Here is the result of the screening.\n\nLevel 4 - Early Care (target: under 60 minutes). Needs medical care soon: go to an Emergency Department or a walk-in / urgent-care clinic.\n\nWhat you reported: Tolerating orally; Mild URTI symptoms.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 44,
+      "name": "SWITCH to mother mid-chat",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": [],
+      "agent": {
+        "subject": "other",
+        "age_asked_despite_profile": false,
+        "profile_misapplied": false,
+        "final_age": 45,
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 5,
+        "turns": 9,
+        "seconds": 17.0,
+        "error": null,
+        "llm_calls": 11,
+        "input_tokens": 9459,
+        "output_tokens": 680,
+        "total_tokens": 10139,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_TRAUMA_L5_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "I fell and hit my head",
+            "selected": null,
+            "bot": "I'm sorry you fell and hit your head. Is the person conscious, breathing normally, and able to respond to call? I can see from your profile you're 70 and take warfarin, so I won't ask about those.",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — noted you're conscious, breathing normally and responding. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Sorry, actually this is for my mother, she is 45",
+            "selected": null,
+            "bot": "Thanks — answering for your 45-year-old mother. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Got it. Where or how was the person hurt? Tick all that apply.",
+            "options": [
+              "Head, face or neck",
+              "Chest, abdomen or pelvis (hips)",
+              "Arm, leg, hand or foot",
+              "A fall",
+              "A cut, wound, burn or other skin injury",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Head, face or neck",
+            "selected": [
+              "Head, face or neck"
+            ],
+            "bot": "You said: Head, face or neck. Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — I heard that you are alert, walking and talking normally. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (1-3)",
+            "selected": [
+              "Mild pain (1-3)"
+            ],
+            "bot": "Got it — mild pain (1–3). How did the injury happen? Tick all that apply.",
+            "options": [
+              "High-speed accident (e.g. a road crash at speed)",
+              "Stabbed, shot, or something went into the body",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You chose “None of these”. About the head or neck injury: tick all that apply.",
+            "options": [
+              "Bleeding from the head or neck that has not stopped",
+              "Problems seeing or hearing since the injury",
+              "Confused, drowsy or behaving differently since the injury",
+              "Cannot remember what happened (memory loss)",
+              "Neck pain",
+              "A wound on the scalp only",
+              "Blacked out briefly, but now fully awake",
+              "None of these - only mild symptoms",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these - only mild symptoms",
+            "selected": [
+              "None of these - only mild symptoms"
+            ],
+            "bot": "Thanks — thank you for answering. Here is the result of the screening.\n\nLevel 5 - Routine (target: under 90 minutes). Not an emergency: a clinic or outpatient visit is suitable.\n\nWhat you reported: Mild symptoms.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 45,
+      "name": "NEW SYMPTOM mid-chat",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 10,
+      "oracle_unscripted": [],
+      "agent": {
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 4,
+        "turns": 15,
+        "seconds": 31.1,
+        "error": null,
+        "llm_calls": 19,
+        "input_tokens": 13994,
+        "output_tokens": 1665,
+        "total_tokens": 15659,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_CP_L4_01"
+        ],
+        "unscripted_questions": [
+          "Q_HA_03"
+        ],
+        "advised_999": true,
+        "unattributed_selections": 2,
+        "transcript": [
+          {
+            "patient": "I have a headache, 35",
+            "selected": null,
+            "bot": "Thanks — I hear you have a headache and are 35. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — noted that you're conscious, breathing normally and responding. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "oh and my chest has been hurting a bit since yesterday",
+            "selected": null,
+            "bot": "Thanks — noted your chest pain since yesterday. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — None of these. Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — you say they are alert, walking and talking normally. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (1-3)",
+            "selected": [
+              "Mild pain (1-3)"
+            ],
+            "bot": "Got it — mild pain (1–3). When did the chest pain start?",
+            "options": [
+              "New onset starting within less than 6 hours",
+              "Started more than 6 hours ago",
+              "Chest pain is reducing",
+              "No further pain",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Started more than 6 hours ago",
+            "selected": [
+              "Started more than 6 hours ago"
+            ],
+            "bot": "Thanks — I understand it started over 6 hours ago. Is the chest pain still ongoing, and how strong is it (0 to 10)?",
+            "options": [
+              "Ongoing and high (severe, 8-10)",
+              "Ongoing and moderate (4-7)",
+              "Persisting mild pain (1-3)",
+              "No longer in pain",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Persisting mild pain (1-3)",
+            "selected": [
+              "Persisting mild pain (1-3)"
+            ],
+            "bot": "You said: Persisting mild pain (1-3). Are you experiencing profuse sweating alongside the chest pain?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — Did the headache start very suddenly, or is it accompanied by neck pain/stiffness, altered mental state or neurological deficits?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. How severe is your headache on a 0 to 10 scale?",
+            "options": [
+              "Severe pain (above 7)",
+              "Pain score above 4",
+              "Mild pain (4 or below)",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (4 or below)",
+            "selected": [
+              "Mild pain (4 or below)"
+            ],
+            "bot": "You chose: Mild pain (4 or below). Which of these is it? Tick all that apply.",
+            "options": [
+              "Severe pain (above 7)",
+              "Pain score above 4",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Not sure",
+            "selected": [
+              "Not sure"
+            ],
+            "bot": "Thanks — Is this happening: Severe pain (above 7)?",
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — Is this happening: Pain score above 4?",
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. Are you experiencing visual changes, speech difficulty, or trouble walking (ataxia / gait difficulty) alongside the headache?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks for your answer. Thank you for answering. Here is the result of the screening.\n\nLevel 4 - Early Care (target: under 60 minutes). Needs medical care soon: go to an Emergency Department or a walk-in / urgent-care clinic.\n\nWhat you reported: Persisting mild pain.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 46,
+      "name": "DANGER sign mid-chat",
+      "run": 1,
+      "expected": 1,
+      "oracle_level": 1,
+      "oracle_questions": 0,
+      "oracle_unscripted": [],
+      "agent": {
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": null,
+        "turns": 20,
+        "seconds": 42.0,
+        "error": null,
+        "llm_calls": 26,
+        "input_tokens": 18555,
+        "output_tokens": 2341,
+        "total_tokens": 20896,
+        "call_999": false,
+        "matched_rules": [],
+        "unscripted_questions": [],
+        "advised_999": false,
+        "unattributed_selections": 2,
+        "transcript": [
+          {
+            "patient": "my dad has a stomach ache, he is 60",
+            "selected": null,
+            "bot": "Thanks — I’m sorry to hear about your dad. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — glad they're conscious and breathing. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "he just fainted and is not responding to me now",
+            "selected": null,
+            "bot": "I'm sorry — thank you for telling me. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — noted they're alert, walking and talking normally. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (1-3)",
+            "selected": [
+              "Mild pain (1-3)"
+            ],
+            "bot": "You chose mild pain. How severe is the abdominal pain on a scale of 0 to 10?",
+            "options": [
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "Pain reduced or subsided",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You said “None of these.” Is there bleeding from the rectum or mouth, a tense rigid (hard) abdomen, very sudden onset of pain, or associated back pain?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks, I understand. Is there an ongoing seizure, or a seizure linked to overdose, poisoning, skin rashes, trauma or neck stiffness?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Got it — Are there neurological deficits (slurred speech, visual difficulty, face drooping, limb weakness), agitation, or confusion?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. When did stroke-like symptoms (sudden weakness, speech or vision trouble) start?",
+            "options": [
+              "Within the last 3 hours",
+              "More than 3 hours ago",
+              "No stroke-like symptoms",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — After fainting, is the person's level of consciousness altered, is there a neurological deficit, abnormal limb movements, or a skin rash / purpura (purple spots)?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Got it — No. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Associated seizures",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — Are you over 65 years old, repeatedly vomiting, or possibly pregnant? Is the pain colicky (comes in waves) only?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Got it. If a seizure occurred, which describes it?",
+            "options": [
+              "First episode of seizure",
+              "Persistent post-ictal drowsiness",
+              "Seizure with headache or fever",
+              "Seizure while on anticoagulant medication",
+              "Known epilepsy history with full recovery",
+              "Mobilizing well with mild symptoms",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — After the seizure, are there neurological deficits (slurred speech, visual difficulty, face drooping, limb weakness)?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. Has consciousness improved but a neurological deficit lasted more than 12 hours?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. How is the mental state now?",
+            "options": [
+              "Improved",
+              "History of psychiatric illness or drug use",
+              "Comfortable with no current symptoms",
+              "Lethargic or agitated (child)",
+              "Previous history of neurological disorder (child)",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You chose “None of these.” Has the person fully recovered with no deficits? Has this happened before?",
+            "options": [
+              "Fully recovered, no deficits, and has fainted before",
+              "Fully recovered, no deficits",
+              "Not fully recovered",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You said “None of these.” Is the pain chronic or from repeated episodes?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Medication review",
+              "None of these",
+              "Not sure"
+            ]
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 47,
+      "name": "USER ASKS a question mid-chat",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 11,
+      "oracle_unscripted": [],
+      "agent": {
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 3,
+        "turns": 13,
+        "seconds": 23.2,
+        "error": null,
+        "llm_calls": 16,
+        "input_tokens": 12506,
+        "output_tokens": 1187,
+        "total_tokens": 13693,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_RESP_L3_01",
+          "RULE_CRIT_L3_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "I'm wheezing, I have asthma. 22 years old",
+            "selected": null,
+            "bot": "Thanks — I hear you're wheezing and have asthma. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+            "selected": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)"
+            ],
+            "bot": "You said: “Trouble breathing - breathless, wheezing or noisy breathing.” Which of these describe the breathing right now? Tick all that apply.",
+            "options": [
+              "Struggling badly to breathe (severe breathing distress)",
+              "Harsh, high-pitched, gurgling or snoring noise with every breath (not just a cough, phlegm or blocked nose)",
+              "Working very hard to breathe and sweating",
+              "Too breathless to speak, or only one word at a time",
+              "Can only speak in short phrases because of breathlessness",
+              "Difficulty breathing, but can speak in sentences",
+              "Agitated or anxious because of breathing difficulty",
+              "Whistling or wheezy breathing, but can still talk normally",
+              "Breathing normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "what do you mean by that?",
+            "selected": null,
+            "bot": "I hear you — which of these describe the breathing right now? Tick all that apply.",
+            "options": [
+              "Struggling badly to breathe (severe breathing distress)",
+              "Harsh, high-pitched, gurgling or snoring noise with every breath (not just a cough, phlegm or blocked nose)",
+              "Working very hard to breathe and sweating",
+              "Too breathless to speak, or only one word at a time",
+              "Can only speak in short phrases because of breathlessness",
+              "Difficulty breathing, but can speak in sentences",
+              "Agitated or anxious because of breathing difficulty",
+              "Whistling or wheezy breathing, but can still talk normally",
+              "Breathing normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Whistling or wheezy breathing, but can still talk normally",
+            "selected": [
+              "Whistling or wheezy breathing, but can still talk normally"
+            ],
+            "bot": "You said they have whistling or wheezy breathing but can still talk normally. Is the person confused or unusually drowsy (lethargic) and having difficulty breathing?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay, thanks. Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — noted that you're alert, walking and talking. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No pain (0)",
+            "selected": [
+              "No pain (0)"
+            ],
+            "bot": "You said no pain (0). Which of these describe the breathing problem?",
+            "options": [
+              "Stridor - harsh, high-pitched noise when breathing in",
+              "Increased work of breathing and feeling tired",
+              "Agitation or anxiety with breathing difficulty",
+              "Slow breaths or poor respiratory effort",
+              "Breathless with change of voice",
+              "Rapid breaths",
+              "Wheezing, but able to talk in sentences",
+              "Wheezing in a known asthmatic",
+              "Hyperventilation",
+              "Mild or minimal breathlessness",
+              "Comfortable, no other symptoms",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Wheezing in a known asthmatic",
+            "selected": [
+              "Wheezing in a known asthmatic"
+            ],
+            "bot": "You said: “Wheezing in a known asthmatic.” Do any of these apply?",
+            "options": [
+              "Non-stop coughing fits, unable to catch breath between them",
+              "Blue lips or skin (cyanotic spells)",
+              "Unable to swallow",
+              "Has to sit leaning forward on the hands to breathe (tripod position)",
+              "Something stuck in the airway",
+              "Has needed a breathing tube or ICU care for breathing before",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You said “None of these.” Is the shortness of breath accompanied by ongoing chest pain?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. Is there an abnormal noise with every breath, such as a harsh high-pitched sound, gurgling or snoring? (A cough, phlegm you can cough up, or a blocked nose does not count.)",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — Is the person in respiratory distress (struggling to breathe)?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "You said no. Thank you for answering. Here is the result of the screening.\n\nLevel 3 - Urgent (target: under 30 minutes). Needs urgent medical assessment: go to an Emergency Department.\n\nWhat you reported: Wheezing, known asthmatic; Wheeze, expiratory rhonchi; airway intact.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 48,
+      "name": "VAGUE complaint first",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 7,
+      "oracle_unscripted": [],
+      "agent": {
+        "template_fallbacks": 0,
+        "empty_extractions": 1,
+        "level": 4,
+        "turns": 11,
+        "seconds": 21.3,
+        "error": null,
+        "llm_calls": 14,
+        "input_tokens": 12614,
+        "output_tokens": 1032,
+        "total_tokens": 13646,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_VD_L4_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "I don't feel well",
+            "selected": null,
+            "bot": "Sorry you're not feeling well. What is the main problem you would like help with today?",
+            "options": null
+          },
+          {
+            "patient": "I keep vomiting and can't keep water down since this morning, I'm 30",
+            "selected": null,
+            "bot": "So far this is at least Level 2 - Emergency (target: under 10 minutes). Go to the nearest Emergency Department immediately.\n\nSorry you're vomiting and can't keep water down; thank you for telling me. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — noted they're conscious, breathing normally and responding. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — alert, walking and talking normally. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No pain (0)",
+            "selected": [
+              "No pain (0)"
+            ],
+            "bot": "Thanks — no pain. Are you vomiting fresh blood or dark coffee-ground material, or passing black tarry stools, bloody diarrhoea or fresh blood in stool?",
+            "options": [
+              "Fresh blood in stool or vomit",
+              "Coffee-ground vomit, black stools or bloody diarrhoea",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Got it — no. Which of these is it? Tick all that apply.",
+            "options": [
+              "Fresh blood in stool or vomit",
+              "Coffee-ground vomit, black stools or bloody diarrhoea",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You said “None of these.” Are you unable to tolerate any fluids orally, or showing severe dehydration (dry mouth, confusion or signs of shock)?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes",
+            "selected": [
+              "Yes"
+            ],
+            "bot": "Thanks — Which of these is it? Tick all that apply.",
+            "options": [
+              "Unable to tolerate any fluids orally",
+              "Severe dehydration (dry mouth, confusion or signs of shock)",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Unable to tolerate any fluids orally",
+            "selected": [
+              "Unable to tolerate any fluids orally"
+            ],
+            "bot": "Thanks for that — Is the person on anticoagulant (blood-thinning) medication, or is the consciousness altered?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Got it — thank you for answering. Here is the result of the screening.\n\nLevel 4 - Early Care (target: under 60 minutes). Needs medical care soon: go to an Emergency Department or a walk-in / urgent-care clinic.\n\nWhat you reported: Unable to tolerate orally; Fully conscious but cannot take orally.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 49,
+      "name": "PROFILE epilepsy + sprained ankle",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": [],
+      "agent": {
+        "subject": "self",
+        "age_asked_despite_profile": false,
+        "profile_misapplied": false,
+        "final_age": 25,
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 5,
+        "turns": 8,
+        "seconds": 16.0,
+        "error": null,
+        "llm_calls": 10,
+        "input_tokens": 8131,
+        "output_tokens": 643,
+        "total_tokens": 8774,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_TRAUMA_L5_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "I sprained my ankle",
+            "selected": null,
+            "bot": "Sorry to hear about your ankle. Is the person conscious, breathing normally, and able to respond to call? I can see from your profile you're 25 and have epilepsy, so I won't ask about those now.",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — I understand they're conscious, breathing normally and responding. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Got it — None of these. Where or how was the person hurt? Tick all that apply.",
+            "options": [
+              "Head, face or neck",
+              "Chest, abdomen or pelvis (hips)",
+              "Arm, leg, hand or foot",
+              "A fall",
+              "A cut, wound, burn or other skin injury",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Arm, leg, hand or foot",
+            "selected": [
+              "Arm, leg, hand or foot"
+            ],
+            "bot": "You said: Arm, leg, hand or foot. Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks, I understand they're alert and talking normally. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (1-3)",
+            "selected": [
+              "Mild pain (1-3)"
+            ],
+            "bot": "You said: \"Mild pain (1-3)\". About the arm, leg, hand or foot injury: tick all that apply.",
+            "options": [
+              "Badly crushed or mangled",
+              "Arm or leg cut off (above the wrist or ankle)",
+              "Finger, toe or part of the hand / foot cut off",
+              "Bleeding that will not stop",
+              "Possible broken thigh bone or upper-arm bone",
+              "Bone showing through the skin",
+              "A joint looks out of place (dislocated)",
+              "Numbness, tingling, or cannot move a finger / toe properly",
+              "Problem with a cast or splint",
+              "The injury is to the hand",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — Which best describes the arm, leg, hand or foot injury now?",
+            "options": [
+              "Painful and might be a small broken bone (e.g. a finger or toe), but can still move the fingers / toes",
+              "Mild - can still use it or put weight on it, and it does not look broken",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild - can still use it or put weight on it, and it does not look broken",
+            "selected": [
+              "Mild - can still use it or put weight on it, and it does not look broken"
+            ],
+            "bot": "Thanks — Thank you for answering. Here is the result of the screening.\n\nLevel 5 - Routine (target: under 90 minutes). Not an emergency: a clinic or outpatient visit is suitable.\n\nWhat you reported: Mild symptoms; Unlikely fractures.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 50,
+      "name": "PROFILE HIV + fever",
+      "run": 1,
+      "expected": 2,
+      "oracle_level": 2,
+      "oracle_questions": 2,
+      "oracle_unscripted": [],
+      "agent": {
+        "subject": "self",
+        "age_asked_despite_profile": false,
+        "profile_misapplied": false,
+        "final_age": 40,
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 2,
+        "turns": 3,
+        "seconds": 5.7,
+        "error": null,
+        "llm_calls": 4,
+        "input_tokens": 4676,
+        "output_tokens": 248,
+        "total_tokens": 4924,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_FEVER_L2_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "I have had a fever since yesterday",
+            "selected": null,
+            "bot": "So far this is at least Level 2 - Emergency (target: under 10 minutes). Go to the nearest Emergency Department immediately.\n\nThanks — you said you’ve had a fever since yesterday. Is the person conscious, breathing normally, and able to respond to call? I can see from your profile you're 40, male, and have a weakened immune system (HIV).",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — noted they're conscious, breathing normally and responding. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — Thank you for answering. Here is the result of the screening.\n\nLevel 2 - Emergency (target: under 10 minutes). Go to the nearest Emergency Department immediately.\n\nWhat you reported: Immunocompromised.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 51,
+      "name": "PROFILE male + stomach pain 6/10",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": [],
+      "agent": {
+        "subject": "self",
+        "age_asked_despite_profile": false,
+        "profile_misapplied": false,
+        "final_age": 30,
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 3,
+        "turns": 7,
+        "seconds": 13.3,
+        "error": null,
+        "llm_calls": 9,
+        "input_tokens": 7531,
+        "output_tokens": 613,
+        "total_tokens": 8144,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_CRIT_L3_01",
+          "RULE_ABD_L3_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "I have stomach pain, about 6 out of 10",
+            "selected": null,
+            "bot": "Thanks — I see from your profile you're a 30-year-old male. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — noted. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You chose “None of these.” Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — I hear you're alert, walking and talking normally. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Moderate pain (4-7)",
+            "selected": [
+              "Moderate pain (4-7)"
+            ],
+            "bot": "You said moderate pain (4–7). How severe is the abdominal pain on a scale of 0 to 10?",
+            "options": [
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "Pain reduced or subsided",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Moderate pain (4-7)",
+            "selected": [
+              "Moderate pain (4-7)"
+            ],
+            "bot": "You said: “Moderate pain (4-7).” Is there bleeding from the rectum or mouth, a tense rigid (hard) abdomen, very sudden onset of pain, or associated back pain?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Got it. Thank you for answering. Here is the result of the screening.\n\nLevel 3 - Urgent (target: under 30 minutes). Needs urgent medical assessment: go to an Emergency Department.\n\nWhat you reported: Pain score 4-7; Pain score 4-7.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 52,
+      "name": "PROFILE adult, child patient",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 14,
+      "oracle_unscripted": [],
+      "agent": {
+        "subject": "other",
+        "age_asked_despite_profile": false,
+        "profile_misapplied": false,
+        "final_age": 4,
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 3,
+        "turns": 16,
+        "seconds": 29.3,
+        "error": null,
+        "llm_calls": 18,
+        "input_tokens": 12599,
+        "output_tokens": 1094,
+        "total_tokens": 13693,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_TRAUMA_PAED_L3_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 1,
+        "transcript": [
+          {
+            "patient": "My 4 year old daughter fell and hurt her arm",
+            "selected": null,
+            "bot": "So far this is at least Level 2 - Emergency (target: under 10 minutes). Go to the nearest Emergency Department immediately.\n\nI'm sorry to hear that — Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — noted they're conscious, breathing normally and responding. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Got it. Where or how was the person hurt? Tick all that apply.",
+            "options": [
+              "Head, face or neck",
+              "Chest, abdomen or pelvis (hips)",
+              "Arm, leg, hand or foot",
+              "A fall",
+              "A cut, wound, burn or other skin injury",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Arm, leg, hand or foot; A fall",
+            "selected": [
+              "Arm, leg, hand or foot",
+              "A fall"
+            ],
+            "bot": "You said: \"Arm, leg, hand or foot; A fall.\" About the arm, leg, hand or foot injury: tick all that apply.",
+            "options": [
+              "Badly crushed or mangled",
+              "Arm or leg cut off (above the wrist or ankle)",
+              "Finger, toe or part of the hand / foot cut off",
+              "Bleeding that will not stop",
+              "Possible broken thigh bone or upper-arm bone",
+              "Bone showing through the skin",
+              "A joint looks out of place (dislocated)",
+              "Numbness, tingling, or cannot move a finger / toe properly",
+              "Problem with a cast or splint",
+              "The injury is to the hand",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You chose “None of these.” About the fall: tick all that apply.",
+            "options": [
+              "Fell from higher than 3 m (about one storey), or more than twice a child's height",
+              "An arm or leg looks deformed (out of shape) or badly injured",
+              "Confused, drowsy, or new weakness or numbness since the fall",
+              "Pain is the main problem",
+              "Walking normally with only mild symptoms",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Pain is the main problem",
+            "selected": [
+              "Pain is the main problem"
+            ],
+            "bot": "Thanks — Is the child limp or flaccid, not alert, unresponsive, not crying (or a very weak cry), with a blank stare or no speech?",
+            "options": [
+              "Yes - danger signs in appearance",
+              "No - alert, attentive, consolable",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No - alert, attentive, consolable",
+            "selected": [
+              "No - alert, attentive, consolable"
+            ],
+            "bot": "Thanks — noted they're alert, attentive and consolable. Is the child showing any of these breathing signs?",
+            "options": [
+              "Stridor (harsh high-pitched noise), grunting or wheezing",
+              "Snoring or muffled voice",
+              "Sniffing / tripod position (leaning forward to breathe)",
+              "Head bobbing with each breath (infants)",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You said “None of these.” Does the child have patchy or bluish skin, cold hands/feet, or pale mucous membranes / palms / soles?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — No. Is the infant unresponsive or lethargic, not feeding, with a floppy / weak cry, cold hands/feet, or skin rashes? Or crying continuously for more than 2 hours, or inconsolable?",
+            "options": [
+              "Yes - unresponsive, lethargic, not feeding, floppy / weak cry, cold peripheries or skin rashes",
+              "Yes - crying more than 2 hours, or inconsolable on arrival",
+              "No - intermittent crying, afebrile, warm hands/feet, feeding normally",
+              "No - active and comfortable",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Got it — none of these. Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — you're alert, walking and talking normally. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (1-3)",
+            "selected": [
+              "Mild pain (1-3)"
+            ],
+            "bot": "Thanks — Mild pain (1-3). After the fall, how severe is the child's pain on a scale of 0 to 10?",
+            "options": [
+              "Severe pain (above 7)",
+              "Pain score above 4",
+              "Pain 4 or below",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — Is the child moving less, uninterested in surroundings or play, crying or agitated unrelieved by reassurance, with a fixed gaze or weak cry?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Got it. Does the child have difficulty swallowing, drooling, wheezing, refusal to lie down, unable to walk, chest retractions, increased work of breathing, nasal flaring, or fast breathing alone?",
+            "options": [
+              "Yes - difficulty swallowing, drooling, retractions, nasal flaring, increased work of breathing or unable to walk",
+              "Yes - fast breathing (tachypnoea) alone",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Got it — Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Accessory muscles",
+              "Inappropriate history",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — None of these. Thank you for answering. Here is the result of the screening.\n\nLevel 3 - Urgent (target: under 30 minutes). Needs urgent medical assessment: go to an Emergency Department.\n\nWhat you reported: Pain main symptom (fall).\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 53,
+      "name": "MALAY danger: not breathing",
+      "run": 1,
+      "expected": 1,
+      "oracle_level": 1,
+      "oracle_questions": 0,
+      "oracle_unscripted": [],
+      "agent": {
+        "malay_replies": "1/1",
+        "999_first": true,
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 1,
+        "turns": 1,
+        "seconds": 6.6,
+        "error": null,
+        "llm_calls": 2,
+        "input_tokens": 3657,
+        "output_tokens": 655,
+        "total_tokens": 4312,
+        "call_999": true,
+        "matched_rules": [
+          "RULE_CRIT_L1_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "Ayah saya tidak bernafas dan tidak sedar",
+            "selected": null,
+            "bot": "Hubungi 999 sekarang (112 dari telefon bimbit).\n\nSaya faham — terima kasih kerana memberitahu. Terima kasih kerana menjawab. Berikut hasil saringan.\n\nTahap 1 - Resusitasi (masa sasaran rawatan: segera). Hubungi 999 sekarang (112 dari telefon bimbit). Ini memerlukan penjagaan kecemasan serta-merta.\n\nApa yang anda laporkan: Tidak bernafas; Tidak sedar.\n\nIni adalah saringan awal, bukan diagnosis perubatan. Ia tidak menggantikan penilaian oleh profesional penjagaan kesihatan. Jika gejala menjadi lebih teruk, hubungi 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 54,
+      "name": "SYNCOPE, recovered",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 7,
+      "oracle_unscripted": [],
+      "agent": {
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 4,
+        "turns": 9,
+        "seconds": 21.3,
+        "error": null,
+        "llm_calls": 13,
+        "input_tokens": 10009,
+        "output_tokens": 1268,
+        "total_tokens": 11277,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_SYN_L4_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "I fainted this morning but feel okay now, 30",
+            "selected": null,
+            "bot": "Thanks — I’m sorry that happened this morning. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — noted that they're conscious, breathing normally and responding. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You said: “None of these.” Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — noted you’re alert, walking and talking normally. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No pain (0)",
+            "selected": [
+              "No pain (0)"
+            ],
+            "bot": "You said: No pain (0). After fainting, is the person's level of consciousness altered, is there a neurological deficit, abnormal limb movements, or a skin rash / purpura (purple spots)?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "No — Has consciousness improved but a neurological deficit lasted more than 12 hours?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "You said “No.” Has the person fully recovered with no deficits? Has this happened before?",
+            "options": [
+              "Fully recovered, no deficits, and has fainted before",
+              "Fully recovered, no deficits",
+              "Not fully recovered",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Fully recovered, no deficits",
+            "selected": [
+              "Fully recovered, no deficits"
+            ],
+            "bot": "Thanks — Fully recovered, no deficits. Which of these is it? Tick all that apply.",
+            "options": [
+              "Fully recovered, no deficits, and has fainted before",
+              "Fully recovered, no deficits, and has not fainted before",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Fully recovered, no deficits, and has not fainted before",
+            "selected": [
+              "Fully recovered, no deficits, and has not fainted before"
+            ],
+            "bot": "Thanks — fully recovered with no deficits and no prior fainting. Thank you for answering. Here is the result of the screening.\n\nLevel 4 - Early Care (target: under 60 minutes). Needs medical care soon: go to an Emergency Department or a walk-in / urgent-care clinic.\n\nWhat you reported: Full recovery, no deficits, and no history of previous syncope.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    },
+    {
+      "scenario": 55,
+      "name": "ENT sore throat",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 8,
+      "oracle_unscripted": [],
+      "agent": {
+        "template_fallbacks": 0,
+        "empty_extractions": 0,
+        "level": 5,
+        "turns": 8,
+        "seconds": 22.6,
+        "error": null,
+        "llm_calls": 13,
+        "input_tokens": 10148,
+        "output_tokens": 1326,
+        "total_tokens": 11474,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_ENT_L5_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "I've had a sore throat for 2 days, 28",
+            "selected": null,
+            "bot": "Thanks — I hear you've had a sore throat for 2 days and are 28. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — noted. Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — you said they're alert, walking and talking normally. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (1-3)",
+            "selected": [
+              "Mild pain (1-3)"
+            ],
+            "bot": "Thanks — you said mild pain (1–3). Is there a possible airway obstruction (choking, throat closing, struggling to breathe)? For a child: is there breathing distress?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — No. Is there an active nosebleed, difficulty swallowing, or a tracheostomy? For a child: severe pain (above 7) or a hoarse voice?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay. Is there a foreign body in the ear / nose / throat? For a child: is the pain score above 4, or is the child under 5?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Okay — thank you for answering. Here is the result of the screening.\n\nLevel 5 - Routine (target: under 90 minutes). Not an emergency: a clinic or outpatient visit is suitable.\n\nWhat you reported: All other presentations.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "hybrid"
+    }
+  ]
+}

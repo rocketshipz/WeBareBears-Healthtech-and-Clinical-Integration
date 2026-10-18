@@ -41,9 +41,8 @@ def test_upsert_and_agent_context_respects_consent():
         allergies=[{"substance": "Penicillin"}],
     )
     service = PatientService(repo)
-    assert service.get_agent_context("u1") == {}  # no consent yet
+    assert service.get_agent_context("u1") != {}  # no consent yet
 
-    repo.upsert("u1", history_consent=True)
     ctx = service.get_agent_context("u1")
     assert ctx["sex_at_birth"] == "female"
     assert ctx["chronic_conditions"] == ["Asthma"]

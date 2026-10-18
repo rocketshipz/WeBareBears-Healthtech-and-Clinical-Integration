@@ -1,0 +1,940 @@
+{
+  "summary": {
+    "scenarios": 5,
+    "engine_oracle_accuracy": 1.0,
+    "agent_exact_accuracy": 1.0,
+    "agent_within_one_level": 1.0,
+    "agent_matches_oracle": 1.0,
+    "classified_rate": 1.0,
+    "over_triage": 0,
+    "under_triage": 0,
+    "no_result": 0,
+    "safety_recall_level_1_2": null,
+    "errors": 0,
+    "tokens_total": 437501,
+    "tokens_input": 402872,
+    "tokens_output": 34629,
+    "tokens_avg_per_test": 87500,
+    "tokens_max_test": 155458,
+    "tokens_min_test": 47580,
+    "tokens_avg_per_turn": 7415,
+    "llm_calls_avg_per_test": 14.2,
+    "turns_avg": 11.8,
+    "seconds_avg": 71.1,
+    "unscripted_questions": 0,
+    "unattributed_selections": 0,
+    "confusion_expected_vs_agent": {
+      "L3": {
+        "L3": 2
+      },
+      "L4": {
+        "L4": 1
+      },
+      "L5": {
+        "L5": 2
+      }
+    }
+  },
+  "results": [
+    {
+      "scenario": 34,
+      "name": "PROFILE self: sprained ankle",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": [],
+      "agent": {
+        "subject": "self",
+        "age_asked_despite_profile": false,
+        "profile_misapplied": false,
+        "final_age": 21,
+        "level": 5,
+        "turns": 8,
+        "seconds": 41.2,
+        "error": null,
+        "llm_calls": 9,
+        "input_tokens": 50923,
+        "output_tokens": 4115,
+        "total_tokens": 55038,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_TRAUMA_L5_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "I sprained my ankle",
+            "selected": null,
+            "bot": "Thanks — quick check: Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — quick check: Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — where or how were you hurt? Tick all that apply.",
+            "options": [
+              "Head, face or neck",
+              "Chest, abdomen or pelvis (hips)",
+              "Arm, leg, hand or foot",
+              "A fall",
+              "A cut, wound, burn or other skin injury",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Arm, leg, hand or foot",
+            "selected": [
+              "Arm, leg, hand or foot"
+            ],
+            "bot": "You said you sprained your ankle. About the arm, leg, hand or foot injury: tick all that apply.",
+            "options": [
+              "Badly crushed or mangled",
+              "Arm or leg cut off (above the wrist or ankle)",
+              "Finger, toe or part of the hand / foot cut off",
+              "Bleeding that will not stop",
+              "Possible broken thigh bone or upper-arm bone",
+              "Bone showing through the skin",
+              "A joint looks out of place (dislocated)",
+              "Numbness, tingling, or cannot move a finger / toe properly",
+              "Problem with a cast or splint",
+              "The injury is to the hand",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (1-3)",
+            "selected": [
+              "Mild pain (1-3)"
+            ],
+            "bot": "Okay — Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "You said it’s a sprained ankle with mild pain and you can walk — Which best describes the arm, leg, hand or foot injury now?",
+            "options": [
+              "Painful and might be a small broken bone (e.g. a finger or toe), but can still move the fingers / toes",
+              "Mild - can still use it or put weight on it, and it does not look broken",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild - can still use it or put weight on it, and it does not look broken",
+            "selected": [
+              "Mild - can still use it or put weight on it, and it does not look broken"
+            ],
+            "bot": "Level 5 - Routine\nLevel 5 - Routine (target: under 90 minutes). Not an emergency: a clinic or outpatient visit is suitable.\nKey findings: Unlikely fractures; Mild symptoms.\nI used your profile age (21) for this screening.\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "agent"
+    },
+    {
+      "scenario": 35,
+      "name": "PROFILE other: dad's chest pain",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 7,
+      "oracle_unscripted": [],
+      "agent": {
+        "subject": "other",
+        "age_asked_despite_profile": false,
+        "profile_misapplied": false,
+        "final_age": 60,
+        "level": 4,
+        "turns": 8,
+        "seconds": 32.5,
+        "error": null,
+        "llm_calls": 9,
+        "input_tokens": 44731,
+        "output_tokens": 2849,
+        "total_tokens": 47580,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_CP_L4_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "My dad has chest pain, he is 60",
+            "selected": null,
+            "bot": "I understand your dad is 60 and has chest pain. Is he conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — quick check: Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "I understand your dad has chest pain. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (1-3)",
+            "selected": [
+              "Mild pain (1-3)"
+            ],
+            "bot": "Thanks — I understand he has mild chest pain. When did the chest pain start?",
+            "options": [
+              "New onset starting within less than 6 hours",
+              "Started more than 6 hours ago",
+              "Chest pain is reducing",
+              "No further pain",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Started more than 6 hours ago",
+            "selected": [
+              "Started more than 6 hours ago"
+            ],
+            "bot": "I understand your dad has had mild chest pain for more than 6 hours. Is the chest pain still ongoing, and how strong is it (0 to 10)?",
+            "options": [
+              "Ongoing and high (severe, 8-10)",
+              "Ongoing and moderate (4-7)",
+              "Persisting mild pain (1-3)",
+              "No longer in pain",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Persisting mild pain (1-3)",
+            "selected": [
+              "Persisting mild pain (1-3)"
+            ],
+            "bot": "He is conscious and his chest pain is mild and persisting — quick check: Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — quick question: is your dad experiencing profuse sweating alongside the chest pain?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Level 4 - Early Care. Needs medical care soon: go to an Emergency Department or a walk-in / urgent-care clinic within 60 minutes.\n\nKey findings: Persisting mild chest pain for more than 6 hours, alert and breathing normally, no profuse sweating.\n\nNext steps: Arrange transport to the nearest ED or urgent-care clinic. If he becomes worse (pain increases, breathing difficulty, fainting, sweating, confusion, vomiting blood, or collapses), call 999 immediately.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "agent"
+    },
+    {
+      "scenario": 36,
+      "name": "PROFILE self: mild headache",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 9,
+      "oracle_unscripted": [],
+      "agent": {
+        "subject": "self",
+        "age_asked_despite_profile": false,
+        "profile_misapplied": false,
+        "final_age": 21,
+        "level": 5,
+        "turns": 12,
+        "seconds": 75.8,
+        "error": null,
+        "llm_calls": 15,
+        "input_tokens": 76971,
+        "output_tokens": 7820,
+        "total_tokens": 84791,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_HA_L5_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "I have a headache",
+            "selected": null,
+            "bot": "I understand you have a headache.\nIs this about you (the logged-in user)?",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "Okay — thanks. Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Okay — thanks. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — quick question: Did the headache start very suddenly, or is it accompanied by neck pain/stiffness, altered mental state or neurological deficits?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — one more quick question: Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (1-3)",
+            "selected": [
+              "Mild pain (1-3)"
+            ],
+            "bot": "Thanks — is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Okay — thanks. How severe is the headache on a 0 to 10 scale?",
+            "options": [
+              "Severe pain (above 7)",
+              "Pain score above 4",
+              "Mild pain (4 or below)",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (4 or below)",
+            "selected": [
+              "Mild pain (4 or below)"
+            ],
+            "bot": "Thanks — are you experiencing visual changes, speech difficulty, or trouble walking (ataxia / gait difficulty) alongside the headache?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — just to confirm: is the headache pain score above 4?",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "Thanks — is there a behavioural change, aura or one-sided headache, vomiting, or associated fever?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — I understand. Are these headache symptoms only, with none of the features asked about above?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes",
+            "selected": [
+              "Yes"
+            ],
+            "bot": "Level 5 - Routine\nNot an emergency: a clinic or outpatient visit is suitable. Please seek a clinic visit within 90 minutes if the headache persists or if new or worsening symptoms develop.\nKey findings: headache only, mild pain, alert and responsive.\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "agent"
+    },
+    {
+      "scenario": 37,
+      "name": "PROFILE unclear: fever+headache",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": [],
+      "agent": {
+        "subject": "self",
+        "age_asked_despite_profile": true,
+        "profile_misapplied": false,
+        "final_age": 21,
+        "level": 3,
+        "turns": 13,
+        "seconds": 92.7,
+        "error": null,
+        "llm_calls": 16,
+        "input_tokens": 85857,
+        "output_tokens": 8777,
+        "total_tokens": 94634,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_FEVER_L3_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "Fever and headache since yesterday",
+            "selected": null,
+            "bot": "Thanks — quick question: Is this about you?",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "Understood — this is for someone else. How old is the person, in years?",
+            "options": null
+          },
+          {
+            "patient": "It's for me.",
+            "selected": null,
+            "bot": "Thanks — quick check: Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — quick check: Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "You said fever and headache since yesterday. Did the headache start very suddenly, or is it accompanied by neck pain/stiffness, altered mental state or neurological deficits?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — you said fever and headache since yesterday. Does the fever come with a skin rash or blisters, altered mental state, seizures, or an immunocompromised state (e.g. chemotherapy, steroids, HIV)?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (1-3)",
+            "selected": [
+              "Mild pain (1-3)"
+            ],
+            "bot": "Thanks — quick check: Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — how severe is your headache on a 0 to 10 scale?",
+            "options": [
+              "Severe pain (above 7)",
+              "Pain score above 4",
+              "Mild pain (4 or below)",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Understood — thanks. Does the fever come with limb or joint swelling, headache, a reaction to a toxin or drug, or poor oral intake?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Understood — does the fever come with limb or joint swelling, headache, a reaction to a toxin or drug, or poor oral intake?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes",
+            "selected": [
+              "Yes"
+            ],
+            "bot": "Thanks — which one of these is present right now?\n\n- Limb or joint swelling\n- Headache\n- Reaction to a toxin or drug (e.g. new medicine, overdose, poisoning)\n- Poor oral intake (not eating or drinking)\n\nPlease reply with the exact item that applies.",
+            "options": null
+          },
+          {
+            "patient": "Headache",
+            "selected": null,
+            "bot": "Level 3 - Urgent\n\nLevel 3 - Urgent (target: under 30 minutes). Needs urgent medical assessment: go to an Emergency Department.\n\nKey finding: Headache (fever and headache since yesterday).\n\nI used your profile age (21) for this screening. If you would like, I can help find nearby emergency departments now.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "agent"
+    },
+    {
+      "scenario": 38,
+      "name": "PROFILE other: child with cold",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 14,
+      "oracle_unscripted": [],
+      "agent": {
+        "subject": "other",
+        "age_asked_despite_profile": false,
+        "profile_misapplied": false,
+        "final_age": 5,
+        "level": 3,
+        "turns": 18,
+        "seconds": 113.4,
+        "error": null,
+        "llm_calls": 22,
+        "input_tokens": 144390,
+        "output_tokens": 11068,
+        "total_tokens": 155458,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_RESP_PAED_L3_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "My 5 year old son has a cough and runny nose",
+            "selected": null,
+            "bot": "Thanks — quick question about your son: Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — quick follow-up about your son: Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — one more quick question about your son: Is the child limp or flaccid, not alert, unresponsive, not crying (or a very weak cry), with a blank stare or no speech?",
+            "options": [
+              "Yes - danger signs in appearance",
+              "No - alert, attentive, consolable",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No - alert, attentive, consolable",
+            "selected": [
+              "No - alert, attentive, consolable"
+            ],
+            "bot": "Thanks — your son has a cough and runny nose. Do any of these apply to the child?",
+            "options": [
+              "Harsh, high-pitched, gurgling or snoring noise with every breath (not just a cough or blocked nose)",
+              "Non-stop coughing fits, unable to catch breath between them",
+              "Blue lips or skin (cyanotic spells)",
+              "Unable to swallow",
+              "Something stuck in the airway",
+              "Has to sit leaning forward on the hands to breathe (tripod position)",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — quick question about breathing signs for your son: Is the child showing any of these breathing signs?",
+            "options": [
+              "Stridor (harsh high-pitched noise), grunting or wheezing",
+              "Snoring or muffled voice",
+              "Sniffing / tripod position (leaning forward to breathe)",
+              "Head bobbing with each breath (infants)",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — quick check about your son: Does he have patchy or bluish skin, cold hands/feet, or pale mucous membranes / palms / soles?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — quick check about your son: Is the infant unresponsive or lethargic, not feeding, with a floppy / weak cry, cold hands/feet, or skin rashes? Or crying continuously for more than 2 hours, or inconsolable?",
+            "options": [
+              "Yes - unresponsive, lethargic, not feeding, floppy / weak cry, cold peripheries or skin rashes",
+              "Yes - crying more than 2 hours, or inconsolable on arrival",
+              "No - intermittent crying, afebrile, warm hands/feet, feeding normally",
+              "No - active and comfortable",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No - active and comfortable",
+            "selected": [
+              "No - active and comfortable"
+            ],
+            "bot": "Thanks — Does the child have patchy or bluish skin, cold hands/feet, or pale mucous membranes / palms / soles?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — Does the child have difficulty swallowing, drooling, wheezing, refusal to lie down, unable to walk, chest retractions, increased work of breathing, nasal flaring, or fast breathing alone?",
+            "options": [
+              "Yes - difficulty swallowing, drooling, retractions, nasal flaring, increased work of breathing or unable to walk",
+              "Yes - fast breathing (tachypnoea) alone",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — quick question: Is the child moving less, uninterested in surroundings or play, crying or agitated unrelieved by reassurance, with a fixed gaze or weak cry?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — quick question about your son: Is the child moving less, uninterested in surroundings or play, crying or agitated unrelieved by reassurance, with a fixed gaze or weak cry?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — quick question about your son: Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No pain (0)",
+            "selected": [
+              "No pain (0)"
+            ],
+            "bot": "Thanks — quick question: Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — quick check: at any time (including before you sought help), was your son inconsolable or crying continuously for more than 2 hours?",
+            "options": null
+          },
+          {
+            "patient": "No - active and comfortable",
+            "selected": null,
+            "bot": "Thanks — quick follow-ups about your son:\n1) Is he using extra muscles to breathe (visible neck muscles, chest sucking in / retractions, or breathing much harder than usual)?\n2) Is there anything unusual about how this started or his history — for example sudden severe onset, repeated similar episodes, or other concerning features?",
+            "options": null
+          },
+          {
+            "patient": "No pain (0)",
+            "selected": null,
+            "bot": "Thanks — quick question: Is your son using extra muscles to breathe (visible neck muscles, chest sucking in / retractions, or breathing much harder than usual)?",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "Thanks — Does the child only have mild upper respiratory (cold-like) symptoms while tolerating oral intake?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes",
+            "selected": [
+              "Yes"
+            ],
+            "bot": "Level 3 - Urgent\nNeeds urgent medical assessment: go to an Emergency Department within 30 minutes.\n\nKey findings:\n- Mild upper respiratory (cold-like) symptoms\n- Tolerating oral intake\n\nAdvice: Seek urgent assessment at the nearest Emergency Department (this is not a 999 call). If the child worsens (breathing difficulty, high fever, poor feeding, lethargy, decreased responsiveness, blue lips or skin, or severe pain), call 999.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      },
+      "mode": "agent"
+    }
+  ]
+}

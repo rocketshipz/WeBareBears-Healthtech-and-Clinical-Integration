@@ -1,0 +1,165 @@
+{
+  "summary": {
+    "scenarios": 17,
+    "engine_oracle_accuracy": 1.0
+  },
+  "results": [
+    {
+      "scenario": 39,
+      "name": "TYPED answers: sprained ankle",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 40,
+      "name": "MALAY: fever + headache",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 41,
+      "name": "MULTI-FACT opening message",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 42,
+      "name": "NOT SURE on the first-look list",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 14,
+      "oracle_unscripted": [
+        "Q_CRIT_02A"
+      ]
+    },
+    {
+      "scenario": 43,
+      "name": "DON'T KNOW to a yes/no follow-up",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 14,
+      "oracle_unscripted": [
+        "Q_CRIT_02A"
+      ]
+    },
+    {
+      "scenario": 44,
+      "name": "SWITCH to mother mid-chat",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 45,
+      "name": "NEW SYMPTOM mid-chat",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 10,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 46,
+      "name": "DANGER sign mid-chat",
+      "run": 1,
+      "expected": 1,
+      "oracle_level": 1,
+      "oracle_questions": 0,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 47,
+      "name": "USER ASKS a question mid-chat",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 11,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 48,
+      "name": "VAGUE complaint first",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 49,
+      "name": "PROFILE epilepsy + sprained ankle",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 50,
+      "name": "PROFILE HIV + fever",
+      "run": 1,
+      "expected": 2,
+      "oracle_level": 2,
+      "oracle_questions": 2,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 51,
+      "name": "PROFILE male + stomach pain 6/10",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 52,
+      "name": "PROFILE adult, child patient",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 14,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 53,
+      "name": "MALAY danger: not breathing",
+      "run": 1,
+      "expected": 1,
+      "oracle_level": 1,
+      "oracle_questions": 0,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 54,
+      "name": "SYNCOPE, recovered",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 7,
+      "oracle_unscripted": []
+    },
+    {
+      "scenario": 55,
+      "name": "ENT sore throat",
+      "run": 1,
+      "expected": 5,
+      "oracle_level": 5,
+      "oracle_questions": 8,
+      "oracle_unscripted": []
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 import logging
-from typing import Any, Dict, Optional
+from contextlib import contextmanager
+from typing import Any, Dict, Iterator, Optional
+from app.core.database import get_session_factory
 from app.repositories.patient_repository import PatientRepository
 from app.schemas.patient import PatientProfile
 
@@ -10,13 +12,33 @@ class PatientService:
     """Service layer for patient profile and history business logic."""
 
     def __init__(self, repository: Optional[PatientRepository] = None):
-        self.repository = repository or PatientRepository()
+        # Without an injected repository, each call opens its own DB session (see _repo).
+        self.repository = repository
+
+    @contextmanager
+    def _repo(self) -> Iterator[PatientRepository]:
+        """The injected repository, or one on a fresh DB session that is closed afterwards."""
+        if self.repository is not None:
+            yield self.repository
+            return
+        session_factory = get_session_factory()
+        if session_factory is None:
+            yield PatientRepository()  # no database configured: every lookup returns None
+            return
+        session = session_factory()
+        try:
+            yield PatientRepository(session)
+        finally:
+            session.close()
 
     def get_patient_profile(self, patient_id: str) -> Optional[PatientProfile]:
         """Return the formatted patient profile, or None if there is no record."""
-        entity = self.repository.get_by_id(patient_id)
-        if not entity:
-            return None
+        with self._repo() as repo:
+            entity = repo.get_by_id(patient_id)
+            return self._profile(entity) if entity else None
+
+    @staticmethod
+    def _profile(entity) -> PatientProfile:
         contact = " ".join(
             p for p in (
                 entity.emergency_contact_name,
@@ -43,15 +65,20 @@ class PatientService:
         )
 
     def get_agent_context(self, patient_id: str) -> Dict[str, Any]:
-        """Compact context for the triage agent. Empty unless the user consented."""
-        entity = self.repository.get_by_id(patient_id)
-        if not entity or not entity.history_consent:
-            return {}
-        ctx: Dict[str, Any] = {
-            "age": entity.age,
-            "sex_at_birth": entity.sex_at_birth,
-            "chronic_conditions": [c.get("name") for c in (entity.chronic_conditions or [])],
-            "allergies": [a.get("substance") for a in (entity.allergies or [])],
-            "current_medications": [m.get("name") for m in (entity.current_medications or [])],
-        }
+        """Compact profile for triage (age, sex, condition / allergy / medication names). Empty if no record."""
+        with self._repo() as repo:
+            entity = repo.get_by_id(patient_id)
+            if not entity:
+                return {}
+
+            def names(items, key):
+                return [i.get(key) for i in (items or []) if isinstance(i, dict) and i.get(key)]
+
+            ctx: Dict[str, Any] = {
+                "age": entity.age,
+                "sex_at_birth": entity.sex_at_birth,
+                "chronic_conditions": names(entity.chronic_conditions, "name"),
+                "allergies": names(entity.allergies, "substance"),
+                "current_medications": names(entity.current_medications, "name"),
+            }
         return {k: v for k, v in ctx.items() if v not in (None, [], "unspecified")}

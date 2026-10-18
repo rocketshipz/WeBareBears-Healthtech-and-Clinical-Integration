@@ -38,6 +38,8 @@ _LEVEL_PATTERN = re.compile(r"^Level ([1-5])$")
 
 # Answers that rule out every option of a question. "None of these" is also offered on every selection.
 NONE_ANSWERS = ("None of these", "Neither")
+# Marks an option that is only one half of a compound condition (its `when` is "<answer> (this condition ...").
+COMPOUND_NOTE = "(this condition also needs"
 
 
 @dataclass(frozen=True)
@@ -76,6 +78,10 @@ class TriageRulesEngine:
         # condition_id -> {field, op, value} for conditions decided by age alone
         self.age_derived: Dict[str, dict] = {}
         self.questions_by_id: Dict[str, dict] = {}
+        # condition_id -> question_ids that each ask one half of a compound condition (e.g. onset > 6 H AND
+        # moderate pain). Their options carry the COMPOUND_NOTE; the condition is present once all are answered
+        # with that half (any other answer rules it out).
+        self.compound: Dict[str, set] = {}
         # gated question_id -> gate question_id: the gated question is only asked after the gate is answered
         self.gated_by: Dict[str, str] = {}
 
@@ -96,6 +102,9 @@ class TriageRulesEngine:
                 for part in question.get("maps_to", []):
                     for gated in part.get("opens", []):
                         self.gated_by[gated] = question["question_id"]
+                    if COMPOUND_NOTE in part["when"]:
+                        for condition_id in part["condition_ids"]:
+                            self.compound.setdefault(condition_id, set()).add(question["question_id"])
                     for condition_id in part["condition_ids"]:
                         self.ask_as.setdefault(condition_id, part["when"])
             for rule in category.get("rules", []):
@@ -192,13 +201,17 @@ class TriageRulesEngine:
             found["present_condition_ids"] = list(parts[0]["condition_ids"])
             return found
 
+        def half_of_compound(p, a):
+            return p["when"].lower().startswith(a.lower() + " " + COMPOUND_NOTE)
+
         chosen = []
         for a in answers:
-            match = [p for p in parts if a.lower().startswith(p["when"].lower())]
+            match = [p for p in parts if a.lower().startswith(p["when"].lower()) or half_of_compound(p, a)]
             if not match:
                 return None
             chosen += [p for p in match if p not in chosen]
-        present = list(dict.fromkeys(i for p in chosen for i in p["condition_ids"]))
+        # Half of a compound condition: stays open (decided in evaluate once its other half is answered).
+        present = list(dict.fromkeys(i for p in chosen if COMPOUND_NOTE not in p["when"] for i in p["condition_ids"]))
         still_open = set(present) | {i for p in chosen for i in p.get("covers", [])}
         found["present_condition_ids"] = present
         found["absent_condition_ids"] = [i for i in ruled_out([p for p in parts if p not in chosen])
@@ -232,7 +245,9 @@ class TriageRulesEngine:
                 errors.append(f"Unknown {label} condition IDs ignored: {bad}")
             return ids - set(bad)
 
-        history = _valid(history_condition_ids, "history")
+        # History only modifies the rules of the complaint being screened (KB patient_context.rule): epilepsy
+        # history must not make a sprained ankle Level 4. Reported (present) conditions count everywhere.
+        history = {i for i in _valid(history_condition_ids, "history") if self.conditions[i].category in screened}
         present = _valid(present_condition_ids, "present") | history
         # Safety: if a condition is both present and absent, present wins.
         absent = _valid(absent_condition_ids, "absent") - present
@@ -246,6 +261,10 @@ class TriageRulesEngine:
                 holds = age_years > spec["value"] if spec["op"] == ">" else age_years < spec["value"]
                 (present if holds else absent).add(condition_id)
         answered = set(answered_question_ids or [])
+        # Compound conditions: every half answered and none ruled it out -> present.
+        for condition_id, halves in self.compound.items():
+            if condition_id not in present and condition_id not in absent and halves <= answered:
+                present.add(condition_id)
 
         # Present conditions count even outside the screened categories (the user reported them), but only for
         # the patient's population: answers map to the adult and the paediatric version of a condition, and

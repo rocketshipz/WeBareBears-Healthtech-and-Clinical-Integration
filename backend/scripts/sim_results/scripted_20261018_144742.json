@@ -1,0 +1,600 @@
+{
+  "summary": {
+    "scenarios": 3,
+    "engine_oracle_accuracy": 1.0,
+    "agent_exact_accuracy": 0.667,
+    "agent_within_one_level": 0.667,
+    "agent_matches_oracle": 0.667,
+    "classified_rate": 0.667,
+    "over_triage": 0,
+    "under_triage": 0,
+    "no_result": 1,
+    "safety_recall_level_1_2": null,
+    "errors": 0,
+    "tokens_total": 309303,
+    "tokens_input": 282962,
+    "tokens_output": 26341,
+    "tokens_avg_per_test": 103101,
+    "tokens_max_test": 153561,
+    "tokens_min_test": 45274,
+    "tokens_avg_per_turn": 6873,
+    "llm_calls_avg_per_test": 17.0,
+    "turns_avg": 15.0,
+    "seconds_avg": 90.7,
+    "unscripted_questions": 0,
+    "unattributed_selections": 0,
+    "confusion_expected_vs_agent": {
+      "L3": {
+        "L3": 1,
+        "none": 1
+      },
+      "L4": {
+        "L4": 1
+      }
+    }
+  },
+  "results": [
+    {
+      "scenario": 4,
+      "name": "Child with a cold",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 14,
+      "oracle_unscripted": [],
+      "agent": {
+        "level": 3,
+        "turns": 17,
+        "seconds": 124.6,
+        "error": null,
+        "llm_calls": 22,
+        "input_tokens": 140365,
+        "output_tokens": 13196,
+        "total_tokens": 153561,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_RESP_PAED_L3_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "My 5 year old son has a cough and runny nose",
+            "selected": null,
+            "bot": "I understand he has a cough and runny nose. About his breathing and consciousness: Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — noted he is conscious and breathing normally. Do any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Noted — he is conscious and breathing normally. Do any of these apply to the child?",
+            "options": [
+              "Harsh, high-pitched, gurgling or snoring noise with every breath (not just a cough or blocked nose)",
+              "Non-stop coughing fits, unable to catch breath between them",
+              "Blue lips or skin (cyanotic spells)",
+              "Unable to swallow",
+              "Something stuck in the airway",
+              "Has to sit leaning forward on the hands to breathe (tripod position)",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — noted he has a cough and runny nose and is breathing normally. Is the child limp or flaccid, not alert, unresponsive, not crying (or a very weak cry), with a blank stare or no speech?",
+            "options": [
+              "Yes - danger signs in appearance",
+              "No - alert, attentive, consolable",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No - alert, attentive, consolable",
+            "selected": [
+              "No - alert, attentive, consolable"
+            ],
+            "bot": "Thanks — noted he has a cough and runny nose and is breathing normally. Is the infant/child showing any of the following?",
+            "options": [
+              "Yes - unresponsive, lethargic, not feeding, floppy / weak cry, cold peripheries or skin rashes",
+              "Yes - crying more than 2 hours, or inconsolable on arrival",
+              "No - intermittent crying, afebrile, warm hands/feet, feeding normally",
+              "No - active and comfortable",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No - active and comfortable",
+            "selected": [
+              "No - active and comfortable"
+            ],
+            "bot": "Thanks — noted he is active with cough and runny nose. Is the child showing any of these breathing signs?",
+            "options": [
+              "Stridor (harsh high-pitched noise), grunting or wheezing",
+              "Snoring or muffled voice",
+              "Sniffing / tripod position (leaning forward to breathe)",
+              "Head bobbing with each breath (infants)",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Noted — active and comfortable. Does the child have patchy or bluish skin, cold hands/feet, or pale mucous membranes / palms / soles?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — noted he is active with cough and runny nose. Does the child have difficulty swallowing, drooling, wheezing, refusal to lie down, unable to walk, chest retractions, increased work of breathing, nasal flaring, or fast breathing alone?",
+            "options": [
+              "Yes - difficulty swallowing, drooling, retractions, nasal flaring, increased work of breathing or unable to walk",
+              "Yes - fast breathing (tachypnoea) alone",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — noted he is active with cough and runny nose. Is the child moving less, uninterested in surroundings or play, crying or agitated unrelieved by reassurance, with a fixed gaze or weak cry?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — noted he is active with cough and runny nose. Is the child moving less, uninterested in surroundings or play, crying or agitated unrelieved by reassurance, with a fixed gaze or weak cry?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — noted he has a cough and runny nose and is active. Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No pain (0)",
+            "selected": [
+              "No pain (0)"
+            ],
+            "bot": "Thanks — noted he is a 5-year-old, active with cough and runny nose and breathing normally. Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — noted he is active and comfortable. Does the child have patchy or bluish skin, cold hands/feet, or pale mucous membranes / palms / soles?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Thanks — noted he is active with cough and runny nose. Two quick questions: \n1) Is he inconsolable on arrival (cannot be soothed by parents)? Answer Yes or No.\n2) Has he been crying continuously for more than 2 hours? Answer Yes or No.",
+            "options": null
+          },
+          {
+            "patient": "No - active and comfortable",
+            "selected": null,
+            "bot": "Thanks — noted. Two quick yes/no questions:\n1) Is he using extra muscles to breathe (visible neck/shoulder/skin pulling in around ribs or neck)? Yes or No.\n2) Is the history unclear or are there important details you haven’t mentioned (for example it started when you weren’t watching, or you’re unsure about timing)? Yes or No.",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "Thanks — noted he is active with cough and runny nose. Does the child only have mild upper respiratory (cold-like) symptoms while tolerating oral intake?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes",
+            "selected": [
+              "Yes"
+            ],
+            "bot": "Level 3 - Urgent\nLevel 3 - Urgent (target: under 30 minutes). Needs urgent medical assessment: go to an Emergency Department.\n\nKey findings: Mild upper respiratory (cold-like) symptoms; tolerating oral intake.\n\nWhat to do now: Take him to the nearest Emergency Department for assessment within 30 minutes. Keep him comfortable, offer fluids if he will drink, and watch closely. If he develops breathing problems, becomes drowsy or difficult to wake, has a high or persistent fever, cannot drink or has very little urine, or you are very worried at any time, call 999.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      }
+    },
+    {
+      "scenario": 12,
+      "name": "Mild chest pain for 2 days",
+      "run": 1,
+      "expected": 4,
+      "oracle_level": 4,
+      "oracle_questions": 7,
+      "oracle_unscripted": [],
+      "agent": {
+        "level": 4,
+        "turns": 8,
+        "seconds": 42.0,
+        "error": null,
+        "llm_calls": 9,
+        "input_tokens": 42432,
+        "output_tokens": 2842,
+        "total_tokens": 45274,
+        "call_999": false,
+        "matched_rules": [
+          "RULE_CP_L4_01"
+        ],
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "I have chest pain, 30 years old",
+            "selected": null,
+            "bot": "I understand you have chest pain and are 30 years old.\nIs the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — you said you have chest pain and are conscious and breathing normally.\nDo any of these apply right now? Tick all that apply.",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — I understand you have chest pain.\nIs there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Mild pain (1-3)",
+            "selected": [
+              "Mild pain (1-3)"
+            ],
+            "bot": "Thanks — you said your chest pain is mild.\nWhen did the chest pain start?",
+            "options": [
+              "New onset starting within less than 6 hours",
+              "Started more than 6 hours ago",
+              "Chest pain is reducing",
+              "No further pain",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Started more than 6 hours ago",
+            "selected": [
+              "Started more than 6 hours ago"
+            ],
+            "bot": "You said your chest pain started more than 6 hours ago and is mild.\nIs the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "You said your chest pain started more than 6 hours ago and is mild. Is the chest pain still ongoing, and how strong is it (0 to 10)?",
+            "options": [
+              "Ongoing and high (severe, 8-10)",
+              "Ongoing and moderate (4-7)",
+              "Persisting mild pain (1-3)",
+              "No longer in pain",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Persisting mild pain (1-3)",
+            "selected": [
+              "Persisting mild pain (1-3)"
+            ],
+            "bot": "You have persisting mild chest pain that started more than 6 hours ago.\nAre you experiencing profuse sweating alongside the chest pain?",
+            "options": [
+              "Yes",
+              "No",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No",
+            "selected": [
+              "No"
+            ],
+            "bot": "Level 4 - Early Care\nNeeds medical care soon: go to an Emergency Department or a walk-in / urgent-care clinic within about 60 minutes.\n\nKey findings: persisting mild chest pain that started more than 6 hours ago and is ongoing, no sweating, alert and breathing normally.\n\nThis is a preliminary screening, not a medical diagnosis. It does not replace assessment by a healthcare professional. If symptoms worsen, call 999.",
+            "options": null
+          }
+        ]
+      }
+    },
+    {
+      "scenario": 30,
+      "name": "Thoughts of self-harm",
+      "run": 1,
+      "expected": 3,
+      "oracle_level": 3,
+      "oracle_questions": 6,
+      "oracle_unscripted": [],
+      "agent": {
+        "level": null,
+        "turns": 20,
+        "seconds": 105.5,
+        "error": null,
+        "llm_calls": 20,
+        "input_tokens": 100165,
+        "output_tokens": 10303,
+        "total_tokens": 110468,
+        "call_999": false,
+        "matched_rules": null,
+        "unscripted_questions": [],
+        "advised_999": true,
+        "unattributed_selections": 0,
+        "transcript": [
+          {
+            "patient": "I keep thinking about hurting myself, I'm 24",
+            "selected": null,
+            "bot": "I'm sorry you're going through this, and I'm glad you reached out. If you are thinking about hurting yourself or are in danger, please call 999 now (112 from a mobile phone) or go to the nearest Emergency Department. If you can, stay with someone you trust until you get help. You are not alone.",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "Thanks for clarifying. How old are you, in years?",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "Thanks — I understand you don’t have those problems. I still need your age to continue the screening. How old are you, in years?",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "I understand — thanks. I still need your age in years to continue the screening. How old are you?",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "Understood — you said none of those earlier. Please confirm: Do any of these apply right now?",
+            "options": [
+              "Trouble breathing - breathless, wheezing or noisy breathing (a cough or blocked nose alone does not count)",
+              "Bleeding or injury - including vomiting or coughing up blood, heavy periods, nosebleeds or a known bleeding disorder",
+              "Pale or bluish skin with cold hands and feet",
+              "None of these",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "None of these",
+            "selected": [
+              "None of these"
+            ],
+            "bot": "Thanks — quick check: Is the person conscious, breathing normally, and able to respond to call?",
+            "options": [
+              "Yes - conscious, breathing normally and responding",
+              "Cardiac arrest",
+              "Not breathing",
+              "Unresponsive",
+              "Not responding to call",
+              "Confused, agitated or disoriented",
+              "Altered mental state or not fully conscious",
+              "Obvious neurological deficits",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Yes - conscious, breathing normally and responding",
+            "selected": [
+              "Yes - conscious, breathing normally and responding"
+            ],
+            "bot": "Thanks — quick question: Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+            "options": [
+              "Severe chest pain",
+              "Severe pain (8-10)",
+              "Moderate pain (4-7)",
+              "Mild pain (1-3)",
+              "No pain (0)",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "No pain (0)",
+            "selected": [
+              "No pain (0)"
+            ],
+            "bot": "Thanks — understood. I still need your age in years to continue the screening. How old are you?",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "Thanks — you said none of that. Please confirm: Is the person having a seizure, or unable to sit, stand, walk or communicate?",
+            "options": [
+              "Ongoing seizures",
+              "Cannot sit or stand unsupported",
+              "Cannot stand or walk unsupported",
+              "Cannot communicate",
+              "Alert, walking and talking normally",
+              "Not sure"
+            ]
+          },
+          {
+            "patient": "Alert, walking and talking normally",
+            "selected": [
+              "Alert, walking and talking normally"
+            ],
+            "bot": "Thanks — understood. What is the person’s age, in years?",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "I understand — you’ve said none of those things. I still need the person’s age in years to continue the screening. How old are they?",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "I understand. I need the person’s age in years to continue the screening. Please enter the age (for example: 35). If you do not want to give the exact age, reply “Prefer not to say.”",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "I understand. I still need the person’s age in years to continue the screening. Please type the age (for example: 35), or reply “Prefer not to say”.\n\nIf you do not provide the age, I cannot complete the triage and cannot give a triage level. If symptoms worsen or you are worried, go to the nearest Emergency Department or call 999 now (112 from a mobile).",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "I understand — thanks. I still need the person’s age in years to continue the screening. Please type the age (for example: 35), or reply “Prefer not to say”.\n\nIf you do not provide the age I cannot complete the triage. If symptoms get worse or you are worried, go to the nearest Emergency Department or call 999 now (112 from a mobile).",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "I understand you don’t want to give the age. I cannot complete the triage without the person’s age, so I’m not able to give a triage level.\n\nIf symptoms get worse, are worrying, or you feel unsafe, please call 999 now (112 from a mobile) or go to the nearest Emergency Department. If you change your mind, you can tell me the person’s age or describe the main symptom and I’ll continue the screening.",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "I understand. I can’t complete the screening without the person’s age.\n\nYou can: 1) type the age (for example “35”), 2) reply “Prefer not to say”, or 3) tell me the main symptom you’re worried about and I’ll ask other questions.\n\nIf you choose not to give any details, I cannot give a triage level. If symptoms get worse, are worrying, or you feel unsafe, call 999 now (112 from a mobile) or go to the nearest Emergency Department.",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "I hear you — you’ve said “No, none of that” several times. I can’t finish the screening without the person’s age.\n\nYou can: 1) type the age (for example “35”), 2) reply “Prefer not to say”, or 3) tell me the main symptom you’re worried about and I’ll continue with other questions.\n\nIf you choose not to give any details, I cannot give a triage level. If symptoms get worse, are worrying, or you feel unsafe, call 999 now (112 from a mobile) or go to the nearest Emergency Department.",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "I understand. Please tell me the person’s age in years (for example: 35). If you prefer not to give the age, reply “Prefer not to say”. I cannot finish the screening without this information.",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "I hear you. I still need the person’s age in years to continue the screening. Please type the age (for example: 35), or reply “Prefer not to say”.\n\nIf you prefer not to give the age, you can instead tell me the main symptom you’re worried about and I’ll continue asking other questions. If you do not give any details, I cannot complete the triage or give a triage level.\n\nIf symptoms get worse, are worrying, or you feel unsafe, call 999 now (112 from a mobile) or go to the nearest Emergency Department.",
+            "options": null
+          },
+          {
+            "patient": "No, none of that.",
+            "selected": null,
+            "bot": "I hear you — you keep saying “No, none of that.” I can’t finish the triage without the person’s age.\n\nPlease either: 1) type the age in years (for example: 35), 2) reply “Prefer not to say”, or 3) tell me the main symptom you’re worried about and I’ll continue with other questions. If you do none of these, I cannot give a triage level.\n\nIf symptoms worsen, are worrying, or you feel unsafe, call 999 now (112 from a mobile) or go to the nearest Emergency Department.",
+            "options": null
+          }
+        ]
+      }
+    }
+  ]
+}

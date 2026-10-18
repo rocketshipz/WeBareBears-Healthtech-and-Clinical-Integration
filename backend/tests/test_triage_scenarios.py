@@ -246,6 +246,80 @@ def test_kb_question_structure(engine):
                 assert gated in engine.questions_by_id
 
 
+# ------------------------------------------------------------------ compound condition (onset > 6 H AND moderate)
+CHEST = "Chest Pain & Cardiac Symptoms"
+OVER_6H = "Started more than 6 hours ago"
+
+
+@pytest.mark.parametrize("pain_now,level", [
+    ("Ongoing and moderate (4-7)", 3),   # both halves -> 'onset > 6 H with moderate pain'
+    ("Persisting mild pain (1-3)", 4),
+])
+def test_chest_pain_onset_and_severity_combine_without_the_llm(engine, pain_now, level):
+    assert engine.apply_answer("Q_CP_01", OVER_6H) is not None  # half of a compound: still mappable
+    res, _ = screen(engine, [CHEST], 30, {"Q_CRIT_05": "Mild pain (1-3)", "Q_CP_01": OVER_6H, "Q_CP_05": pain_now})
+    assert res["triage_level"] == level
+
+
+def test_compound_condition_needs_both_halves(engine):
+    compound = "RULE_CP_L3_01.C1"
+    assert engine.compound[compound] == {"Q_CP_01", "Q_CP_05"}
+    found = engine.apply_answer("Q_CP_01", OVER_6H)
+    assert compound not in found["present_condition_ids"] + found["absent_condition_ids"]
+    only_one = engine.evaluate(categories=[CHEST], age_years=30, answered_question_ids=["Q_CP_01"],
+                               absent_condition_ids=found["absent_condition_ids"])
+    assert compound not in only_one["key_findings"]
+
+
+# ------------------------------------------------------------------ agent: provider content filter
+
+def test_filtered_message_gets_urgent_advice_and_the_session_keeps_working():
+    from langchain_core.messages import AIMessage, HumanMessage
+    from app.agents.triage_agent import _FILTERED_REPLY, MedicalTriageAgent
+
+    class FilteringLLM:
+        def __init__(self):
+            self.calls = 0
+
+        def invoke(self, messages):
+            self.calls += 1
+            if any(isinstance(m, HumanMessage) and "hurt myself" in m.content for m in messages):
+                raise RuntimeError("Error code: 400 - {'error': {'code': 'content_filter', 'innererror': "
+                                   "{'content_filter_result': {'self_harm': {'filtered': True, 'severity': 'medium'}}}}}")
+            return AIMessage(content='{"type":"text","response":"How old are you?"}')
+
+    agent = MedicalTriageAgent()
+    agent._agent_runnable = FilteringLLM()
+    session = agent.run_session("I want to hurt myself", session_id="filtered")
+    assert session.last_output["response"] == _FILTERED_REPLY and "999" in _FILTERED_REPLY
+    assert not any("hurt myself" in str(m.content) for m in session.messages)  # not resent next turn
+    assert session.findings["categories"] == ["Psychiatric & Behavioural"]  # screened; user confirms items
+    session = agent.run_session("I'm 24", session_id="filtered")
+    assert session.last_output["response"] == "How old are you?"
+
+
+# ------------------------------------------------------------------ agent: stall guard
+
+def test_agent_is_told_to_stop_after_repeated_turns_with_nothing_left_to_ask():
+    from langchain_core.messages import AIMessage, SystemMessage
+    from app.agents.triage_agent import _STALL_NOTE, STALL_LIMIT, MedicalTriageAgent
+
+    class FakeLLM:
+        def invoke(self, messages):
+            return AIMessage(content='{"type":"text","response":"Any other symptoms?"}')
+
+    agent = MedicalTriageAgent()
+    agent._agent_runnable = FakeLLM()
+    session = agent.get_session("stall")
+    session.triage_result = {"status": "insufficient_information", "missing_information": [],
+                             "unexplored_categories": ["Headache"]}
+    for _ in range(STALL_LIMIT):
+        agent.run_session("No", session_id="stall")
+    assert not any(isinstance(m, SystemMessage) and m.content == _STALL_NOTE for m in session.messages)
+    agent.run_session("No", session_id="stall")
+    assert any(isinstance(m, SystemMessage) and m.content == _STALL_NOTE for m in session.messages)
+
+
 # ------------------------------------------------------------------ agent: selections
 
 def test_tapped_options_are_recorded_from_the_kb(engine):

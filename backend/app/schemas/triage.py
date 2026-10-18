@@ -61,6 +61,8 @@ class TriageChatRequest(BaseModel):
     patient_id: Optional[str] = Field(None, description="Patient ID if available")
     selected_options: Optional[List[str]] = Field(
         None, description="Option(s) picked from the previous selection, exactly as offered (several if multi_select)")
+    note: Optional[str] = Field(
+        None, description="Optional extra details typed alongside a picked option (read as new information)")
 
 
 class TriageChatResponse(BaseModel):
@@ -71,6 +73,9 @@ class TriageChatResponse(BaseModel):
     multi_select: bool = Field(False, description="Selection allows ticking several options")
     exclusive_options: List[str] = Field(
         default_factory=list, description="Options that cannot be ticked together with any other (e.g. 'None of these')")
+    suggested_options: List[str] = Field(
+        default_factory=list,
+        description="Options matching what the user already mentioned: shown pre-selected, the user still confirms")
     reply: str = Field(..., description="Plain text of the turn (the question for a selection); kept for compatibility")
     session_id: Optional[str] = None
     assessment: Optional[TriageAssessment] = None
