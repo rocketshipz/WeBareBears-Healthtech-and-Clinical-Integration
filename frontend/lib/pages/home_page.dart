@@ -633,7 +633,7 @@ class _HomePageState extends State<HomePage>
     return Pressable(
       onTap: onTap,
       child: Container(
-        height: 148,
+        height: 160,
         padding: const EdgeInsets.all(16),
         decoration: cardDecoration(radius: 22),
         child: Column(

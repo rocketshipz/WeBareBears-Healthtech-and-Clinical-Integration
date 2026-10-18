@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
-import 'admin_landing.dart';
+import '../screens/role_selection_screen.dart';
 import 'admin_store.dart';
 import 'admin_widgets.dart';
 import 'admin_i18n.dart';
+import 'change_password.dart';
 
 class AdminAccountPage extends StatelessWidget {
   const AdminAccountPage({super.key});
@@ -52,8 +53,9 @@ class AdminAccountPage extends StatelessWidget {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color:
-                                        AppColors.teal.withValues(alpha: 0.20),
+                                    color: AppColors.teal.withValues(
+                                      alpha: 0.20,
+                                    ),
                                     blurRadius: 30,
                                     spreadRadius: 2,
                                   ),
@@ -76,10 +78,7 @@ class AdminAccountPage extends StatelessWidget {
                               style: AppText.bodyStrong,
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              staff?.hospital ?? '',
-                              style: AppText.body,
-                            ),
+                            Text(staff?.hospital ?? '', style: AppText.body),
                           ],
                         ),
                       ),
@@ -106,7 +105,10 @@ class AdminAccountPage extends StatelessWidget {
                             const Divider(height: 1, color: AppColors.border),
                             _row(tr('Hospital'), staff?.hospital ?? '-'),
                             const Divider(height: 1, color: AppColors.border),
-                            _row(tr('Department'), tr(staff?.department ?? '-')),
+                            _row(
+                              tr('Department'),
+                              tr(staff?.department ?? '-'),
+                            ),
                             const Divider(height: 1, color: AppColors.border),
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -150,10 +152,14 @@ class AdminAccountPage extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 adminStore.repo.isDemo
-                                    ? tr('Demo mode: sample data only. Nothing is saved '
-                                        'and everything resets when the app restarts.')
-                                    : tr('Connected to Supabase. Every update you make is '
-                                        'saved with your name and staff ID.'),
+                                    ? tr(
+                                        'Demo mode: sample data only. Nothing is saved '
+                                        'and everything resets when the app restarts.',
+                                      )
+                                    : tr(
+                                        'Connected to Supabase. Every update you make is '
+                                        'saved with your name and staff ID.',
+                                      ),
                                 style: AppText.caption,
                               ),
                             ),
@@ -164,6 +170,17 @@ class AdminAccountPage extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
+                    PrimaryButton(
+                      label: 'Change password',
+                      icon: Icons.lock_reset_rounded,
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (_) => const ChangeStaffPassword(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     FadeSlideIn(
                       index: 4,
                       child: PrimaryButton(
@@ -178,7 +195,7 @@ class AdminAccountPage extends StatelessWidget {
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const AdminLandingScreen(),
+                              builder: (_) => const RoleSelectionScreen(),
                             ),
                             (route) => false,
                           );

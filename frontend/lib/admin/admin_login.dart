@@ -17,15 +17,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final passwordController = TextEditingController();
 
   bool obscure = true;
-  String role = 'Nurse';
-
-  static const hospitals = [
-    'Central General Hospital',
-    'Riverside Medical Centre',
-    'Maple Community Hospital',
-  ];
-
-  String hospital = hospitals.first;
+  bool signingIn = false;
 
   @override
   void dispose() {
@@ -35,6 +27,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   }
 
   Future<void> _login() async {
+    if (signingIn) return;
     final id = staffIdController.text.trim();
     final pw = passwordController.text;
 
@@ -43,12 +36,15 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       return;
     }
 
+    setState(() => signingIn = true);
     try {
-      await adminStore.signIn(id, pw, hospital: hospital, role: role);
-    } catch (_) {
+      await adminStore.signIn(id, pw);
+    } catch (error) {
       if (!mounted) return;
-      showAppSnack(context, tr('Sign in failed. Check your staff ID and password.'));
+      showAppSnack(context, error.toString().replaceFirst('Exception: ', ''));
       return;
+    } finally {
+      if (mounted) setState(() => signingIn = false);
     }
 
     if (!mounted) return;
@@ -63,6 +59,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: Navigator.of(context).canPop()
+          ? buildAppBar('Choose account type')
+          : null,
       body: GradientBackground(
         child: SafeArea(
           child: SingleChildScrollView(
@@ -124,47 +123,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            fieldLabel(tr('Hospital')),
-                            const SizedBox(height: 8),
-                            DropdownButtonFormField<String>(
-                              initialValue: hospital,
-                              isExpanded: true,
-                              style: AppText.input,
-                              borderRadius: BorderRadius.circular(16),
-                              decoration: appInputDecoration(
-                                hint: tr('Select hospital'),
-                                icon: Icons.local_hospital_outlined,
-                              ),
-                              items: [
-                                for (final h in hospitals)
-                                  DropdownMenuItem(value: h, child: Text(h)),
-                              ],
-                              onChanged: (value) {
-                                if (value != null) {
-                                  setState(() => hospital = value);
-                                }
-                              },
-                            ),
-
-                            const SizedBox(height: 18),
-
-                            fieldLabel(tr('Role')),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                for (final r in const ['Nurse', 'Doctor', 'Admin'])
-                                  SelectChip(
-                                    label: tr(r),
-                                    selected: role == r,
-                                    onTap: () => setState(() => role = r),
-                                  ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 18),
-
                             fieldLabel(tr('Staff ID')),
                             const SizedBox(height: 8),
                             TextField(
@@ -206,9 +164,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                             const SizedBox(height: 22),
 
                             PrimaryButton(
-                              label: tr('Log in'),
+                              label: signingIn
+                                  ? tr('Signing in...')
+                                  : tr('Log in'),
                               icon: Icons.arrow_forward_rounded,
-                              onPressed: _login,
+                              onPressed: signingIn ? null : _login,
                             ),
                           ],
                         ),
@@ -219,7 +179,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
                     Center(
                       child: Text(
-                        tr('Prototype: any staff ID and password will work.'),
+                        tr('Use your hospital staff credentials.'),
                         style: AppText.caption,
                       ),
                     ),

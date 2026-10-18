@@ -272,25 +272,23 @@ class StaffBottomNav extends StatelessWidget {
           selectedIndex: selectedIndex,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           onDestinationSelected: onSelected,
-          labelTextStyle: WidgetStateProperty.resolveWith(
-            (states) {
-              final selected = states.contains(WidgetState.selected);
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            final selected = states.contains(WidgetState.selected);
 
-              return AppText.style(
-                12,
-                selected ? FontWeight.w700 : FontWeight.w500,
-                selected ? AppColors.darkTeal : AppColors.grey,
-              );
-            },
-          ),
+            return AppText.style(
+              12,
+              selected ? FontWeight.w700 : FontWeight.w500,
+              selected ? AppColors.darkTeal : AppColors.grey,
+            );
+          }),
           destinations: [
             NavigationDestination(
-              icon: const Icon(Icons.format_list_bulleted_rounded),
+              icon: const Icon(Icons.home_rounded),
               selectedIcon: const Icon(
-                Icons.format_list_bulleted_rounded,
+                Icons.home_rounded,
                 color: AppColors.darkTeal,
               ),
-              label: tr('Queue'),
+              label: tr('Home'),
             ),
             NavigationDestination(
               icon: const Icon(Icons.person_add_alt_outlined),
@@ -298,7 +296,15 @@ class StaffBottomNav extends StatelessWidget {
                 Icons.person_add_alt_1_rounded,
                 color: AppColors.darkTeal,
               ),
-              label: tr('Register'),
+              label: tr('Check-In'),
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.people_outline_rounded),
+              selectedIcon: const Icon(
+                Icons.people_rounded,
+                color: AppColors.darkTeal,
+              ),
+              label: tr('Patients'),
             ),
             NavigationDestination(
               icon: const Icon(Icons.badge_outlined),

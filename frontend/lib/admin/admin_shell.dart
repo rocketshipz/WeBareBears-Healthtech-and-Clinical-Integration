@@ -7,8 +7,10 @@ import 'patient_detail.dart';
 import 'admin_queue.dart';
 import 'admin_register.dart';
 import 'admin_widgets.dart';
+import 'admin_patients.dart';
+import 'sync_banner.dart';
 
-/// Main frame for hospital staff: Queue / Register / Account.
+/// Main frame for hospital staff: Home / Check-In / Patients / Account.
 class AdminShell extends StatefulWidget {
   const AdminShell({super.key});
 
@@ -30,20 +32,28 @@ class _AdminShellState extends State<AdminShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: IndexedStack(
-        index: index,
+      body: Column(
         children: [
-          QueuePage(
-            onRegister: () => setState(() => index = 1),
-            onOpenVisit: _openVisit,
+          const StaffSyncBanner(),
+          Expanded(
+            child: IndexedStack(
+              index: index,
+              children: [
+                QueuePage(
+                  onRegister: () => setState(() => index = 1),
+                  onOpenVisit: _openVisit,
+                ),
+                RegisterPatientPage(
+                  onRegistered: (visit) {
+                    setState(() => index = 2);
+                    _openVisit(visit);
+                  },
+                ),
+                PatientsPage(onOpenVisit: _openVisit),
+                const AdminAccountPage(),
+              ],
+            ),
           ),
-          RegisterPatientPage(
-            onRegistered: (visit) {
-              setState(() => index = 0);
-              _openVisit(visit);
-            },
-          ),
-          const AdminAccountPage(),
         ],
       ),
       bottomNavigationBar: StaffBottomNav(

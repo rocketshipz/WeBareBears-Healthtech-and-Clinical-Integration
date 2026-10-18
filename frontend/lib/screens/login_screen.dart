@@ -104,6 +104,9 @@ class _LoginScreenState extends State<LoginScreen>
   Widget build(BuildContext context) {
     Localizations.localeOf(context);
     return Scaffold(
+      appBar: Navigator.of(context).canPop()
+          ? buildAppBar('Choose account type')
+          : null,
       body: GradientBackground(
         child: SafeArea(
           child: Center(

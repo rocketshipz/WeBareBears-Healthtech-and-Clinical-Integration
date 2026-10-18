@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'admin/admin_landing.dart';
-import 'theme.dart';
+import 'localization.dart';
+import 'main.dart' show TriageMYApp;
 
-/// Entry point for the hospital (staff) side.
-/// Run with:  flutter run -t lib/pages/admin/main_admin.dart
-void main() {
+/// Compatibility entry point for the shared user and admin application.
+/// Run with: flutter run -t lib/main_admin.dart
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AppLanguage.instance.load();
   runApp(const TriageMYAdminApp());
 }
 
@@ -14,11 +16,6 @@ class TriageMYAdminApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'TriageMY Hospital',
-      theme: buildAppTheme(),
-      home: const AdminLandingScreen(),
-    );
+    return const TriageMYApp();
   }
 }

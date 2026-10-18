@@ -1,14 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:triagemy/main.dart';
 
 void main() {
-  testWidgets('App smoke test - verifies login screen loads', (WidgetTester tester) async {
+  testWidgets('App opens with a choice of user or admin login', (WidgetTester tester) async {
+    GoogleFonts.config.allowRuntimeFetching = false;
     // Build our app and trigger a frame.
     await tester.pumpWidget(const TriageMYApp());
     await tester.pump();
 
-    // Verify that the login screen elements are present.
-    expect(find.text('Welcome back'), findsOneWidget);
-    expect(find.text('Email, Phone Number, or IC'), findsOneWidget);
+    expect(find.text('Normal user'), findsOneWidget);
+    expect(find.text('Admin'), findsOneWidget);
   });
 }

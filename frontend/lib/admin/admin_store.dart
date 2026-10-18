@@ -1,8 +1,11 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import 'admin_models.dart';
 import 'admin_repository.dart';
+import 'patient_lookup.dart';
+import 'api_admin_repository.dart';
 
 // Screens import this file only; it re-exports the models.
 export 'admin_models.dart';
@@ -10,7 +13,7 @@ export 'admin_models.dart';
 /// State shared by every hospital screen.
 /// Changes are applied immediately on screen, then saved through [AdminRepository].
 class AdminStore extends ChangeNotifier {
-  AdminRepository _repo = DemoAdminRepository();
+  AdminRepository _repo = ApiAdminRepository();
 
   AdminRepository get repo => _repo;
 
@@ -25,11 +28,13 @@ class AdminStore extends ChangeNotifier {
   Timer? _debounce;
 
   AdminStore() {
-    _seed();
+    if (_repo.isDemo) _seed();
   }
 
   /// Called once at start-up (see main_admin.dart).
   void useRepository(AdminRepository repo) {
+    _stopListening?.call();
+    _debounce?.cancel();
     _repo = repo;
     visits.clear();
     incoming.clear();
@@ -43,18 +48,22 @@ class AdminStore extends ChangeNotifier {
   // AUTH
   // ------------------------------------------------------------
 
-  Future<void> signIn(
-    String staffId,
-    String password, {
-    String? hospital,
-    String? role,
-  }) async {
-    staff = await _repo.signIn(
-      staffId,
-      password,
-      hospital: hospital,
-      role: role,
+  Future<void> signIn(String staffId, String password) async {
+    final session = await PatientLookup.request(
+      '/admin/login',
+      body: {'staff_id': staffId, 'password': password},
     );
+    final data = Map<String, dynamic>.from(session['staff'] as Map);
+    final member = StaffMember(
+      id: data['staff_id'].toString(),
+      name: data['name']?.toString() ?? data['staff_id'].toString(),
+      role: data['role']?.toString() ?? 'Staff',
+      hospital: data['hospital']?.toString() ?? 'Hospital not assigned',
+      hospitalId: data['hospital_id']?.toString(),
+      department: data['department']?.toString() ?? 'Department not assigned',
+    );
+    PatientLookup.token = session['token'] as String;
+    staff = member;
     notifyListeners();
 
     await refresh();
@@ -70,6 +79,7 @@ class AdminStore extends ChangeNotifier {
     try {
       await _repo.signOut();
     } catch (_) {}
+    PatientLookup.token = null;
 
     staff = null;
 
@@ -91,12 +101,22 @@ class AdminStore extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
+    if (_repo is ApiAdminRepository &&
+        (_repo as ApiAdminRepository).hasPendingWrites) {
+      return;
+    }
     final s = staff;
     if (s == null) return;
 
     try {
       if (!_repo.isDemo) {
-        _merge(await _repo.loadVisits(s.hospital));
+        final fresh = await _repo.loadVisits(s.hospital);
+        if (!identical(staff, s)) return;
+        if (_repo is ApiAdminRepository &&
+            (_repo as ApiAdminRepository).hasPendingWrites) {
+          return;
+        }
+        _merge(fresh);
       }
 
       final inc = await _repo.loadIncoming(s.hospital);
@@ -104,7 +124,9 @@ class AdminStore extends ChangeNotifier {
         ..clear()
         ..addAll(inc);
 
-      syncError.value = null;
+      if (syncError.value == 'Could not sync with the server.') {
+        syncError.value = null;
+      }
     } catch (_) {
       syncError.value = 'Could not sync with the server.';
     }
@@ -121,7 +143,7 @@ class AdminStore extends ChangeNotifier {
       final existing = byId[f.id];
 
       if (existing != null) {
-        existing.updateFrom(f);
+        if (f.version >= existing.version) existing.updateFrom(f);
         merged.add(existing);
       } else {
         merged.add(f);
@@ -138,6 +160,18 @@ class AdminStore extends ChangeNotifier {
   // ------------------------------------------------------------
 
   List<Visit> get active => visits.where((v) => !v.isComplete).toList();
+
+  List<Visit> get assignedPatients => visits
+      .where(
+        (v) =>
+            staff != null &&
+            v.assignedStaffId == staff!.id &&
+            (v.hospitalId != null && staff!.hospitalId != null
+                ? v.hospitalId == staff!.hospitalId
+                : v.hospital == staff!.hospital) &&
+            v.department == staff!.department,
+      )
+      .toList();
 
   List<Visit> get completed => visits.where((v) => v.isComplete).toList();
 
@@ -159,6 +193,9 @@ class AdminStore extends ChangeNotifier {
     required Acuity acuity,
     required List<String> tests,
     required String patientPhone,
+    Map<String, dynamic> profile = const {},
+    TriageSummary? triage,
+    String? triageReportId,
   }) async {
     final queueNo = await _repo.nextQueueNo(staff?.hospital ?? '');
 
@@ -172,6 +209,14 @@ class AdminStore extends ChangeNotifier {
       acuity: acuity,
       tests: tests,
       patientPhone: patientPhone,
+      profile: profile,
+      triage: triage,
+      triageReportId: triageReportId,
+      patientId: profile['id']?.toString(),
+      bloodType: profile['blood_type']?.toString() ?? '',
+      allergies: profile['allergies']?.toString() ?? '',
+      conditions: profile['chronic_conditions']?.toString() ?? '',
+      medication: profile['current_medications']?.toString() ?? '',
     );
   }
 
@@ -183,7 +228,7 @@ class AdminStore extends ChangeNotifier {
   }) async {
     final queueNo = await _repo.nextQueueNo(staff?.hospital ?? '');
 
-    final visit = _createVisit(
+    final visit = await _createVisit(
       queueNo: queueNo,
       name: p.name,
       ic: p.ic,
@@ -208,7 +253,7 @@ class AdminStore extends ChangeNotifier {
     return visit;
   }
 
-  Visit _createVisit({
+  Future<Visit> _createVisit({
     required String queueNo,
     required String name,
     required String ic,
@@ -225,7 +270,8 @@ class AdminStore extends ChangeNotifier {
     String allergies = '',
     String conditions = '',
     String medication = '',
-  }) {
+    Map<String, dynamic> profile = const {},
+  }) async {
     final now = DateTime.now();
 
     final visit = Visit(
@@ -238,7 +284,9 @@ class AdminStore extends ChangeNotifier {
       acuity: acuity,
       department: staff?.department ?? 'Emergency Department',
       hospital: staff?.hospital ?? '',
+      hospitalId: staff?.hospitalId,
       arrivedAt: now,
+      assignedStaffId: staff?.id,
       steps: _buildSteps(tests),
       patientPhone: patientPhone,
       patientId: patientId,
@@ -248,15 +296,19 @@ class AdminStore extends ChangeNotifier {
       allergies: allergies,
       conditions: conditions,
       medication: medication,
+      profile: profile,
     );
 
     // Registration is done the moment the patient is entered.
     _apply(visit, visit.steps.first, StepStatus.done, now);
 
+    if (!_repo.isDemo) {
+      await _repo.saveVisit(visit, newLogs: List.of(visit.log));
+    }
     visits.insert(0, visit);
     notifyListeners();
 
-    _persist(visit, newLogs: List.of(visit.log));
+    if (_repo.isDemo) _persist(visit, newLogs: List.of(visit.log));
 
     return visit;
   }
@@ -325,7 +377,9 @@ class AdminStore extends ChangeNotifier {
 
     v.acuity = a;
 
-    final entry = _entry('Triage zone set to ${a.labelEn} (${a.descriptionEn})');
+    final entry = _entry(
+      'Triage zone set to ${a.labelEn} (${a.descriptionEn})',
+    );
     v.log.add(entry);
 
     notifyListeners();
@@ -357,10 +411,12 @@ class AdminStore extends ChangeNotifier {
 
     notifyListeners();
 
-    _repo.deleteStep(v, step).then(
-      (_) => _persist(v, newLogs: [entry]),
-      onError: (_) => _fail('Could not remove the test.'),
-    );
+    _repo
+        .deleteStep(v, step)
+        .then(
+          (_) => _persist(v, newLogs: [entry]),
+          onError: (_) => _fail('Could not remove the test.'),
+        );
   }
 
   /// Renames a test. Core stages keep their names because the patient app
@@ -490,8 +546,18 @@ class AdminStore extends ChangeNotifier {
     v.log.add(entry);
 
     notifyListeners();
-    _persist(v, newLogs: [entry]);
-
+    if (_repo.isDemo) {
+      _persist(v, newLogs: [entry]);
+    } else {
+      try {
+        await _repo.saveVisit(v, newLogs: [entry]);
+      } catch (_) {
+        step.results.remove(result);
+        v.log.remove(entry);
+        notifyListeners();
+        rethrow;
+      }
+    }
     return result;
   }
 
@@ -552,8 +618,9 @@ class AdminStore extends ChangeNotifier {
         .saveVisit(v, newLogs: newLogs, updatedLogs: updatedLogs)
         .then(
           (_) => syncError.value = null,
-          onError: (_) =>
-              _fail('Could not save the last update. Check your connection.'),
+          onError: (error) => _fail(
+            'Update was not saved. ${error.toString().replaceFirst('Exception: ', '')} Reload before editing again.',
+          ),
         );
   }
 
@@ -677,18 +744,48 @@ class AdminStore extends ChangeNotifier {
         submittedAt: ago(96),
       ),
     );
-    _apply(a128, step(a128, 'registration'), StepStatus.done, ago(88),
-        staffId: 'N-1021');
-    _apply(a128, step(a128, 'triage'), StepStatus.inProgress, ago(80),
-        staffId: 'N-1021');
-    _apply(a128, step(a128, 'triage'), StepStatus.done, ago(70),
-        staffId: 'N-1021');
-    _apply(a128, step(a128, 'blood_test'), StepStatus.inProgress, ago(50),
-        staffId: 'N-1034');
-    _apply(a128, step(a128, 'blood_test'), StepStatus.done, ago(25),
-        staffId: 'N-1034');
-    _apply(a128, step(a128, 'x-ray'), StepStatus.inProgress, ago(8),
-        staffId: 'N-1034');
+    _apply(
+      a128,
+      step(a128, 'registration'),
+      StepStatus.done,
+      ago(88),
+      staffId: 'N-1021',
+    );
+    _apply(
+      a128,
+      step(a128, 'triage'),
+      StepStatus.inProgress,
+      ago(80),
+      staffId: 'N-1021',
+    );
+    _apply(
+      a128,
+      step(a128, 'triage'),
+      StepStatus.done,
+      ago(70),
+      staffId: 'N-1021',
+    );
+    _apply(
+      a128,
+      step(a128, 'blood_test'),
+      StepStatus.inProgress,
+      ago(50),
+      staffId: 'N-1034',
+    );
+    _apply(
+      a128,
+      step(a128, 'blood_test'),
+      StepStatus.done,
+      ago(25),
+      staffId: 'N-1034',
+    );
+    _apply(
+      a128,
+      step(a128, 'x-ray'),
+      StepStatus.inProgress,
+      ago(8),
+      staffId: 'N-1034',
+    );
 
     // A127: red zone, with the doctor now
     final a127 = make(
@@ -712,16 +809,41 @@ class AdminStore extends ChangeNotifier {
         submittedAt: ago(62),
       ),
     );
-    _apply(a127, step(a127, 'registration'), StepStatus.done, ago(54),
-        staffId: 'N-1021');
-    _apply(a127, step(a127, 'triage'), StepStatus.done, ago(50),
-        staffId: 'N-1021');
-    _apply(a127, step(a127, 'ecg'), StepStatus.done, ago(40),
-        staffId: 'N-1034');
-    _apply(a127, step(a127, 'blood_test'), StepStatus.done, ago(22),
-        staffId: 'N-1034');
-    _apply(a127, step(a127, 'doctor'), StepStatus.inProgress, ago(12),
-        staffId: 'D-2001');
+    _apply(
+      a127,
+      step(a127, 'registration'),
+      StepStatus.done,
+      ago(54),
+      staffId: 'N-1021',
+    );
+    _apply(
+      a127,
+      step(a127, 'triage'),
+      StepStatus.done,
+      ago(50),
+      staffId: 'N-1021',
+    );
+    _apply(
+      a127,
+      step(a127, 'ecg'),
+      StepStatus.done,
+      ago(40),
+      staffId: 'N-1034',
+    );
+    _apply(
+      a127,
+      step(a127, 'blood_test'),
+      StepStatus.done,
+      ago(22),
+      staffId: 'N-1034',
+    );
+    _apply(
+      a127,
+      step(a127, 'doctor'),
+      StepStatus.inProgress,
+      ago(12),
+      staffId: 'D-2001',
+    );
 
     // A129: just arrived, being triaged
     final a129 = make(
@@ -744,10 +866,20 @@ class AdminStore extends ChangeNotifier {
         submittedAt: ago(20),
       ),
     );
-    _apply(a129, step(a129, 'registration'), StepStatus.done, ago(13),
-        staffId: 'N-1021');
-    _apply(a129, step(a129, 'triage'), StepStatus.inProgress, ago(4),
-        staffId: 'N-1021');
+    _apply(
+      a129,
+      step(a129, 'registration'),
+      StepStatus.done,
+      ago(13),
+      staffId: 'N-1021',
+    );
+    _apply(
+      a129,
+      step(a129, 'triage'),
+      StepStatus.inProgress,
+      ago(4),
+      staffId: 'N-1021',
+    );
 
     // A126: walk-in, finished earlier
     final a126 = make(
@@ -761,16 +893,41 @@ class AdminStore extends ChangeNotifier {
       tests: ['Blood test'],
       arrivedMinAgo: 150,
     );
-    _apply(a126, step(a126, 'registration'), StepStatus.done, ago(148),
-        staffId: 'N-1021');
-    _apply(a126, step(a126, 'triage'), StepStatus.done, ago(140),
-        staffId: 'N-1021');
-    _apply(a126, step(a126, 'blood_test'), StepStatus.done, ago(110),
-        staffId: 'N-1034');
-    _apply(a126, step(a126, 'doctor'), StepStatus.done, ago(70),
-        staffId: 'D-2001');
-    _apply(a126, step(a126, 'discharge'), StepStatus.done, ago(60),
-        staffId: 'N-1021');
+    _apply(
+      a126,
+      step(a126, 'registration'),
+      StepStatus.done,
+      ago(148),
+      staffId: 'N-1021',
+    );
+    _apply(
+      a126,
+      step(a126, 'triage'),
+      StepStatus.done,
+      ago(140),
+      staffId: 'N-1021',
+    );
+    _apply(
+      a126,
+      step(a126, 'blood_test'),
+      StepStatus.done,
+      ago(110),
+      staffId: 'N-1034',
+    );
+    _apply(
+      a126,
+      step(a126, 'doctor'),
+      StepStatus.done,
+      ago(70),
+      staffId: 'D-2001',
+    );
+    _apply(
+      a126,
+      step(a126, 'discharge'),
+      StepStatus.done,
+      ago(60),
+      staffId: 'N-1021',
+    );
     a126.outcome = 'Discharged home';
     a126.completedAt = ago(60);
 
