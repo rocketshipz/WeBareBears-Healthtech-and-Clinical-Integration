@@ -1,11 +1,12 @@
 """Staff-only patient lookup and authenticated patient report storage."""
 import secrets
+import json
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field
-from sqlalchemy import Column, DateTime, ForeignKey, JSON, String, func
+from sqlalchemy import Column, DateTime, ForeignKey, JSON, String, Text, func
 
 from app.api.routes.auth import get_auth_service
 from app.core.database import Base, get_db_session, get_engine
@@ -23,7 +24,13 @@ class SavedReport(Base):
     __tablename__ = "patient_triage_reports"
     id = Column(String(64), primary_key=True)
     user_id = Column(String(50), ForeignKey("users.id"), nullable=False, index=True)
-    report = Column(JSON, nullable=False)
+    report = Column(JSON, nullable=True)
+    # Keep the original report fields populated for existing database constraints.
+    report_id = Column(String(64), nullable=True)
+    main_symptom = Column(Text, nullable=True)
+    reported_severity = Column(Text, nullable=True)
+    danger_signs = Column(Text, nullable=True)
+    duration = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
 
@@ -115,8 +122,11 @@ def save_report(request: ReportInput, authorization: str = Header(default=""),
     if session is None:
         raise HTTPException(503, "Database unavailable.")
     SavedReport.__table__.create(get_engine(), checkfirst=True)
-    report = SavedReport(id=secrets.token_hex(16), user_id=user["id"],
-                         report=jsonable_encoder(request))
+    report_id = secrets.token_hex(16)
+    report = SavedReport(id=report_id, report_id=report_id, user_id=user["id"],
+                         report=jsonable_encoder(request), main_symptom=request.symptom,
+                         reported_severity=request.severity, danger_signs=json.dumps(request.danger_signs),
+                         duration=request.duration)
     session.add(report)
     session.commit()
     return {"id": report.id}

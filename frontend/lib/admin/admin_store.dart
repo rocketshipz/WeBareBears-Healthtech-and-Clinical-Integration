@@ -1,6 +1,7 @@
 import 'dart:async';
+import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import 'admin_models.dart';
 import 'admin_repository.dart';
@@ -235,7 +236,7 @@ class AdminStore extends ChangeNotifier {
       age: p.age,
       sex: p.sex,
       complaint: '${p.triage.symptom} · ${p.triage.severity.toLowerCase()}',
-      acuity: p.triage.acuity,
+      acuity: Acuity.pending,
       tests: tests,
       patientPhone: p.phone,
       patientId: p.patientId,
@@ -321,6 +322,11 @@ class AdminStore extends ChangeNotifier {
   void advance(Visit v, {String? outcome}) {
     final step = v.currentStep;
     if (step == null) return;
+    if (step.id == 'triage' &&
+        step.status == StepStatus.inProgress &&
+        v.acuity == Acuity.pending) {
+      return;
+    }
 
     final now = DateTime.now();
 
@@ -372,6 +378,20 @@ class AdminStore extends ChangeNotifier {
     _persist(v, newLogs: [record], updatedLogs: [target]);
   }
 
+  void completeTriage(Visit v, Acuity zone, String remarks) {
+    if (v.isComplete || zone == Acuity.pending) return;
+    final step = v.steps.firstWhere((s) => s.id == 'triage');
+    v.acuity = zone;
+    step.note = remarks.trim();
+    final zoneEntry = _entry(
+      'Triage zone set to ${zone.labelEn} (${zone.descriptionEn})',
+    );
+    v.log.add(zoneEntry);
+    final entry = _apply(v, step, StepStatus.done, DateTime.now());
+    notifyListeners();
+    _persist(v, newLogs: [zoneEntry, entry]);
+  }
+
   void setAcuity(Visit v, Acuity a) {
     if (v.acuity == a) return;
 
@@ -386,13 +406,41 @@ class AdminStore extends ChangeNotifier {
     _persist(v, newLogs: [entry]);
   }
 
-  void addTest(Visit v, String test) {
-    final step = VisitStep.test(test);
+  void addTest(Visit v, String test, {bool isTest = true, String note = ''}) {
+    final step = switch (test) {
+      'Doctor consultation' => VisitStep.doctor(),
+      'Discharge / admission decision' => VisitStep.discharge(),
+      _ => VisitStep(
+        id: VisitStep.slug(test),
+        name: test,
+        icon:
+            VisitStep.testCatalog[test] ??
+            (isTest ? Icons.science_outlined : Icons.task_alt_rounded),
+        isTest: isTest,
+      ),
+    };
+    step.note = note.trim();
+    if (v.isComplete) return;
     if (v.steps.any((s) => s.id == step.id)) return;
 
     // tests go just before "Doctor consultation"
     final doctorIndex = v.steps.indexWhere((s) => s.id == 'doctor');
-    v.steps.insert(doctorIndex < 0 ? v.steps.length : doctorIndex, step);
+    final dischargeIndex = v.steps.indexWhere((s) => s.id == 'discharge');
+    final testBoundary = v.steps.indexWhere(
+      (s) => !s.isTest && s.id != 'registration' && s.id != 'triage',
+    );
+    v.steps.insert(
+      step.id == 'discharge'
+          ? v.steps.length
+          : step.isTest && testBoundary >= 0
+          ? testBoundary
+          : doctorIndex >= 0
+          ? doctorIndex
+          : dischargeIndex >= 0
+          ? dischargeIndex
+          : v.steps.length,
+      step,
+    );
 
     final entry = _entry('$test added to the visit');
     v.log.add(entry);
@@ -402,7 +450,10 @@ class AdminStore extends ChangeNotifier {
   }
 
   void removeStep(Visit v, VisitStep step) {
-    if (!step.isTest || step.status != StepStatus.waiting) return;
+    if ({'registration', 'triage'}.contains(step.id) ||
+        step.status != StepStatus.waiting) {
+      return;
+    }
 
     v.steps.remove(step);
 
@@ -423,7 +474,11 @@ class AdminStore extends ChangeNotifier {
   /// shows the same wording.
   void renameStep(Visit v, VisitStep step, String name) {
     final trimmed = name.trim();
-    if (!step.isTest || trimmed.isEmpty || trimmed == step.name) return;
+    if ({'registration', 'triage', 'doctor', 'discharge'}.contains(step.id) ||
+        trimmed.isEmpty ||
+        trimmed == step.name) {
+      return;
+    }
 
     final entry = _entry('${step.name} renamed to $trimmed');
     step.name = trimmed;
@@ -437,6 +492,11 @@ class AdminStore extends ChangeNotifier {
   /// test that was done out of order. Logged and undoable like [advance].
   void setStepStatus(Visit v, VisitStep step, StepStatus to) {
     if (step.status == to) return;
+    if (step.id == 'triage' &&
+        to == StepStatus.done &&
+        v.acuity == Acuity.pending) {
+      return;
+    }
 
     final now = DateTime.now();
     final entry = _apply(v, step, to, now);
@@ -629,8 +689,6 @@ class AdminStore extends ChangeNotifier {
       VisitStep.registration(),
       VisitStep.triage(),
       ...tests.map(VisitStep.test),
-      VisitStep.doctor(),
-      VisitStep.discharge(),
     ];
   }
 
@@ -708,7 +766,8 @@ class AdminStore extends ChangeNotifier {
         department: 'Emergency Department',
         hospital: 'Central General Hospital',
         arrivedAt: ago(arrivedMinAgo),
-        steps: _buildSteps(tests),
+        steps: _buildSteps(tests)
+          ..addAll([VisitStep.doctor(), VisitStep.discharge()]),
         allergies: allergies,
         conditions: conditions,
         bloodType: bloodType,

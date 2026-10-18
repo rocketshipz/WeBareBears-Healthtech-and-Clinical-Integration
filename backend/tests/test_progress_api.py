@@ -106,10 +106,57 @@ async def test_progress_checkin_persistence_auth_conflicts_and_diagnosis_release
         for step in payload['steps']:
             step['status'] = 'done'
         assert (await client.post(url, headers=headers, json=payload)).status_code == 200
+        history = await client.get('/api/progress/history', headers=patient_headers)
+        assert history.status_code == 200
+        entry = history.json()['history'][0]
+        assert entry['visit_id'] == 'persisted-visit'
+        assert entry['diagnosis'] == 'Recorded diagnosis'
+        assert entry['medications'] == ['Medication A']
+        assert entry['completed_at']
+        assert (await client.get('/api/progress/history')).status_code == 401
+        assert (await client.get('/api/progress/history', headers=family_headers)).json()['history'] == []
+        assert (await client.get('/api/admin/patients/progress-user/history', headers=foreign_headers)).json()['history'] == []
         payload['version'] = 0
-        payload['steps'] = stages()
+        payload['acuity'] = None
+        payload['steps'] = [s for s in stages() if s['id'] not in {'doctor', 'discharge'}]
+        payload['steps'][1]['note'] = 'Staff-only triage remarks'
+        payload['steps'][2]['results'] = [{'id': 'private-result', 'file_name': 'private.pdf'}]
         assert (await client.post('/api/admin/visits/next-visit', headers=headers, json=payload)).status_code == 200
+        pending = (await client.get('/api/admin/visits', headers=headers)).json()['visits'][0]
+        assert pending['acuity'] is None
+        assert 'doctor' not in [s['id'] for s in pending['steps']]
+        assert pending['steps'][1]['note'] == 'Staff-only triage remarks'
+        patient_pending = (await client.get('/api/progress/visits', headers=patient_headers)).json()['visits'][0]
+        assert all(not s['note'] and not s['results'] for s in patient_pending['steps'])
+        assert 'doctor' not in [s['id'] for s in patient_pending['steps']]
+        payload['version'] = pending['version']
+        payload['steps'][1]['status'] = 'done'
+        next_url = '/api/admin/visits/next-visit'
+        assert (await client.post(next_url, headers=headers, json=payload)).status_code == 422
+        payload['acuity'] = 'green'
+        payload['steps'].insert(-1, {'id': 'doctor', 'name': 'Doctor consultation', 'status': 'waiting'})
+        assigned = await client.post(next_url, headers=headers, json=payload)
+        assert assigned.status_code == 200, assigned.text
+        assert assigned.json()['acuity'] == 'green'
+        assert 'doctor' in [s['id'] for s in assigned.json()['steps']]
         payload['version'] = (await client.get('/api/admin/visits', headers=headers)).json()['visits'][1]['version']
         assert (await client.post(url, headers=headers, json=payload)).status_code == 409
+        # Finishing every currently selected stage must not check a patient out.
+        payload['version'] = assigned.json()['version']
+        for step in payload['steps']:
+            step['status'] = 'done'
+        waiting = await client.post(next_url, headers=headers, json=payload)
+        assert waiting.status_code == 200, waiting.text
+        assert waiting.json()['completed_at'] is None
+        assert len((await client.get('/api/progress/history', headers=patient_headers)).json()['history']) == 1
+        # Discharge checks out even if an earlier test was left unfinished.
+        payload['version'] = waiting.json()['version']
+        payload['steps'][2]['status'] = 'waiting'
+        payload['steps'].append({'id': 'discharge', 'name': 'Discharge / admission decision', 'status': 'done'})
+        payload['outcome'] = 'Discharged home'
+        checkout = await client.post(next_url, headers=headers, json=payload)
+        assert checkout.status_code == 200, checkout.text
+        assert checkout.json()['completed_at']
+        assert len((await client.get('/api/progress/history', headers=patient_headers)).json()['history']) == 2
     auth._active_sessions.pop('progress-token')
     auth._active_sessions.pop('other-token')
