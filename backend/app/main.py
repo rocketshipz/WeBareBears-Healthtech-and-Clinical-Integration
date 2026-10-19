@@ -14,7 +14,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.core.scheduler import start_scheduler, stop_scheduler
-from app.api.routes import health, triage, auth, patients, admin, progress
+from app.api.routes import health, triage, auth, patients, admin, progress, hospitals
 
 logging.basicConfig(
     level=logging.INFO,
@@ -56,6 +56,7 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(patients.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(progress.router, prefix="/api")
+app.include_router(hospitals.router, prefix="/api")
 
 
 @app.get("/")
@@ -72,7 +73,8 @@ async def root():
             "auth_register": "/api/auth/register",
             "auth_login": "/api/auth/login",
             "triage_assess": "/api/triage/assess",
-            "triage_chat": "/api/triage/chat"
+            "triage_chat": "/api/triage/chat",
+            "hospital_recommendations": "/api/hospitals/recommendations"
         }
     }
 

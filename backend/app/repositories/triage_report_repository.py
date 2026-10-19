@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from typing import Optional
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
@@ -47,6 +48,14 @@ class TriageReportRepository:
     def set_subject(self, row: SavedReport, subject: str, subject_user_id: Optional[str]) -> None:
         row.subject, row.subject_user_id = subject, subject_user_id
         self.session.commit()
+
+    def latest_recent(self, user_id: str, since: datetime) -> Optional[SavedReport]:
+        """The newest report this user ran (for anyone) or that is linked to them, saved at or after `since`."""
+        saved_at = func.coalesce(SavedReport.updated_at, SavedReport.created_at)
+        return self.session.query(SavedReport).filter(
+            or_(SavedReport.user_id == user_id, SavedReport.subject_user_id == user_id),
+            saved_at >= since,
+        ).order_by(saved_at.desc(), SavedReport.session_id.desc()).first()
 
     def latest_for_patient(self, user_id: str) -> Optional[SavedReport]:
         """The newest report about this person: linked to them, or run by them and not for someone else."""

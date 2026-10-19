@@ -60,6 +60,15 @@ class Settings(BaseSettings):
     WAIT_LABEL_MODERATE_MAX: float = 1.0
     WAIT_LABEL_BUSY_MAX: float = 1.5 # Anything above is "very busy".
 
+    # Hospital routing: Google Maps Platform (Places for the location check, Routes for live-traffic times).
+    # Without a key, or if Google fails, routing falls back to the straight-line estimate.
+    GOOGLE_MAPS_API_KEY: Optional[str] = None
+    ROUTING_TRAFFIC_ENABLED: bool = True
+    ROUTING_TRAFFIC_SHORTLIST: int = 15  # hospitals sent to the route matrix per request (max 25)
+    ROUTING_TRAFFIC_TIMEOUT_SECONDS: float = 3.0
+    ROUTING_TRAFFIC_CACHE_SECONDS: int = 300
+    HOSPITAL_LOCATION_MISMATCH_KM: float = 1.0  # DB vs Google location further apart than this = mismatch
+
     # Data Directory
     DATA_DIR: str = str(Path(__file__).resolve().parent.parent.parent / "data")
     

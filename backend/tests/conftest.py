@@ -19,6 +19,8 @@ def pytest_configure(config):
         "GEMINI_API_KEY": "dummy-gemini-key",
         "GOOGLE_API_KEY": "dummy-gemini-key",
         "WAIT_LABEL_ENABLED": "false",
+        "GOOGLE_MAPS_API_KEY": "",
+        "ROUTING_TRAFFIC_ENABLED": "false",
     }.items():
         _environment.setenv(key, value)
 

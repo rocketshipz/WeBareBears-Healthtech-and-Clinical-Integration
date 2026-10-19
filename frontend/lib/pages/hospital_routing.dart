@@ -3,36 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../services/hospital_service.dart';
 import '../services/location_service.dart';
 import '../theme.dart';
 import 'home_page.dart';
 import 'triage_report.dart';
 
-/// Representation of a hospital facility with geographical coordinates.
-class HospitalOption {
-  final String name;
-  final String badge;
-  final double latitude;
-  final double longitude;
-  final String waitingTime;
-  final String emptyBeds;
-  final String registeredPatients;
-
-  const HospitalOption({
-    required this.name,
-    required this.badge,
-    required this.latitude,
-    required this.longitude,
-    required this.waitingTime,
-    required this.emptyBeds,
-    required this.registeredPatients,
-  });
-}
-
 class RecommendedHospitalsPage extends StatefulWidget {
   final TriageReportData? report;
 
-  const RecommendedHospitalsPage({super.key, this.report});
+  /// Stored triage report the user came from, so the ranking uses that level.
+  final String? sessionId;
+
+  const RecommendedHospitalsPage({super.key, this.report, this.sessionId});
 
   @override
   State<RecommendedHospitalsPage> createState() =>
@@ -43,36 +26,10 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
   Position? _currentPosition;
   bool _isLoadingLocation = true;
 
-  // Hospital options. Coordinate values can be customized or replaced with real backend data.
-  final List<HospitalOption> _hospitals = const [
-    HospitalOption(
-      name: 'Central General Hospital',
-      badge: 'Best match',
-      latitude: 3.1470,
-      longitude: 101.6910,
-      waitingTime: '30 min',
-      emptyBeds: '12',
-      registeredPatients: '36',
-    ),
-    HospitalOption(
-      name: 'Riverside Medical Centre',
-      badge: 'Shortest wait',
-      latitude: 3.1650,
-      longitude: 101.7100,
-      waitingTime: '15 min',
-      emptyBeds: '8',
-      registeredPatients: '28',
-    ),
-    HospitalOption(
-      name: 'Maple Community Hospital',
-      badge: 'Closest',
-      latitude: 3.1310,
-      longitude: 101.6820,
-      waitingTime: '45 min',
-      emptyBeds: '6',
-      registeredPatients: '42',
-    ),
-  ];
+  // Ranked by the backend (distance, ED busyness and the triage level from the last 24 h).
+  HospitalRecommendations? _recommendations;
+  bool _isLoadingHospitals = true;
+  String? _hospitalError;
 
   @override
   void initState() {
@@ -94,23 +51,73 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
         _isLoadingLocation = false;
       });
     }
+    await _loadHospitals();
   }
 
-  Future<void> _openGoogleMaps(String hospitalName) async {
-    final String query = Uri.encodeComponent(hospitalName);
-    final Uri url = Uri.parse(
-      'https://www.google.com/maps/search/?api=1&query=$query',
-    );
+  Future<void> _loadHospitals() async {
+    setState(() {
+      _isLoadingHospitals = true;
+      _hospitalError = null;
+    });
+    final lat = _currentPosition?.latitude ??
+        LocationService.defaultCoordinates.latitude;
+    final lon = _currentPosition?.longitude ??
+        LocationService.defaultCoordinates.longitude;
+    try {
+      final result = await HospitalService.fetchRecommendations(
+        lat,
+        lon,
+        sessionId: widget.sessionId,
+      );
+      if (!mounted) return;
+      setState(() {
+        _recommendations = result;
+        _isLoadingHospitals = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingHospitals = false;
+        _hospitalError =
+            'Could not load nearby hospitals. Please try again.';
+      });
+    }
+  }
+
+  String get _rankingCaption {
+    final level = _recommendations?.triageLevelUsed;
+    if (level == null) {
+      return 'No triage in the last 24 hours. Ranked by distance and how busy each emergency department is.';
+    }
+    final hours = _recommendations?.triageAgeHours ?? 0;
+    final ago = hours < 1 ? 'less than an hour ago' : '${hours.round()} h ago';
+    return 'Ranked for your Level $level triage result ($ago).';
+  }
+
+  Future<void> _openGoogleMaps(HospitalOption hospital) async {
+    // The exact Google place when the location check found it; otherwise
+    // Google's own search for name + address (safer than a possibly wrong coordinate).
+    final placeId = hospital.googlePlaceId;
+    final Uri url = Uri.https('www.google.com', '/maps/search/', {
+      'api': '1',
+      if (placeId != null) ...{
+        'query': hospital.name,
+        'query_place_id': placeId,
+      } else
+        'query': [hospital.name, hospital.address]
+            .where((s) => s.isNotEmpty)
+            .join(', '),
+    });
 
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception('Could not open Google Maps');
     }
   }
 
-  Future<void> _openWaze(String hospitalName) async {
-    final String query = Uri.encodeComponent(hospitalName);
+  Future<void> _openWaze(HospitalOption hospital) async {
     final Uri url = Uri.parse(
-      'https://waze.com/ul?q=$query&navigate=yes',
+      'https://waze.com/ul?ll=${hospital.latitude},${hospital.longitude}'
+      '&navigate=yes',
     );
 
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
@@ -118,7 +125,7 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
     }
   }
 
-  void _showRouteOptions(BuildContext context, String hospitalName) {
+  void _showRouteOptions(BuildContext context, HospitalOption hospital) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -145,14 +152,14 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
               ),
               LocalizedText('Open route with', style: AppText.heading),
               const SizedBox(height: 4),
-              LocalizedText(hospitalName, style: AppText.caption),
+              LocalizedText(hospital.name, style: AppText.caption),
               const SizedBox(height: 14),
               _routeTile(
                 icon: Icons.map_outlined,
                 title: 'Google Maps',
                 onTap: () {
                   Navigator.pop(context);
-                  _openGoogleMaps(hospitalName);
+                  _openGoogleMaps(hospital);
                 },
               ),
               const SizedBox(height: 10),
@@ -161,7 +168,7 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
                 title: 'Waze',
                 onTap: () {
                   Navigator.pop(context);
-                  _openWaze(hospitalName);
+                  _openWaze(hospital);
                 },
               ),
             ],
@@ -399,50 +406,43 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
                       ],
                     ),
 
+                    if (_recommendations != null) ...[
+                      const SizedBox(height: 8),
+                      LocalizedText(_rankingCaption, style: AppText.caption),
+                    ],
+
                     const SizedBox(height: 14),
 
-                    // RENDER DYNAMIC HOSPITAL CARDS
-                    ..._hospitals.asMap().entries.map((entry) {
-                      final int index = entry.key;
-                      final HospitalOption hospital = entry.value;
-
-                      // Calculate dynamic distance and travel time
-                      final userLat = _currentPosition?.latitude ??
-                          LocationService.defaultCoordinates.latitude;
-                      final userLon = _currentPosition?.longitude ??
-                          LocationService.defaultCoordinates.longitude;
-
-                      final distanceKm = LocationService.calculateDistanceKm(
-                        startLatitude: userLat,
-                        startLongitude: userLon,
-                        endLatitude: hospital.latitude,
-                        endLongitude: hospital.longitude,
-                      );
-
-                      final travelMinutes =
-                          LocationService.estimateTravelTimeMinutes(distanceKm);
-                      final distanceLabel =
-                          LocationService.formatDistance(distanceKm);
-                      final travelLabel =
-                          LocationService.formatTravelTime(travelMinutes);
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: FadeSlideIn(
-                          index: 3 + index,
-                          child: _hospitalCard(
-                            context: context,
-                            badge: hospital.badge,
-                            hospitalName: hospital.name,
-                            distance: distanceLabel,
-                            travelTime: travelLabel,
-                            waitingTime: hospital.waitingTime,
-                            emptyBeds: hospital.emptyBeds,
-                            registeredPatients: hospital.registeredPatients,
-                          ),
+                    if (_isLoadingLocation || _isLoadingHospitals)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 30),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (_hospitalError != null)
+                      _statusMessage(
+                        _hospitalError!,
+                        action: PrimaryButton(
+                          label: 'Try again',
+                          icon: Icons.refresh_rounded,
+                          onPressed: _loadHospitals,
                         ),
-                      );
-                    }),
+                      )
+                    else if (_recommendations!.hospitals.isEmpty)
+                      _statusMessage('No hospitals found near you.')
+                    else
+                      // RENDER RANKED HOSPITAL CARDS
+                      ..._recommendations!.hospitals.asMap().entries.map((entry) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: FadeSlideIn(
+                            index: 3 + entry.key,
+                            child: _hospitalCard(
+                              context: context,
+                              hospital: entry.value,
+                            ),
+                          ),
+                        );
+                      }),
 
                     const SizedBox(height: 10),
 
@@ -483,16 +483,35 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
     );
   }
 
+  Widget _statusMessage(String message, {Widget? action}) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(18),
+      decoration: cardDecoration(radius: 24),
+      child: Column(
+        children: [
+          LocalizedText(message,
+              textAlign: TextAlign.center, style: AppText.body),
+          if (action != null) ...[const SizedBox(height: 14), action],
+        ],
+      ),
+    );
+  }
+
+  /// Capitalised ED activity label, e.g. "Very busy".
+  String _activityLabel(String? level) {
+    if (level == null || level.isEmpty) return 'Unknown';
+    return level[0].toUpperCase() + level.substring(1);
+  }
+
   Widget _hospitalCard({
     required BuildContext context,
-    required String badge,
-    required String hospitalName,
-    required String distance,
-    required String travelTime,
-    required String waitingTime,
-    required String emptyBeds,
-    required String registeredPatients,
+    required HospitalOption hospital,
   }) {
+    final distance = LocationService.formatDistance(
+        hospital.roadDistanceKm ?? hospital.distanceKm);
+    final travelTime = LocationService.formatTravelTime(hospital.travelMinutes);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -500,22 +519,32 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // BADGE
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: AppColors.paleTeal,
-              borderRadius: BorderRadius.circular(20),
+          // BADGES
+          if (hospital.badges.isNotEmpty) ...[
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final badge in hospital.badges)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.paleTeal,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: LocalizedText(
+                      badge,
+                      style:
+                          AppText.style(12, FontWeight.w700, AppColors.darkTeal),
+                    ),
+                  ),
+              ],
             ),
-            child: LocalizedText(
-              badge,
-              style: AppText.style(12, FontWeight.w700, AppColors.darkTeal),
-            ),
-          ),
+            const SizedBox(height: 12),
+          ],
 
-          const SizedBox(height: 12),
-
-          LocalizedText(hospitalName, style: AppText.heading),
+          LocalizedText(hospital.name, style: AppText.heading),
 
           const SizedBox(height: 6),
 
@@ -555,28 +584,35 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
               children: [
                 Expanded(
                   child: _infoItem(
-                    icon: Icons.schedule_rounded,
-                    value: waitingTime,
-                    label: 'Est. wait',
+                    icon: Icons.local_hospital_outlined,
+                    value: _activityLabel(hospital.activityLevel),
+                    label: 'ED activity',
                   ),
                 ),
                 Expanded(
                   child: _infoItem(
                     icon: Icons.bed_outlined,
-                    value: emptyBeds,
-                    label: 'Empty beds',
+                    value: hospital.availableEdSpaces?.toString() ?? '-',
+                    label: 'ED spaces free',
                   ),
                 ),
                 Expanded(
                   child: _infoItem(
-                    icon: Icons.people_outline_rounded,
-                    value: registeredPatients,
-                    label: 'Patients',
+                    icon: hospital.liveTraffic
+                        ? Icons.traffic_outlined
+                        : Icons.schedule_rounded,
+                    value: travelTime,
+                    label: hospital.liveTraffic ? 'Live traffic' : 'Est. travel',
                   ),
                 ),
               ],
             ),
           ),
+
+          if (hospital.reason.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            LocalizedText(hospital.reason, style: AppText.caption),
+          ],
 
           const SizedBox(height: 16),
 
@@ -584,10 +620,7 @@ class _RecommendedHospitalsPageState extends State<RecommendedHospitalsPage> {
             label: 'View Route',
             icon: Icons.navigation_outlined,
             onPressed: () {
-              _showRouteOptions(
-                context,
-                hospitalName,
-              );
+              _showRouteOptions(context, hospital);
             },
           ),
         ],

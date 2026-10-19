@@ -479,7 +479,10 @@ class TriageReportPage extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (_) =>
-                                  RecommendedHospitalsPage(report: report),
+                                  RecommendedHospitalsPage(
+                                report: report,
+                                sessionId: storedReportId,
+                              ),
                             ),
                           );
                         },
