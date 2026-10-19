@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     HOST: str = "127.0.0.1"
     PORT: int = 8000
+    # Reachable backend origin for family invitations shared outside this device.
+    PUBLIC_BACKEND_URL: str = ""
     
     # Main Agent LLM Configuration (Azure OpenAI, OpenAI-compatible v1 endpoint)
     OPENAI_API_KEY: Optional[str] = None

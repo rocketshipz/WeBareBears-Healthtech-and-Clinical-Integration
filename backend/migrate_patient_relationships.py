@@ -47,7 +47,7 @@ def main():
             ('staff_login', 'hospital_id', 'hospital_data', 'hospital_id'),
             ('patient_progress', 'hospital_id', 'hospital_data', 'hospital_id'),
             ('patient_progress', 'user_id', 'users', 'id'),
-            ('patient_progress', 'triage_report_id', 'patient_triage_reports', 'id'),
+            ('patient_progress', 'triage_report_id', 'patient_triage_reports', 'report_id'),
             ('patient_progress', 'assigned_staff_account_id', 'staff_login', 'id'),
             ('patient_test_tracking', 'visit_id', 'patient_progress', 'visit_id'),
             ('patient_test_tracking', 'updated_by_account_id', 'staff_login', 'id'),

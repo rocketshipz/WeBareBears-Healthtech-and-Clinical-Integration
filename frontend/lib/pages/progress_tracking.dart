@@ -26,7 +26,6 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
   List<Map<String, dynamic>> visits = [];
   bool showingFamily = false;
   bool viewingFamily = false;
-  bool sharingSaving = false;
 
   @override
   void initState() {
@@ -91,27 +90,6 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
       }
     } finally {
       if (mounted) setState(() => loading = false);
-    }
-  }
-
-  Future<void> toggleSharing(String id, bool value) async {
-    setState(() => sharingSaving = true);
-    try {
-      final response = await http
-          .post(
-            Uri.parse('${ApiService.baseUrl}/progress/visits/$id/sharing'),
-            headers: ApiService.defaultHeaders,
-            body: jsonEncode({'enabled': value}),
-          )
-          .timeout(const Duration(seconds: 20));
-      if (response.statusCode != 200) throw Exception('Sharing update failed.');
-      await load();
-    } catch (_) {
-      if (mounted) {
-        showAppSnack(context, 'Could not update sharing. Please retry.');
-      }
-    } finally {
-      if (mounted) setState(() => sharingSaving = false);
     }
   }
 
@@ -1074,19 +1052,12 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
                 const SizedBox(height: 3),
 
                 Text(
-                  'Approved emergency contacts may view this visit\'s progress.',
+                  'Only family members you accept in Profile can view progress. Revoke access there anytime.',
                   style: AppText.caption,
                 ),
               ],
             ),
           ),
-          if (!viewingFamily)
-            Switch(
-              value: currentVisit!.familySharing,
-              onChanged: sharingSaving
-                  ? null
-                  : (value) => toggleSharing(currentVisit!.id, value),
-            ),
         ],
       ),
     );

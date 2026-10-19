@@ -82,12 +82,21 @@ async def test_progress_checkin_persistence_auth_conflicts_and_diagnosis_release
         assert (await client.get('/api/progress/family', headers=family_headers)).json()['visits'] == []
         assert (await client.post('/api/progress/visits/persisted-visit/sharing', headers=family_headers, json={'enabled': True})).status_code == 404
         assert (await client.post('/api/progress/visits/persisted-visit/sharing', headers=patient_headers, json={'enabled': True})).status_code == 200
+        # Legacy phone matching/sharing flags cannot bypass the patient's approval.
+        assert (await client.get('/api/progress/family', headers=family_headers)).json()['visits'] == []
+        invitation = (await client.post('/api/family/invitations', headers=patient_headers)).json()['invitation_url']
+        requested = await client.post('/api/family/requests', headers=family_headers,
+                                      json={'token': invitation.rsplit('/', 1)[1]})
+        assert requested.json()['status'] == 'pending'
+        assert (await client.get('/api/progress/family', headers=family_headers)).json()['visits'] == []
+        decision_url = '/api/family/requests/progress-other'
+        assert (await client.put(decision_url, headers=patient_headers, json={'status': 'approved'})).status_code == 200
         shared = (await client.get('/api/progress/family', headers=family_headers)).json()['visits']
         assert len(shared) == 1
         assert shared[0]['profile'] == {'name': 'progress-user'}
         assert shared[0]['diagnosis'] is None
         assert shared[0]['triage'] is None
-        assert (await client.post('/api/progress/visits/persisted-visit/sharing', headers=patient_headers, json={'enabled': False})).status_code == 200
+        assert (await client.put(decision_url, headers=patient_headers, json={'status': 'revoked'})).status_code == 200
         assert (await client.get('/api/progress/family', headers=family_headers)).json()['visits'] == []
         diagnosis_url = url + '/diagnosis'
         diagnosis = {'diagnosis': 'Recorded diagnosis', 'treatment_notes': 'Care notes', 'medications': ['Medication A'], 'release': False}

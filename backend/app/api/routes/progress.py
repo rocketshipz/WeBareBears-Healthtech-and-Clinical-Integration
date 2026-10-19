@@ -15,6 +15,8 @@ from app.models.staff import StaffAccount
 from app.models.user import User
 from app.models.user_information import UserInformation
 from app.models.triage_report import SavedReport
+from app.models.family_access import FamilyAccess, ensure_family_tables
+from app.repositories.triage_report_repository import TriageReportRepository
 from app.models.progress import PatientProgress, PatientTestTracking, PatientDiagnosisTreatment
 from app.models.hospital_directory import HospitalDirectory
 from app.services.hospital_identity import staff_hospital
@@ -201,6 +203,7 @@ def write_visit(visit_id: str, request: VisitWrite, staff=Depends(staff_account)
     if session.bind.dialect.name == 'postgresql':
         session.execute(text('SELECT pg_advisory_xact_lock(hashtext(:key))'), {'key': f'{staff.hospital_id}:{user.id}'})
     visit = session.query(PatientProgress).filter_by(visit_id=visit_id).with_for_update().first()
+    is_new_visit = visit is None
     if visit:
         if visit.hospital_id != staff.hospital_id:
             raise HTTPException(404, 'Visit not found.')
@@ -218,15 +221,22 @@ def write_visit(visit_id: str, request: VisitWrite, staff=Depends(staff_account)
             department=staff.department, assigned_staff_id=staff.staff_id, assigned_staff_account_id=staff.id, arrival_time=now(),
             queue_number='Q-' + secrets.token_hex(4).upper(), version=0, audit_log=[])
         session.add(visit)
+    report = None
     if request.triage_report_id:
         report = session.get(SavedReport, request.triage_report_id)
         # The report is about this patient: linked to them by IC, or their own screening not for someone else.
         if report is None or not (report.subject_user_id == user.id
                                   or (report.user_id == user.id and report.subject != 'other')):
             raise HTTPException(422, 'Triage report does not belong to this patient.')
+    elif is_new_visit:
+        # Resolve on the server so IC/manual check-in also carries the saved screening.
+        # Existing visits retain their original report when later screenings are completed.
+        report = TriageReportRepository(session).latest_for_patient(user.id)
+    if report is not None:
         visit.triage_report_id = report.session_id
         visit.triage_level = report.report.get('level')
-    if not all(step.status == 'done' for step in request.steps):
+    checkout = any(step.id == 'discharge' and step.status == 'done' for step in request.steps)
+    if not checkout:
         other_active = session.query(PatientProgress).filter(
             PatientProgress.user_id == user.id, PatientProgress.hospital_id == staff.hospital_id,
             PatientProgress.visit_id != visit_id,
@@ -352,22 +362,12 @@ def family_view(session, visit):
 
 @router.get('/progress/family')
 def family_visits(user=Depends(patient_identity), session=Depends(database)):
-    account = session.get(User, user['id'])
-    def phone_key(value):
-        digits = ''.join(c for c in (value or '') if c.isdigit())
-        return '60' + digits[1:] if digits.startswith('0') else digits
-    phone = phone_key(account.phone if account else '')
-    if not phone:
-        return {'visits': []}
-    visits = session.query(PatientProgress).join(UserInformation, UserInformation.user_id == PatientProgress.user_id).filter(
-        PatientProgress.family_sharing.is_(True), PatientProgress.user_id != user['id']).order_by(PatientProgress.arrival_time.desc()).all()
-    matches = []
-    for visit in visits:
-        info = session.get(UserInformation, visit.user_id)
-        contact = phone_key(info.emergency_contact_phone)
-        if contact == phone:
-            matches.append(family_view(session, visit))
-    return {'visits': matches}
+    ensure_family_tables(session.get_bind())
+    visits = session.query(PatientProgress).join(
+        FamilyAccess, FamilyAccess.patient_id == PatientProgress.user_id).filter(
+        FamilyAccess.viewer_id == user['id'], FamilyAccess.status == 'approved',
+        PatientProgress.user_id != user['id']).order_by(PatientProgress.arrival_time.desc()).all()
+    return {'visits': [family_view(session, visit) for visit in visits]}
 
 
 @router.get('/admin/visits/{visit_id}/diagnosis')

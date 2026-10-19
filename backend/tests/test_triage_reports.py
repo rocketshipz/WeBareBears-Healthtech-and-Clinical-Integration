@@ -125,9 +125,21 @@ async def test_chat_stores_report_and_links_someone_else_for_checkin():
                      "complaint": "Chest pain", "logs": [], "version": 0, "steps": [
                          {"id": key, "name": key, "status": "waiting"}
                          for key in ["registration", "triage", "doctor", "discharge"]]}
-            checked_in = await client.post("/api/admin/visits/report-visit", headers=staff, json=visit)
+            # Manual/IC check-in need not know the report id: resolve the patient's report server-side.
+            automatic_visit = {k: v for k, v in visit.items() if k != "triage_report_id"}
+            checked_in = await client.post("/api/admin/visits/report-visit", headers=staff, json=automatic_visit)
             assert checked_in.status_code == 200, checked_in.text
             assert checked_in.json()["triage_report_id"] == "s-mother"
+            assert checked_in.json()["triage"]["symptom"] == "Severe chest pain for 1 hour"
+            stored_visits = (await client.get("/api/admin/visits", headers=staff)).json()["visits"]
+            assert next(v for v in stored_visits if v["id"] == "report-visit")["triage"]["level"] == 2
+            # Later screenings must not silently replace the report of an existing hospital visit.
+            with get_session_factory()() as db:
+                assert save_report(screening("s-mother-later", "report-mother", subject="self"), db)
+            automatic_visit["version"] = checked_in.json()["version"]
+            updated_visit = await client.post("/api/admin/visits/report-visit", headers=staff, json=automatic_visit)
+            assert updated_visit.status_code == 200, updated_visit.text
+            assert updated_visit.json()["triage_report_id"] == "s-mother"
             wrong = dict(visit, patient_id="report-owner")
             assert (await client.post("/api/admin/visits/report-visit-2", headers=staff,
                                       json=wrong)).status_code == 422

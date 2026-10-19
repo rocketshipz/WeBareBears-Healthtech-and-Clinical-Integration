@@ -255,7 +255,7 @@ const Map<String, String> _ms = {
   'Allergy: {x}': 'Alahan: {x}',
   'Blood type {x}': 'Jenis darah {x}',
   'Medication: {x}': 'Ubat: {x}',
-  'Triage report (patient app)': 'Laporan triaj (aplikasi pesakit)',
+  'AI Triage Report': 'Laporan Triaj AI',
   'Submitted {ago}': 'Dihantar {ago}',
   'Outcome': 'Keputusan',
   'Main symptom': 'Simptom utama',

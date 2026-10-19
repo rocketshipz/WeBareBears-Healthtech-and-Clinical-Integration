@@ -267,6 +267,10 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                                   'No saved profile details available.',
                                   style: AppText.body,
                                 ),
+                              if (visit.triage != null) ...[
+                                const SizedBox(height: 16),
+                                _triageCard(),
+                              ],
                               if (visit.patientId != null &&
                                   !adminStore.repo.isDemo) ...[
                                 const SizedBox(height: 16),
@@ -274,10 +278,6 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                                   patientId: visit.patientId,
                                   revision: visit.version,
                                 ),
-                              ],
-                              if (visit.triage != null) ...[
-                                const SizedBox(height: 16),
-                                _triageCard(),
                               ],
                             ],
                           ),
@@ -460,7 +460,7 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  tr('Triage report (patient app)'),
+                  tr('AI Triage Report'),
                   style: AppText.heading,
                 ),
               ),
