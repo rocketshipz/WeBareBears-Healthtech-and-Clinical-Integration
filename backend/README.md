@@ -119,6 +119,10 @@ Both frontends poll every five seconds. Concurrent stale writes return 409 inste
 Check-in waits for database confirmation; duplicate active visits per patient/hospital are rejected.
 Without a saved triage report, staff must select a nurse-assessed zone before check-in.
 
-Family progress uses `/api/progress/family` and requires patient opt-in plus a matching registered emergency-contact phone.
+Family progress uses `/api/progress/family` and requires an explicit patient-approved request. Emergency-contact phone matching and the legacy per-visit sharing flag no longer grant access.
+In Profile, create an invitation and share it through WhatsApp. The recipient opens the link, logs in with their own TriageMY account and sends a request. The patient accepts/rejects in Profile, and can revoke access anytime. Approved family members use Progress > Family. Approval covers the patient's visits until revoked.
+Each invitation permits exactly one submitted request and expires after 24 hours if unused. Opening links or WhatsApp previews does not consume them. Claims use an atomic database update, so simultaneous requests cannot reuse a link. Only token hashes are stored. Create separate invitations for separate family members.
+Set `PUBLIC_BACKEND_URL` in `backend/.env` to the backend origin reachable from recipients' phones (for example `https://api.your-domain.com`, with any reverse proxy path prefix). If unset, links use the incoming API request origin; emulator/localhost addresses are only useful for local testing. The shared page is served by the backend and needs no separate tracking website.
+The API creates `patient_family_invitations` and `patient_family_access` on first use. For deployment run `python migrate_family_access.py` beforehand; it preserves existing rows and enables PostgreSQL RLS. Routes are `POST /api/family/invitations`, `GET /api/family/invitations/{token}`, `POST/GET /api/family/requests`, and `PUT /api/family/requests/{viewer_id}`.
 Family responses omit medical profiles and diagnoses. Public sharing links still require the separately configured tracking website.
 PDFs currently persist as bounded base64 documents in `patient_test_tracking.result_documents` (maximum 5 MB per PDF, 8 MB per step payload), rather than a separate Supabase Storage bucket. These documents are staff-only.

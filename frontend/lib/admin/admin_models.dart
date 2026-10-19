@@ -46,12 +46,14 @@ const Map<String, String> demoStaffNames = {
 
 enum StepStatus { waiting, inProgress, done }
 
-enum Acuity { red, yellow, green }
+enum Acuity { red, yellow, green, pending }
 
 extension AcuityX on Acuity {
   /// English wording, used for stored data such as log entries.
   String get labelEn {
     switch (this) {
+      case Acuity.pending:
+        return 'Pending Triage';
       case Acuity.red:
         return 'Red';
       case Acuity.yellow:
@@ -63,6 +65,8 @@ extension AcuityX on Acuity {
 
   String get descriptionEn {
     switch (this) {
+      case Acuity.pending:
+        return 'Awaiting zone assignment';
       case Acuity.red:
         return 'Critical';
       case Acuity.yellow:
@@ -79,6 +83,8 @@ extension AcuityX on Acuity {
 
   Color get color {
     switch (this) {
+      case Acuity.pending:
+        return AppColors.grey;
       case Acuity.red:
         return AppColors.red;
       case Acuity.yellow:
@@ -91,6 +97,8 @@ extension AcuityX on Acuity {
   /// Used to sort the queue: most urgent first.
   int get rank {
     switch (this) {
+      case Acuity.pending:
+        return 3;
       case Acuity.red:
         return 0;
       case Acuity.yellow:
@@ -502,19 +510,25 @@ class Visit {
   String get shareLink => AdminConfig.shareLink(shareToken);
 
   VisitStep? get currentStep {
+    if (isComplete) return null;
     for (final s in steps) {
       if (s.status != StepStatus.done) return s;
     }
     return null;
   }
 
-  bool get isComplete => currentStep == null;
+  bool get isComplete =>
+      steps.any((s) => s.id == 'discharge' && s.status == StepStatus.done);
 
   int get doneCount => steps.where((s) => s.status == StepStatus.done).length;
 
   String get statusText {
     final c = currentStep;
-    if (c == null) return tr(outcome ?? 'Visit completed');
+    if (c == null) {
+      return isComplete
+          ? tr(outcome ?? 'Visit completed')
+          : tr('Awaiting next stage');
+    }
     return c.statusText;
   }
 

@@ -1,5 +1,6 @@
 """Staff login and staff-only patient lookup."""
 import secrets
+import json
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Header, HTTPException

@@ -59,7 +59,7 @@ Visit decodeVisit(Map<String, dynamic> data) {
     complaint: data['complaint'] ?? '',
     acuity: Acuity.values.firstWhere(
       (a) => a.name == data['acuity'],
-      orElse: () => Acuity.green,
+      orElse: () => Acuity.pending,
     ),
     hospital: data['hospital'] ?? '',
     hospitalId: data['hospital_id'],
@@ -104,7 +104,7 @@ Map<String, dynamic> encodeVisit(Visit visit) => {
   'patient_id': visit.patientId,
   'ic': visit.ic,
   'triage_report_id': visit.triageReportId,
-  'acuity': visit.acuity.name,
+  'acuity': visit.acuity == Acuity.pending ? null : visit.acuity.name,
   'complaint': visit.complaint,
   'version': visit.version,
   'outcome': visit.outcome,

@@ -78,7 +78,9 @@ class QueuePage extends StatelessWidget {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        '${zone.label} zone',
+                                        zone == Acuity.pending
+                                            ? 'Pending Triage'
+                                            : '${zone.label} zone',
                                         style: AppText.style(
                                           20,
                                           FontWeight.w700,
@@ -147,7 +149,11 @@ class _ZonePatientsPageState extends State<_ZonePatientsPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: buildAppBar(
-      widget.zone == null ? 'Completed visits' : '${widget.zone!.label} zone',
+      widget.zone == null
+          ? 'Completed visits'
+          : widget.zone == Acuity.pending
+          ? 'Pending Triage'
+          : '${widget.zone!.label} zone',
     ),
     body: AnimatedBuilder(
       animation: adminStore,

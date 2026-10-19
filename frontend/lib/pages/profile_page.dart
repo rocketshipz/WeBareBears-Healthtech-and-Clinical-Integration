@@ -3,6 +3,8 @@ import '../localization.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import '../widgets/visit_history.dart';
+import '../widgets/family_access_card.dart';
 import '../services/auth_service.dart';
 import '../screens/role_selection_screen.dart';
 
@@ -537,6 +539,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     // ========================================================
                     // PERSONAL
                     // ========================================================
+                    const FamilyAccessCard(),
+                    const SizedBox(height: 24),
                     FadeSlideIn(
                       index: 2,
                       child: _section(
@@ -780,6 +784,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
 
+                    const SizedBox(height: 26),
+
+                    const VisitHistory(),
                     const SizedBox(height: 26),
 
                     // ========================================================

@@ -15,6 +15,8 @@ from app.models.staff import StaffAccount
 from app.models.user import User
 from app.models.user_information import UserInformation
 from app.models.triage_report import SavedReport
+from app.models.family_access import FamilyAccess, ensure_family_tables
+from app.repositories.triage_report_repository import TriageReportRepository
 from app.models.progress import PatientProgress, PatientTestTracking, PatientDiagnosisTreatment
 from app.models.hospital_directory import HospitalDirectory
 from app.services.hospital_identity import staff_hospital
@@ -60,9 +62,9 @@ class VisitWrite(BaseModel):
     patient_id: str | None = None
     ic: str | None = None
     triage_report_id: str | None = None
-    acuity: Literal['red', 'yellow', 'green'] = 'green'
+    acuity: Literal['red', 'yellow', 'green'] | None = None
     complaint: str = Field(default='', max_length=2000)
-    steps: list[StepInput] = Field(min_length=4, max_length=100)
+    steps: list[StepInput] = Field(min_length=2, max_length=100)
     logs: list[dict] = Field(default_factory=list, max_length=2000)
     outcome: str | None = Field(default=None, max_length=200)
     version: int = Field(default=0, ge=0)
@@ -134,14 +136,20 @@ def serialize(session, visit, patient=False):
                    'results': [] if patient else s.result_documents or [],
                    'result_status': s.result_status} for s in steps]
     # Older rows may predate the app's core timeline stages.
+    # Preserve explicitly added stages; omit unused defaults from older visits.
+    added = {entry.get('text') for entry in (visit.audit_log or [])}
+    serialized_steps = [s for s in serialized_steps if not (
+        s['id'] in {'doctor', 'discharge'} and s['status'] == 'waiting'
+        and not s['started_at'] and not s['completed_at']
+        and f"{s['name']} added to the visit" not in added)]
     keys = {s['id'] for s in serialized_steps}
     complete = (visit.visit_status or '').lower() in {'completed', 'discharged'}
     defaults = [
         {'id': 'registration', 'name': 'Registration', 'status': 'done'},
         {'id': 'triage', 'name': 'Nurse triage', 'status': 'done' if visit.triage_zone or complete else 'waiting'},
-        {'id': 'doctor', 'name': 'Doctor consultation', 'status': 'done' if complete else 'in_progress' if visit.consultation_started_at else 'waiting'},
-        {'id': 'discharge', 'name': 'Discharge', 'status': 'done' if complete else 'waiting'},
     ]
+    if complete:
+        defaults.append({'id': 'discharge', 'name': 'Discharge / admission decision', 'status': 'done'})
     for stage in defaults:
         if stage['id'] not in keys:
             item = {**stage, 'is_test': False, 'note': '', 'results': [],
@@ -156,7 +164,7 @@ def serialize(session, visit, patient=False):
         'queue_no': visit.queue_number or visit.visit_id,
         'hospital_id': visit.hospital_id, 'hospital': hospital.hospital_name if hospital else 'Hospital not linked',
         'department': visit.department or 'Emergency Department', 'assigned_staff_id': assigned_staff.staff_id if assigned_staff else visit.assigned_staff_id,
-        'acuity': visit.triage_zone or 'green', 'complaint': visit.chief_complaint or '',
+        'acuity': visit.triage_zone, 'complaint': visit.chief_complaint or '',
         'arrived_at': iso(visit.arrival_time), 'completed_at': visit.discharged_at,
         'outcome': visit.outcome, 'version': visit.version, 'profile': profile,
         'family_sharing': visit.family_sharing is True, 'share_token': visit.share_token,
@@ -178,10 +186,12 @@ def write_visit(visit_id: str, request: VisitWrite, staff=Depends(staff_account)
     if len(visit_id) > 100:
         raise HTTPException(422, 'Invalid visit ID.')
     keys = [s.id for s in request.steps]
-    if len(keys) != len(set(keys)) or not {'registration', 'triage', 'doctor', 'discharge'}.issubset(keys):
-        raise HTTPException(422, 'Every visit needs unique registration, triage, doctor and discharge steps.')
+    if len(keys) != len(set(keys)) or not {'registration', 'triage'}.issubset(keys):
+        raise HTTPException(422, 'Every visit needs unique registration and triage steps.')
     if any(s.is_test for s in request.steps if s.id in {'registration', 'triage', 'doctor', 'discharge'}):
         raise HTTPException(422, 'Core stages cannot be tests.')
+    if request.acuity is None and any(s.id == 'triage' and s.status == 'done' for s in request.steps):
+        raise HTTPException(422, 'Select a triage zone before completing triage.')
     # Serialize simultaneous check-ins for the same patient, including across workers.
     patient_id = request.patient_id
     if not patient_id and request.ic:
@@ -193,6 +203,7 @@ def write_visit(visit_id: str, request: VisitWrite, staff=Depends(staff_account)
     if session.bind.dialect.name == 'postgresql':
         session.execute(text('SELECT pg_advisory_xact_lock(hashtext(:key))'), {'key': f'{staff.hospital_id}:{user.id}'})
     visit = session.query(PatientProgress).filter_by(visit_id=visit_id).with_for_update().first()
+    is_new_visit = visit is None
     if visit:
         if visit.hospital_id != staff.hospital_id:
             raise HTTPException(404, 'Visit not found.')
@@ -210,15 +221,22 @@ def write_visit(visit_id: str, request: VisitWrite, staff=Depends(staff_account)
             department=staff.department, assigned_staff_id=staff.staff_id, assigned_staff_account_id=staff.id, arrival_time=now(),
             queue_number='Q-' + secrets.token_hex(4).upper(), version=0, audit_log=[])
         session.add(visit)
+    report = None
     if request.triage_report_id:
         report = session.get(SavedReport, request.triage_report_id)
         # The report is about this patient: linked to them by IC, or their own screening not for someone else.
         if report is None or not (report.subject_user_id == user.id
                                   or (report.user_id == user.id and report.subject != 'other')):
             raise HTTPException(422, 'Triage report does not belong to this patient.')
+    elif is_new_visit:
+        # Resolve on the server so IC/manual check-in also carries the saved screening.
+        # Existing visits retain their original report when later screenings are completed.
+        report = TriageReportRepository(session).latest_for_patient(user.id)
+    if report is not None:
         visit.triage_report_id = report.session_id
         visit.triage_level = report.report.get('level')
-    if not all(step.status == 'done' for step in request.steps):
+    checkout = any(step.id == 'discharge' and step.status == 'done' for step in request.steps)
+    if not checkout:
         other_active = session.query(PatientProgress).filter(
             PatientProgress.user_id == user.id, PatientProgress.hospital_id == staff.hospital_id,
             PatientProgress.visit_id != visit_id,
@@ -232,10 +250,10 @@ def write_visit(visit_id: str, request: VisitWrite, staff=Depends(staff_account)
     visit.chief_complaint = request.complaint
     visit.updated_at = now()
     visit.outcome = request.outcome
-    visit.visit_status = 'completed' if all(s.status == 'done' for s in request.steps) else 'active'
-    visit.discharged_at = iso(now()) if visit.visit_status == 'completed' else None
-    doctor = next(s for s in request.steps if s.id == 'doctor')
-    visit.consultation_started_at = doctor.started_at
+    visit.visit_status = 'completed' if checkout else 'active'
+    visit.discharged_at = (visit.discharged_at or iso(now())) if checkout else None
+    doctor = next((s for s in request.steps if s.id == 'doctor'), None)
+    visit.consultation_started_at = doctor.started_at if doctor else None
     visit.version += 1
     existing_logs = {entry['id']: dict(entry) for entry in (visit.audit_log or [])}
     for entry in request.logs:
@@ -247,6 +265,12 @@ def write_visit(visit_id: str, request: VisitWrite, staff=Depends(staff_account)
         else:
             existing_logs[ident] = {**{k: entry.get(k) for k in ['id', 'text', 'step_id', 'from', 'to', 'is_undo_record', 'undone']},
                 'staff_id': staff.staff_id, 'staff_name': staff.name, 'time': iso(now())}
+    saved_keys = {row.test_id for row in session.query(PatientTestTracking).filter_by(visit_id=visit_id).all()}
+    for step in request.steps:
+        if step.id in {'doctor', 'discharge'} and step.id not in saved_keys:
+            ident = secrets.token_hex(16)
+            existing_logs[ident] = {'id': ident, 'text': f'{step.name} added to the visit',
+                                    'staff_id': staff.staff_id, 'staff_name': staff.name, 'time': iso(now())}
     visit.audit_log = list(existing_logs.values())
     records = {s.test_id: s for s in session.query(PatientTestTracking).filter_by(visit_id=visit_id).all()}
     for position, step in enumerate(request.steps):
@@ -276,6 +300,43 @@ def patient_visits(user=Depends(patient_identity), session=Depends(database)):
     return {'visits': [serialize(session, v, patient=True) for v in visits]}
 
 
+def history_entry(session, visit):
+    hospital = session.get(HospitalDirectory, visit.hospital_id) if visit.hospital_id else None
+    diagnosis = session.get(PatientDiagnosisTreatment, visit.visit_id)
+    return {
+        'visit_id': visit.visit_id,
+        'hospital': hospital.hospital_name if hospital else 'Hospital not linked',
+        'department': visit.department,
+        'arrived_at': iso(visit.arrival_time),
+        'completed_at': visit.discharged_at,
+        'outcome': visit.outcome,
+        'diagnosis': diagnosis.diagnosis if diagnosis else None,
+        'treatment_notes': diagnosis.treatment_notes if diagnosis else None,
+        'medications': diagnosis.medications or [] if diagnosis else [],
+        'follow_up_instructions': diagnosis.follow_up_instructions if diagnosis else None,
+    }
+
+
+def completed_history(session, patient_id, hospital_id=None):
+    query = session.query(PatientProgress).filter(
+        PatientProgress.user_id == patient_id,
+        func.lower(PatientProgress.visit_status).in_(['completed', 'discharged']))
+    if hospital_id is not None:
+        query = query.filter(PatientProgress.hospital_id == hospital_id)
+    return {'history': [history_entry(session, visit) for visit in query.order_by(
+        PatientProgress.arrival_time.desc()).all()]}
+
+
+@router.get('/progress/history')
+def patient_history(user=Depends(patient_identity), session=Depends(database)):
+    return jsonable_encoder(completed_history(session, user['id']))
+
+
+@router.get('/admin/patients/{patient_id}/history')
+def staff_patient_history(patient_id: str, staff=Depends(staff_account), session=Depends(database)):
+    return jsonable_encoder(completed_history(session, patient_id, staff.hospital_id))
+
+
 @router.post('/progress/visits/{visit_id}/sharing')
 def set_sharing(visit_id: str, request: SharingInput, user=Depends(patient_identity), session=Depends(database)):
     visit = session.query(PatientProgress).filter_by(visit_id=visit_id, user_id=user['id']).with_for_update().first()
@@ -301,22 +362,12 @@ def family_view(session, visit):
 
 @router.get('/progress/family')
 def family_visits(user=Depends(patient_identity), session=Depends(database)):
-    account = session.get(User, user['id'])
-    def phone_key(value):
-        digits = ''.join(c for c in (value or '') if c.isdigit())
-        return '60' + digits[1:] if digits.startswith('0') else digits
-    phone = phone_key(account.phone if account else '')
-    if not phone:
-        return {'visits': []}
-    visits = session.query(PatientProgress).join(UserInformation, UserInformation.user_id == PatientProgress.user_id).filter(
-        PatientProgress.family_sharing.is_(True), PatientProgress.user_id != user['id']).order_by(PatientProgress.arrival_time.desc()).all()
-    matches = []
-    for visit in visits:
-        info = session.get(UserInformation, visit.user_id)
-        contact = phone_key(info.emergency_contact_phone)
-        if contact == phone:
-            matches.append(family_view(session, visit))
-    return {'visits': matches}
+    ensure_family_tables(session.get_bind())
+    visits = session.query(PatientProgress).join(
+        FamilyAccess, FamilyAccess.patient_id == PatientProgress.user_id).filter(
+        FamilyAccess.viewer_id == user['id'], FamilyAccess.status == 'approved',
+        PatientProgress.user_id != user['id']).order_by(PatientProgress.arrival_time.desc()).all()
+    return {'visits': [family_view(session, visit) for visit in visits]}
 
 
 @router.get('/admin/visits/{visit_id}/diagnosis')
@@ -329,9 +380,13 @@ def get_diagnosis(visit_id: str, staff=Depends(staff_account), session=Depends(d
 def save_diagnosis(visit_id: str, request: DiagnosisInput, staff=Depends(staff_account), session=Depends(database)):
     visit = authorized_visit(session, visit_id, staff, lock=True)
     doctor = session.get(PatientTestTracking, (visit_id, 'doctor'))
-    if ((doctor is not None and normalized_status(doctor.test_status) != 'done')
-            or (doctor is None and (visit.visit_status or '').lower() not in {'completed', 'discharged'})):
-        raise HTTPException(409, 'Complete doctor consultation before recording diagnosis and treatment.')
+    discharge = session.get(PatientTestTracking, (visit_id, 'discharge'))
+    can_record = ((doctor is not None and normalized_status(doctor.test_status) == 'done')
+                  or (visit.visit_status or '').lower() in {'completed', 'discharged'}
+                  or (doctor is None and discharge is not None
+                      and normalized_status(discharge.test_status) == 'in_progress'))
+    if not can_record:
+        raise HTTPException(409, 'Complete doctor consultation or start discharge before recording diagnosis and treatment.')
     record = session.get(PatientDiagnosisTreatment, visit_id)
     if record is None:
         record = PatientDiagnosisTreatment(visit_id=visit_id, outcome_id=secrets.token_hex(16))

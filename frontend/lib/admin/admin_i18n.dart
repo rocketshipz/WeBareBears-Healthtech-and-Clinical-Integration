@@ -43,6 +43,33 @@ String tr(String en, [Map<String, Object?> args = const {}]) {
 }
 
 const Map<String, String> _ms = {
+  'Update results': 'Kemas kini keputusan',
+  'Update triage zone': 'Kemas kini zon triaj',
+  'Save triage results': 'Simpan keputusan triaj',
+  'Update': 'Kemas kini',
+  'Custom test': 'Ujian tersuai',
+  'Add / update next step': 'Tambah / kemas kini langkah seterusnya',
+  'Choose the next step for this patient.':
+      'Pilih langkah seterusnya untuk pesakit ini.',
+  'Next step': 'Langkah seterusnya',
+  'Select next step': 'Pilih langkah seterusnya',
+  'Custom step': 'Langkah tersuai',
+  'Step name': 'Nama langkah',
+  'Enter step or test name': 'Masukkan nama langkah atau ujian',
+  'Enter a unique step or test name.':
+      'Masukkan nama langkah atau ujian yang unik.',
+  'Next step saved.': 'Langkah seterusnya disimpan.',
+  'Update step': 'Kemas kini langkah',
+  'Add step': 'Tambah langkah',
+
+  'Pending Triage': 'Menunggu triaj',
+  'Awaiting zone assignment': 'Menunggu penetapan zon',
+  'Add remarks': 'Tambah catatan',
+  'Remarks (optional, staff only)': 'Catatan (pilihan, kakitangan sahaja)',
+  'Select a triage zone before completing triage.':
+      'Pilih zon triaj sebelum melengkapkan triaj.',
+  'Add tests or a doctor consultation to this visit.':
+      'Tambah ujian atau konsultasi doktor untuk lawatan ini.',
   // ---------------- common ----------------
   'Language': 'Bahasa',
   'Hospital': 'Hospital',
@@ -128,14 +155,14 @@ const Map<String, String> _ms = {
 
   // ---------------- activity log (fixed sentences) ----------------
   'Progress tracking link enabled': 'Pautan penjejakan kemajuan diaktifkan',
-  'Progress tracking link disabled': 'Pautan penjejakan kemajuan dinyahaktifkan',
+  'Progress tracking link disabled':
+      'Pautan penjejakan kemajuan dinyahaktifkan',
   'Progress tracking link replaced (old link revoked)':
       'Pautan penjejakan kemajuan diganti (pautan lama dibatalkan)',
 
   // ---------------- landing ----------------
   'Hospital staff portal': 'Portal kakitangan hospital',
-  'Log each stage of a patient\'s emergency visit so patients and families always know what happens next.':
-      'Rekod setiap peringkat lawatan kecemasan pesakit supaya pesakit dan keluarga sentiasa tahu apa yang berlaku seterusnya.',
+  'Log each stage of a patient\'s emergency visit so patients and families always know what happens next.': 'Rekod setiap peringkat lawatan kecemasan pesakit supaya pesakit dan keluarga sentiasa tahu apa yang berlaku seterusnya.',
   'Live emergency queue': 'Giliran kecemasan secara langsung',
   'See every patient, their zone and current stage.':
       'Lihat setiap pesakit, zon dan peringkat semasa mereka.',
@@ -186,8 +213,7 @@ const Map<String, String> _ms = {
       'Pesakit tidak dapat didaftarkan. Sila cuba lagi.',
   '{queue} registered.': '{queue} didaftarkan.',
   'Register patient': 'Daftar pesakit',
-  'For walk-ins. Patients who used the TriageMY app appear under Incoming in the queue, with their details already filled in.':
-      'Untuk pesakit walk-in. Pesakit yang menggunakan aplikasi TriageMY dipaparkan di bawah Akan Tiba dalam giliran, dengan butiran mereka sudah diisi.',
+  'For walk-ins. Patients who used the TriageMY app appear under Incoming in the queue, with their details already filled in.': 'Untuk pesakit walk-in. Pesakit yang menggunakan aplikasi TriageMY dipaparkan di bawah Akan Tiba dalam giliran, dengan butiran mereka sudah diisi.',
   'Patient details': 'Butiran pesakit',
   'Full name': 'Nama penuh',
   'Patient name': 'Nama pesakit',
@@ -210,10 +236,8 @@ const Map<String, String> _ms = {
   'Register & start queue': 'Daftar & mula giliran',
 
   // ---------------- account ----------------
-  'Demo mode: sample data only. Nothing is saved and everything resets when the app restarts.':
-      'Mod demo: data contoh sahaja. Tiada apa yang disimpan dan semuanya ditetapkan semula apabila aplikasi dimulakan semula.',
-  'Connected to Supabase. Every update you make is saved with your name and staff ID.':
-      'Disambungkan ke Supabase. Setiap kemas kini anda disimpan bersama nama dan ID kakitangan anda.',
+  'Demo mode: sample data only. Nothing is saved and everything resets when the app restarts.': 'Mod demo: data contoh sahaja. Tiada apa yang disimpan dan semuanya ditetapkan semula apabila aplikasi dimulakan semula.',
+  'Connected to Supabase. Every update you make is saved with your name and staff ID.': 'Disambungkan ke Supabase. Setiap kemas kini anda disimpan bersama nama dan ID kakitangan anda.',
   'Log out': 'Log keluar',
 
   // ---------------- patient detail ----------------
@@ -224,15 +248,14 @@ const Map<String, String> _ms = {
       'Ia ditambah sebelum konsultasi doktor.',
   'All available tests are already added.':
       'Semua ujian yang ada telah ditambah.',
-  'Follow the live progress of your hospital visit at {hospital}: {link}\n\nYou can forward this link to your family so they can follow too.':
-      'Ikuti kemajuan langsung lawatan hospital anda di {hospital}: {link}\n\nAnda boleh kongsi pautan ini dengan keluarga supaya mereka juga boleh mengikutinya.',
+  'Follow the live progress of your hospital visit at {hospital}: {link}\n\nYou can forward this link to your family so they can follow too.': 'Ikuti kemajuan langsung lawatan hospital anda di {hospital}: {link}\n\nAnda boleh kongsi pautan ini dengan keluarga supaya mereka juga boleh mengikutinya.',
   'Could not open WhatsApp.': 'Tidak dapat membuka WhatsApp.',
   'Queue No.': 'No. Giliran',
   'Arrived {time}': 'Tiba {time}',
   'Allergy: {x}': 'Alahan: {x}',
   'Blood type {x}': 'Jenis darah {x}',
   'Medication: {x}': 'Ubat: {x}',
-  'Triage report (patient app)': 'Laporan triaj (aplikasi pesakit)',
+  'AI Triage Report': 'Laporan Triaj AI',
   'Submitted {ago}': 'Dihantar {ago}',
   'Outcome': 'Keputusan',
   'Main symptom': 'Simptom utama',
@@ -249,8 +272,7 @@ const Map<String, String> _ms = {
   'Undo last update ({x})': 'Batal kemas kini terakhir ({x})',
   'Progress timeline': 'Garis masa kemajuan',
   'Add test': 'Tambah ujian',
-  'Tap a stage to edit it. Drag unfinished tests to reorder them. Patients see this timeline live.':
-      'Ketik peringkat untuk menyuntingnya. Seret ujian yang belum selesai untuk menyusun semula. Pesakit melihat garis masa ini secara langsung.',
+  'Tap a stage to edit it. Drag unfinished tests to reorder them. Patients see this timeline live.': 'Ketik peringkat untuk menyuntingnya. Seret ujian yang belum selesai untuk menyusun semula. Pesakit melihat garis masa ini secara langsung.',
   'Started {time}': 'Bermula {time}',
   '{n} result document': '{n} dokumen keputusan',
   '{n} result documents': '{n} dokumen keputusan',
@@ -260,8 +282,7 @@ const Map<String, String> _ms = {
   'Link copied.': 'Pautan disalin.',
   'Send via WhatsApp': 'Hantar melalui WhatsApp',
   'Send to patient ({phone})': 'Hantar kepada pesakit ({phone})',
-  'Shows live progress only (stages and times). No name, IC or medical details. The link stops working 2 hours after the visit ends.':
-      'Hanya menunjukkan kemajuan langsung (peringkat dan masa). Tiada nama, No. KP atau butiran perubatan. Pautan tamat 2 jam selepas lawatan berakhir.',
+  'Shows live progress only (stages and times). No name, IC or medical details. The link stops working 2 hours after the visit ends.': 'Hanya menunjukkan kemajuan langsung (peringkat dan masa). Tiada nama, No. KP atau butiran perubatan. Pautan tamat 2 jam selepas lawatan berakhir.',
   'New link created. The old link no longer works.':
       'Pautan baharu dicipta. Pautan lama tidak lagi berfungsi.',
   'Revoke and create a new link': 'Batalkan dan cipta pautan baharu',
@@ -294,13 +315,10 @@ const Map<String, String> _ms = {
   'Could not open the camera. Try "Choose from gallery" instead.':
       'Tidak dapat membuka kamera. Cuba "Pilih dari galeri".',
   '{name} result uploaded.': 'Keputusan {name} dimuat naik.',
-  'Upload failed. Check the connection and try again. Your scanned pages are still here.':
-      'Muat naik gagal. Semak sambungan dan cuba lagi. Halaman yang diimbas masih ada di sini.',
+  'Upload failed. Check the connection and try again. Your scanned pages are still here.': 'Muat naik gagal. Semak sambungan dan cuba lagi. Halaman yang diimbas masih ada di sini.',
   'Scan results': 'Imbas keputusan',
-  'Place the document flat in good light. The scanner finds the page edges and straightens it. You can scan several pages in one go.':
-      'Letakkan dokumen rata dalam cahaya yang baik. Pengimbas akan mengesan tepi halaman dan meluruskannya. Anda boleh mengimbas beberapa halaman sekali gus.',
-  'Place the document flat in good light. Add one photo per page.':
-      'Letakkan dokumen rata dalam cahaya yang baik. Tambah satu foto bagi setiap halaman.',
+  'Place the document flat in good light. The scanner finds the page edges and straightens it. You can scan several pages in one go.': 'Letakkan dokumen rata dalam cahaya yang baik. Pengimbas akan mengesan tepi halaman dan meluruskannya. Anda boleh mengimbas beberapa halaman sekali gus.',
+  'Place the document flat in good light. Add one photo per page.': 'Letakkan dokumen rata dalam cahaya yang baik. Tambah satu foto bagi setiap halaman.',
   'No pages yet': 'Belum ada halaman',
   'Scan first page': 'Imbas halaman pertama',
   'Scan another page': 'Imbas halaman lain',
@@ -348,10 +366,7 @@ String trText(String s) {
 
 /// Log sentences written by AdminStore, in Bahasa Melayu.
 final List<(RegExp, String Function(Match))> _logPatterns = [
-  (
-    RegExp(r'^Undid: (.+)$'),
-    (m) => 'Dibatalkan: ${trText(m[1]!)}',
-  ),
+  (RegExp(r'^Undid: (.+)$'), (m) => 'Dibatalkan: ${trText(m[1]!)}'),
   (
     RegExp(r'^Triage zone set to (\w+) \((.+)\)$'),
     (m) => 'Zon triaj ditetapkan kepada ${trText(m[1]!)} (${trText(m[2]!)})',
@@ -384,16 +399,7 @@ final List<(RegExp, String Function(Match))> _logPatterns = [
     RegExp(r'^(.+) moved after (.+)$'),
     (m) => '${trText(m[1]!)} dipindahkan selepas ${trText(m[2]!)}',
   ),
-  (
-    RegExp(r'^(.+) started$'),
-    (m) => '${trText(m[1]!)} dimulakan',
-  ),
-  (
-    RegExp(r'^(.+) completed$'),
-    (m) => '${trText(m[1]!)} selesai',
-  ),
-  (
-    RegExp(r'^Staff (\S+)$'),
-    (m) => 'Kakitangan ${m[1]}',
-  ),
+  (RegExp(r'^(.+) started$'), (m) => '${trText(m[1]!)} dimulakan'),
+  (RegExp(r'^(.+) completed$'), (m) => '${trText(m[1]!)} selesai'),
+  (RegExp(r'^Staff (\S+)$'), (m) => 'Kakitangan ${m[1]}'),
 ];

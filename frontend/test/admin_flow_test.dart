@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:triagemy/admin/admin_queue.dart';
+import 'package:triagemy/admin/patient_lookup.dart';
+import 'package:triagemy/widgets/visit_history.dart';
 import 'package:triagemy/theme.dart';
 import 'package:triagemy/admin/admin_login.dart';
 import 'package:triagemy/admin/admin_account.dart';
@@ -19,6 +21,134 @@ import 'package:triagemy/admin/admin_repository.dart';
 import 'package:triagemy/admin/patient_detail.dart';
 
 void main() {
+  testWidgets('Triage results reveal next-step controls only after saving', (
+    tester,
+  ) async {
+    final visit = await adminStore.registerPatient(
+      name: 'Triage patient',
+      ic: '001010104322',
+      age: 26,
+      sex: 'Female',
+      complaint: 'Assessment',
+      acuity: Acuity.pending,
+      tests: [],
+      patientPhone: '',
+    );
+    await tester.pumpWidget(MaterialApp(home: PatientDetailPage(visit: visit)));
+    await tester.pumpAndSettle();
+    expect(find.text('Add / update next step'), findsNothing);
+    expect(find.text('Start Triage'), findsNothing);
+    expect(find.text('Update results'), findsOneWidget);
+    await tester.tap(find.text('Update results'));
+    await tester.pumpAndSettle();
+    expect(find.text('Update triage zone'), findsOneWidget);
+    expect(find.text('Add / update next step'), findsNothing);
+    await tester.tap(find.text('Yellow zone'));
+    await tester.enterText(find.byType(TextField), 'Nurse assessment remarks');
+    await tester.ensureVisible(find.text('Save triage results'));
+    await tester.tap(find.text('Save triage results'));
+    await tester.pumpAndSettle();
+    expect(visit.acuity, Acuity.yellow);
+    final triage = visit.steps.firstWhere((s) => s.id == 'triage');
+    expect(triage.status, StepStatus.done);
+    expect(triage.note, 'Nurse assessment remarks');
+    expect(find.text('Add / update next step'), findsOneWidget);
+    expect(visit.isComplete, isFalse);
+    adminStore.visits.remove(visit);
+  });
+
+  testWidgets(
+    'Stages remain active until explicit discharge and are added from menu',
+    (tester) async {
+      GoogleFonts.config.allowRuntimeFetching = false;
+      adminStore.useRepository(DemoAdminRepository());
+      final visit = await adminStore.registerPatient(
+        name: 'Checkout patient',
+        ic: '001010104321',
+        age: 26,
+        sex: 'Female',
+        complaint: 'Assessment',
+        acuity: Acuity.green,
+        tests: [],
+        patientPhone: '',
+      );
+      expect(visit.steps.map((s) => s.id), ['registration', 'triage']);
+      adminStore.setStepStatus(visit, visit.steps.last, StepStatus.done);
+      expect(visit.currentStep, isNull);
+      expect(visit.isComplete, isFalse);
+      await tester.pumpWidget(
+        MaterialApp(home: PatientDetailPage(visit: visit)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Awaiting next stage'), findsOneWidget);
+      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.pumpAndSettle();
+      expect(find.text('Doctor consultation'), findsOneWidget);
+      await tester.tap(find.text('Discharge / admission decision').last);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Add step'));
+      await tester.tap(find.text('Add step'));
+      await tester.pumpAndSettle();
+      expect(visit.currentStep?.id, 'discharge');
+      adminStore.setStepStatus(visit, visit.currentStep!, StepStatus.done);
+      await tester.pumpAndSettle();
+      expect(visit.isComplete, isTrue);
+      expect(adminStore.active, isNot(contains(visit)));
+      expect(adminStore.completed, contains(visit));
+      adminStore.visits.remove(visit);
+    },
+  );
+
+  testWidgets(
+    'Profile history displays persisted visit diagnosis and medication',
+    (tester) async {
+      GoogleFonts.config.allowRuntimeFetching = false;
+      PatientLookup.token = 'history-staff';
+      await http.runWithClient(
+        () async {
+          await tester.pumpWidget(
+            const MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: VisitHistory(patientId: 'patient-history'),
+                ),
+              ),
+            ),
+          );
+          await tester.tap(find.text('History'));
+          await tester.pumpAndSettle();
+          expect(find.text('Diagnosis: Recorded diagnosis'), findsOneWidget);
+          expect(find.text('Medications: Medication A'), findsOneWidget);
+          expect(find.textContaining('2026'), findsNWidgets(2));
+          expect(tester.takeException(), isNull);
+        },
+        () => MockClient((request) async {
+          expect(
+            request.url.path,
+            endsWith('/admin/patients/patient-history/history'),
+          );
+          expect(request.headers['Authorization'], 'Bearer history-staff');
+          return http.Response(
+            jsonEncode({
+              'history': [
+                {
+                  'hospital': 'History Hospital',
+                  'arrived_at': '2026-10-18T01:00:00Z',
+                  'completed_at': '2026-10-18T02:00:00Z',
+                  'outcome': 'Discharged home',
+                  'diagnosis': 'Recorded diagnosis',
+                  'medications': ['Medication A'],
+                },
+              ],
+            }),
+            200,
+          );
+        }),
+      );
+      PatientLookup.token = null;
+    },
+  );
+
   setUp(() {
     GoogleFonts.config.allowRuntimeFetching = false;
     adminStore.useRepository(DemoAdminRepository());
@@ -283,6 +413,7 @@ void main() {
     expect(find.text('Red zone'), findsOneWidget);
     expect(find.text('Yellow zone'), findsOneWidget);
     expect(find.text('Green zone'), findsOneWidget);
+    expect(find.text('Pending Triage'), findsOneWidget);
     final red = adminStore.active.firstWhere((v) => v.acuity == Acuity.red);
     expect(find.text(red.name), findsNothing);
     await tester.tap(find.text('Red zone'));
@@ -320,7 +451,8 @@ void main() {
             registered?.profile['emergency_contact_name'],
             'Contact Person',
           );
-          expect(registered?.acuity, Acuity.yellow);
+          expect(registered?.acuity, Acuity.pending);
+          expect(registered?.steps.any((s) => s.id == 'doctor'), isFalse);
         },
         () => MockClient(
           (request) async => http.Response(
@@ -354,21 +486,73 @@ void main() {
 
   testWidgets('Staff can add a named custom test to progress', (tester) async {
     final visit = adminStore.active.first;
+    adminStore.setStepStatus(
+      visit,
+      visit.steps.firstWhere((s) => s.id == 'triage'),
+      StepStatus.done,
+    );
     await tester.pumpWidget(MaterialApp(home: PatientDetailPage(visit: visit)));
     await tester.pumpAndSettle();
-    final add = find.text('Add test');
-    await tester.ensureVisible(add);
-    await tester.tap(add);
+    expect(find.text('Add / update next step'), findsOneWidget);
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Custom ultrasound');
-    await tester.tap(find.text('Add custom test'));
+    await tester.tap(find.text('Custom test').last);
     await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).at(0), 'Custom ultrasound');
+    await tester.enterText(
+      find.byType(TextField).at(1),
+      'Private test remarks',
+    );
+    await tester.ensureVisible(find.text('Add step'));
+    await tester.tap(find.text('Add step'));
+    await tester.pumpAndSettle();
+    expect(
+      visit.steps.firstWhere((s) => s.name == 'Custom ultrasound').note,
+      'Private test remarks',
+    );
     expect(
       visit.steps.any(
         (step) => step.name == 'Custom ultrasound' && step.isTest,
       ),
       isTrue,
     );
-    visit.steps.removeWhere((step) => step.name == 'Custom ultrasound');
+    await tester.ensureVisible(find.byType(DropdownButtonFormField<String>));
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Custom step').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Custom step').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).at(0), 'Observation');
+    await tester.enterText(
+      find.byType(TextField).at(1),
+      'Monitor for one hour',
+    );
+    await tester.ensureVisible(find.text('Add step'));
+    await tester.tap(find.text('Add step'));
+    await tester.pumpAndSettle();
+    final observation = visit.steps.firstWhere((s) => s.name == 'Observation');
+    expect(observation.isTest, isFalse);
+    expect(observation.note, 'Monitor for one hour');
+    await tester.ensureVisible(find.byType(DropdownButtonFormField<String>));
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Observation (Update)').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Observation (Update)').last);
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<TextField>(find.byType(TextField).first).controller?.text,
+      'Monitor for one hour',
+    );
+    await tester.enterText(find.byType(TextField).first, 'Reviewed by nurse');
+    await tester.ensureVisible(find.text('Update step'));
+    await tester.tap(find.text('Update step'));
+    await tester.pumpAndSettle();
+    expect(observation.note, 'Reviewed by nurse');
+    expect(visit.steps.where((s) => s.name == 'Observation'), hasLength(1));
+    visit.steps.removeWhere(
+      (step) => step.name == 'Custom ultrasound' || step.name == 'Observation',
+    );
   });
 }

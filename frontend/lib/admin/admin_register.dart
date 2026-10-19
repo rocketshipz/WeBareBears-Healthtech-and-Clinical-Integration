@@ -17,7 +17,6 @@ class _RegisterPatientPageState extends State<RegisterPatientPage> {
   Map<String, dynamic>? patient;
   bool loading = false;
   String? error;
-  Acuity? assessedZone;
   @override
   void dispose() {
     icController.dispose();
@@ -38,7 +37,6 @@ class _RegisterPatientPageState extends State<RegisterPatientPage> {
       loading = true;
       error = null;
       patient = null;
-      assessedZone = null;
     });
     try {
       final result = await PatientLookup.request('/admin/patients?ic=$ic');
@@ -65,10 +63,6 @@ class _RegisterPatientPageState extends State<RegisterPatientPage> {
         : TriageSummary.fromJson(
             Map<String, dynamic>.from(data['triage'] as Map),
           );
-    if (triage == null && assessedZone == null) {
-      showAppSnack(context, 'Select the nurse-assessed zone before check-in.');
-      return;
-    }
     setState(() => loading = true);
     try {
       final visit = await adminStore.registerPatient(
@@ -77,7 +71,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage> {
         age: (profile['age'] as num).toInt(),
         sex: profile['sex_at_birth']?.toString() ?? 'Unspecified',
         complaint: triage?.symptom ?? 'Awaiting nurse assessment',
-        acuity: triage?.acuity ?? assessedZone!,
+        acuity: Acuity.pending,
         tests: const [],
         patientPhone: profile['phone']?.toString() ?? '',
         profile: profile,
@@ -153,12 +147,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage> {
                     PrimaryButton(
                       label: loading ? 'Checking in...' : 'Check in patient',
                       icon: Icons.arrow_forward,
-                      onPressed:
-                          loading ||
-                              (patient!['triage'] == null &&
-                                  assessedZone == null)
-                          ? null
-                          : _register,
+                      onPressed: loading ? null : _register,
                     ),
                     const SizedBox(height: 20),
                     PatientProfileCard(
@@ -167,32 +156,7 @@ class _RegisterPatientPageState extends State<RegisterPatientPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    if (patient!['triage'] == null)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'No saved report. Select the nurse-assessed zone before check-in.',
-                            style: AppText.body,
-                          ),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 8,
-                            children: [
-                              for (final zone in Acuity.values)
-                                ChoiceChip(
-                                  label: Text('${zone.label} zone'),
-                                  selected: assessedZone == zone,
-                                  onSelected: loading
-                                      ? null
-                                      : (_) =>
-                                            setState(() => assessedZone = zone),
-                                ),
-                            ],
-                          ),
-                        ],
-                      )
-                    else
+                    if (patient!['triage'] != null)
                       PatientProfileCard(
                         title: 'Latest triage report',
                         profile: Map<String, dynamic>.from(

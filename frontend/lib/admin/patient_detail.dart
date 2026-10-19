@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../theme.dart';
+import '../widgets/visit_history.dart';
 import 'scan_result.dart';
 import 'patient_profile_card.dart';
 import 'diagnosis_card.dart';
@@ -56,6 +57,13 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
     final step = visit.currentStep;
     if (step == null) return;
 
+    if (step.id == 'triage' &&
+        step.status == StepStatus.inProgress &&
+        visit.acuity == Acuity.pending) {
+      _changeZone(context);
+      return;
+    }
+
     final isLast = step.id == 'discharge';
     final finishing = isLast && step.status == StepStatus.inProgress;
 
@@ -89,6 +97,16 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
     }
   }
 
+  Future<void> _updateTriageResults(
+    BuildContext context,
+    VisitStep step,
+  ) async {
+    await showStaffSheet<void>(
+      context,
+      builder: (_) => _TriageResultsSheet(visit: visit, step: step),
+    );
+  }
+
   void _changeZone(BuildContext context) {
     showStaffSheet<void>(
       context,
@@ -99,7 +117,7 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
           const SizedBox(height: 4),
           Text(tr('Update after nurse assessment.'), style: AppText.caption),
           const SizedBox(height: 16),
-          for (final a in Acuity.values)
+          for (final a in [Acuity.red, Acuity.yellow, Acuity.green])
             SheetOption(
               icon: Icons.circle,
               color: a.color,
@@ -111,45 +129,6 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                 Navigator.pop(sheetContext);
               },
             ),
-        ],
-      ),
-    );
-  }
-
-  void _addTest(BuildContext context) {
-    final available = VisitStep.testCatalog.keys
-        .where((t) => !visit.steps.any((s) => s.id == VisitStep.slug(t)))
-        .toList();
-
-    showStaffSheet<void>(
-      context,
-      builder: (sheetContext) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _CustomTestInput(visit: visit),
-          const SizedBox(height: 16),
-          Text(tr('Add a test'), style: AppText.heading),
-          const SizedBox(height: 4),
-          Text(
-            tr('It is added before the doctor consultation.'),
-            style: AppText.caption,
-          ),
-          const SizedBox(height: 16),
-          if (available.isEmpty)
-            Text(
-              tr('All available tests are already added.'),
-              style: AppText.body,
-            )
-          else
-            for (final t in available)
-              SheetOption(
-                icon: VisitStep.testCatalog[t]!,
-                title: tr(t),
-                onTap: () {
-                  adminStore.addTest(visit, t);
-                  Navigator.pop(sheetContext);
-                },
-              ),
         ],
       ),
     );
@@ -292,6 +271,14 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                                 const SizedBox(height: 16),
                                 _triageCard(),
                               ],
+                              if (visit.patientId != null &&
+                                  !adminStore.repo.isDemo) ...[
+                                const SizedBox(height: 16),
+                                VisitHistory(
+                                  patientId: visit.patientId,
+                                  revision: visit.version,
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -300,11 +287,21 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              if (!visit.isComplete &&
+                                  visit.steps.any(
+                                    (s) =>
+                                        s.id == 'triage' &&
+                                        s.status == StepStatus.done,
+                                  )) ...[
+                                _NextStepCard(visit: visit),
+                                const SizedBox(height: 14),
+                              ],
                               _actionCard(context),
                               const SizedBox(height: 26),
                               _timeline(context),
                               if (!adminStore.repo.isDemo &&
-                                  consultationComplete) ...[
+                                  (consultationComplete ||
+                                      visit.isComplete)) ...[
                                 const SizedBox(height: 24),
                                 DiagnosisCard(
                                   key: ValueKey(visit.id),
@@ -463,7 +460,7 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  tr('Triage report (patient app)'),
+                  tr('AI Triage Report'),
                   style: AppText.heading,
                 ),
               ),
@@ -499,6 +496,16 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
   Widget _actionCard(BuildContext context) {
     final step = visit.currentStep;
 
+    if (step == null && !visit.isComplete) {
+      return Container(
+        padding: const EdgeInsets.all(18),
+        decoration: cardDecoration(radius: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [Text(tr('Awaiting next stage'), style: AppText.heading)],
+        ),
+      );
+    }
     if (step == null) {
       return Container(
         width: double.infinity,
@@ -565,10 +572,19 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
             ],
           ),
           const SizedBox(height: 14),
+
           PrimaryButton(
-            label: step.actionLabel,
-            icon: waiting ? Icons.play_arrow_rounded : Icons.check_rounded,
-            onPressed: () => _advance(context),
+            label: step.id == 'triage'
+                ? tr('Update results')
+                : step.actionLabel,
+            icon: step.id == 'triage'
+                ? Icons.edit_note_rounded
+                : waiting
+                ? Icons.play_arrow_rounded
+                : Icons.check_rounded,
+            onPressed: () => step.id == 'triage'
+                ? _updateTriageResults(context, step)
+                : _advance(context),
           ),
           if (step.isTest && step.status != StepStatus.waiting) ...[
             const SizedBox(height: 10),
@@ -605,9 +621,11 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
           children: [
             const Icon(Icons.undo_rounded, size: 16, color: AppColors.grey),
             const SizedBox(width: 6),
-            Text(
-              tr('Undo last update ({x})', {'x': trText(last.text)}),
-              style: AppText.style(12, FontWeight.w600, AppColors.grey),
+            Flexible(
+              child: Text(
+                tr('Undo last update ({x})', {'x': trText(last.text)}),
+                style: AppText.style(12, FontWeight.w600, AppColors.grey),
+              ),
             ),
           ],
         ),
@@ -641,40 +659,6 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
           children: [
             Text(tr('Progress timeline'), style: AppText.heading),
             const Spacer(),
-            if (!visit.isComplete)
-              Pressable(
-                onTap: () => _addTest(context),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 7,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.add_rounded,
-                        size: 16,
-                        color: AppColors.darkTeal,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        tr('Add test'),
-                        style: AppText.style(
-                          12,
-                          FontWeight.w700,
-                          AppColors.darkTeal,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
           ],
         ),
         const SizedBox(height: 4),
@@ -1271,12 +1255,13 @@ class _StepSheetState extends State<_StepSheet> {
   void _save() {
     final step = widget.step;
 
-    if (step.isTest && nameController.text.trim().isEmpty) {
+    if (!{'registration', 'triage', 'doctor', 'discharge'}.contains(step.id) &&
+        nameController.text.trim().isEmpty) {
       showAppSnack(context, tr('The test name cannot be empty.'));
       return;
     }
 
-    if (step.isTest) {
+    if (!{'registration', 'triage', 'doctor', 'discharge'}.contains(step.id)) {
       adminStore.renameStep(widget.visit, step, nameController.text);
     }
     adminStore.setNote(widget.visit, step, noteController.text);
@@ -1301,7 +1286,9 @@ class _StepSheetState extends State<_StepSheet> {
   Widget _content(BuildContext context) {
     final visit = widget.visit;
     final step = widget.step;
-    final canRemove = step.isTest && step.status == StepStatus.waiting;
+    final canRemove =
+        !{'registration', 'triage'}.contains(step.id) &&
+        step.status == StepStatus.waiting;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1316,8 +1303,13 @@ class _StepSheetState extends State<_StepSheet> {
         ),
         const SizedBox(height: 16),
 
-        if (step.isTest) ...[
-          fieldLabel(tr('Test name')),
+        if (!{
+          'registration',
+          'triage',
+          'doctor',
+          'discharge',
+        }.contains(step.id)) ...[
+          fieldLabel(tr(step.isTest ? 'Test name' : 'Step name')),
           const SizedBox(height: 8),
           _field(nameController, hint: tr('e.g. Chest X-ray')),
           const SizedBox(height: 16),
@@ -1333,7 +1325,18 @@ class _StepSheetState extends State<_StepSheet> {
               SelectChip(
                 label: tr(label),
                 selected: step.status == status,
-                onTap: () => adminStore.setStepStatus(visit, step, status),
+                onTap: () {
+                  if (step.id == 'triage' &&
+                      status == StepStatus.done &&
+                      visit.acuity == Acuity.pending) {
+                    showAppSnack(
+                      context,
+                      tr('Select a triage zone before completing triage.'),
+                    );
+                    return;
+                  }
+                  adminStore.setStepStatus(visit, step, status);
+                },
               ),
           ],
         ),
@@ -1389,7 +1392,7 @@ class _StepSheetState extends State<_StepSheet> {
           const SizedBox(height: 16),
         ],
 
-        fieldLabel(tr('Note (optional)')),
+        fieldLabel(tr('Remarks (optional, staff only)')),
         const SizedBox(height: 8),
         _field(
           noteController,
@@ -1442,54 +1445,284 @@ class _StepSheetState extends State<_StepSheet> {
   }
 }
 
-class _CustomTestInput extends StatefulWidget {
+class _NextStepCard extends StatefulWidget {
   final Visit visit;
-  const _CustomTestInput({required this.visit});
+  const _NextStepCard({required this.visit});
+
   @override
-  State<_CustomTestInput> createState() => _CustomTestInputState();
+  State<_NextStepCard> createState() => _NextStepCardState();
 }
 
-class _CustomTestInputState extends State<_CustomTestInput> {
-  final controller = TextEditingController();
+class _NextStepCardState extends State<_NextStepCard> {
+  String? selected;
+  final name = TextEditingController();
+  final remarks = TextEditingController();
   String? error;
+
   @override
   void dispose() {
-    controller.dispose();
+    name.dispose();
+    remarks.dispose();
     super.dispose();
   }
 
-  void add() {
-    final name = controller.text.trim();
-    final id = VisitStep.slug(name);
-    if (name.isEmpty || id.isEmpty) {
-      setState(() => error = 'Enter a test name.');
-      return;
+  Map<String, String> get options => {
+    for (final step in widget.visit.steps.where(
+      (s) => s.status != StepStatus.done,
+    ))
+      'existing:${step.id}': '${step.displayName} (${tr('Update')})',
+    for (final test in VisitStep.testCatalog.keys)
+      if (!widget.visit.steps.any((s) => s.id == VisitStep.slug(test)))
+        'new:$test': tr(test),
+    if (!widget.visit.steps.any((s) => s.id == 'doctor'))
+      'new:Doctor consultation': tr('Doctor consultation'),
+    if (!widget.visit.steps.any((s) => s.id == 'discharge'))
+      'new:Discharge / admission decision': tr(
+        'Discharge / admission decision',
+      ),
+    'custom-test': tr('Custom test'),
+    'custom-step': tr('Custom step'),
+  };
+
+  void save() {
+    final choice = selected;
+    if (choice == null || !options.containsKey(choice)) return;
+    if (choice.startsWith('existing:')) {
+      final step = widget.visit.steps.firstWhere(
+        (s) => s.id == choice.substring(9),
+      );
+      adminStore.setNote(widget.visit, step, remarks.text);
+    } else {
+      final custom = choice.startsWith('custom-');
+      final title = custom ? name.text.trim() : choice.substring(4);
+      final id = switch (title) {
+        'Doctor consultation' => 'doctor',
+        'Discharge / admission decision' => 'discharge',
+        _ => VisitStep.slug(title),
+      };
+      if (title.isEmpty ||
+          {'registration', 'triage'}.contains(id) ||
+          widget.visit.steps.any((s) => s.id == id)) {
+        setState(() => error = tr('Enter a unique step or test name.'));
+        return;
+      }
+      adminStore.addTest(
+        widget.visit,
+        title,
+        isTest: choice != 'custom-step',
+        note: remarks.text,
+      );
     }
-    if (widget.visit.steps.any((step) => step.id == id)) {
-      setState(() => error = 'This test or stage is already in the visit.');
-      return;
-    }
-    adminStore.addTest(widget.visit, name);
-    Navigator.pop(context);
+    setState(() {
+      selected = null;
+      name.clear();
+      remarks.clear();
+      error = null;
+    });
+    showAppSnack(context, tr('Next step saved.'));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final available = options;
+    final value = available.containsKey(selected) ? selected : null;
+    final custom = value?.startsWith('custom-') ?? false;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: cardDecoration(radius: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: const BoxDecoration(
+                  color: AppColors.paleTeal,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.post_add_rounded,
+                  color: AppColors.darkTeal,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tr('Add / update next step'),
+                      style: AppText.bodyStrong,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      tr('Choose the next step for this patient.'),
+                      style: AppText.caption,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(tr('Next step'), style: AppText.label),
+          const SizedBox(height: 6),
+          DropdownButtonFormField<String>(
+            key: ValueKey(value),
+            initialValue: value,
+            isExpanded: true,
+            hint: Text(tr('Select next step')),
+            decoration: _decoration(),
+            items: [
+              for (final entry in available.entries)
+                DropdownMenuItem(
+                  value: entry.key,
+                  child: Text(entry.value, overflow: TextOverflow.ellipsis),
+                ),
+            ],
+            onChanged: (choice) {
+              setState(() {
+                selected = choice;
+                error = null;
+                remarks.clear();
+                if (choice?.startsWith('existing:') ?? false) {
+                  remarks.text = widget.visit.steps
+                      .firstWhere((s) => s.id == choice!.substring(9))
+                      .note;
+                }
+              });
+            },
+          ),
+          if (custom) ...[
+            const SizedBox(height: 12),
+            Text(
+              tr(value == 'custom-step' ? 'Step name' : 'Test name'),
+              style: AppText.label,
+            ),
+            const SizedBox(height: 6),
+            TextField(
+              controller: name,
+              maxLength: 100,
+              decoration: _decoration(hint: tr('Enter step or test name'))
+                  .copyWith(errorText: error),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Text(tr('Remarks (optional, staff only)'), style: AppText.label),
+          const SizedBox(height: 6),
+          TextField(
+            controller: remarks,
+            minLines: 1,
+            maxLines: 3,
+            maxLength: 10000,
+            decoration: _decoration(hint: tr('Add remarks'))
+                .copyWith(counterText: ''),
+          ),
+          if (value != null) ...[
+            const SizedBox(height: 12),
+            PrimaryButton(
+              label: tr(
+                value.startsWith('existing:') ? 'Update step' : 'Add step',
+              ),
+              icon: Icons.check_rounded,
+              onPressed: save,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  InputDecoration _decoration({String? hint}) => InputDecoration(
+    hintText: hint,
+    hintStyle: AppText.caption,
+    filled: true,
+    fillColor: Colors.white,
+    isDense: true,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(7),
+      borderSide: const BorderSide(color: AppColors.border),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(7),
+      borderSide: const BorderSide(color: AppColors.border),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(7),
+      borderSide: const BorderSide(color: AppColors.darkTeal),
+    ),
+  );
+}
+
+class _TriageResultsSheet extends StatefulWidget {
+  final Visit visit;
+  final VisitStep step;
+  const _TriageResultsSheet({required this.visit, required this.step});
+
+  @override
+  State<_TriageResultsSheet> createState() => _TriageResultsSheetState();
+}
+
+class _TriageResultsSheetState extends State<_TriageResultsSheet> {
+  late Acuity? zone = widget.visit.acuity == Acuity.pending
+      ? null
+      : widget.visit.acuity;
+  late final remarks = TextEditingController(text: widget.step.note);
+
+  @override
+  void dispose() {
+    remarks.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text('Custom test', style: AppText.heading),
-      const SizedBox(height: 12),
-      TextField(
-        controller: controller,
-        maxLength: 100,
-        onSubmitted: (_) => add(),
-        decoration: appInputDecoration(
-          hint: 'Enter test name',
-          icon: Icons.science_outlined,
-        ).copyWith(errorText: error),
+      Text(tr('Update results'), style: AppText.heading),
+      const SizedBox(height: 16),
+      Text(tr('Update triage zone'), style: AppText.label),
+      const SizedBox(height: 8),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final acuity in [Acuity.red, Acuity.yellow, Acuity.green])
+            ChoiceChip(
+              label: Text(tr('{zone} zone', {'zone': acuity.label})),
+              selected: zone == acuity,
+              onSelected: (_) => setState(() => zone = acuity),
+            ),
+        ],
       ),
-      const SizedBox(height: 12),
-      PrimaryButton(label: 'Add custom test', icon: Icons.add, onPressed: add),
+      const SizedBox(height: 16),
+      Text(tr('Remarks (optional, staff only)'), style: AppText.label),
+      const SizedBox(height: 8),
+      TextField(
+        controller: remarks,
+        minLines: 2,
+        maxLines: 4,
+        maxLength: 10000,
+        decoration: appInputDecoration(
+          hint: tr('Add remarks'),
+          icon: Icons.notes_rounded,
+        ),
+      ),
+      const SizedBox(height: 16),
+      PrimaryButton(
+        label: tr('Save triage results'),
+        icon: Icons.check_rounded,
+        onPressed: zone == null
+            ? null
+            : () {
+                adminStore.completeTriage(widget.visit, zone!, remarks.text);
+                Navigator.pop(context);
+              },
+      ),
     ],
   );
 }
