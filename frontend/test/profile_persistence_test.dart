@@ -25,6 +25,7 @@ void main() {
       };
       final stored = <String, dynamic>{
         ...user,
+        'photo_data_url': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1cAAAAASUVORK5CYII=',
         'age': 27,
         'height_cm': 170,
         'preferred_language': 'English',
@@ -41,7 +42,9 @@ void main() {
           );
           await tester.pumpWidget(const MaterialApp(home: ProfilePage()));
           await tester.pumpAndSettle();
-          expect(find.text('Registered Name'), findsOneWidget);
+          expect(find.text('Registered Name'), findsNWidgets(2));
+          expect(find.text('Change photo'), findsOneWidget);
+          expect(find.text('User Profile'), findsNothing);
           await tester.tap(find.text('Edit'));
           await tester.pumpAndSettle();
           final conditions = find.byKey(

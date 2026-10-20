@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:triagemy/admin/admin_queue.dart';
+import 'package:triagemy/admin/admin_widgets.dart' show agoText;
 import 'package:triagemy/admin/patient_lookup.dart';
 import 'package:triagemy/widgets/visit_history.dart';
 import 'package:triagemy/theme.dart';
@@ -21,6 +22,21 @@ import 'package:triagemy/admin/admin_repository.dart';
 import 'package:triagemy/admin/patient_detail.dart';
 
 void main() {
+  test('Elapsed time changes to days and hours at 48 hours', () {
+    final now = DateTime.now();
+    expect(
+      agoText(now.subtract(const Duration(hours: 47, minutes: 59))),
+      '47h 59m ago',
+    );
+    expect(
+      agoText(now.subtract(const Duration(hours: 48))),
+      '2 days 0 hours ago',
+    );
+    expect(
+      agoText(now.subtract(const Duration(hours: 73, minutes: 15))),
+      '3 days 1 hours ago',
+    );
+  });
   testWidgets('Triage results reveal next-step controls only after saving', (
     tester,
   ) async {
@@ -266,6 +282,21 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Assigned Patient'));
     expect(opened, same(visit));
+    visit.diagnosis = 'Migraine';
+    adminStore.addTest(visit, 'Discharge / admission decision', isTest: false);
+    adminStore.setStepStatus(visit, visit.steps.last, StepStatus.done);
+    await tester.pumpAndSettle();
+    expect(find.text('Assigned Patient'), findsNothing);
+    await tester.tap(find.text('Discharged'));
+    await tester.pumpAndSettle();
+    expect(find.text('Assigned Patient'), findsOneWidget);
+    expect(find.text('Diagnosis: Migraine'), findsOneWidget);
+    expect(find.text('Headache'), findsNothing);
+    expect(find.textContaining('Discharged '), findsOneWidget);
+    expect(find.textContaining('Updated '), findsNothing);
+    await tester.tap(find.text('Active'));
+    await tester.pumpAndSettle();
+    expect(find.text('Assigned Patient'), findsNothing);
     await tester.pumpWidget(const SizedBox());
     adminStore.visits.removeWhere((v) => v == visit || v == other);
     adminStore.staff = originalStaff;
@@ -373,7 +404,7 @@ void main() {
         await tester.ensureVisible(find.text('Log in'));
         await tester.tap(find.text('Log in'));
         await tester.pumpAndSettle();
-        expect(find.text('Greetings Database Staff'), findsOneWidget);
+        expect(find.textContaining(', Database Staff'), findsOneWidget);
         expect(find.text('Database Hospital'), findsWidgets);
         expect(find.text('Cardiology'), findsWidgets);
         expect(adminStore.staff?.role, 'Doctor');
@@ -410,12 +441,31 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('queue-total'))).data,
+      '${adminStore.active.length}',
+    );
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('queue-completed'))).data,
+      '${adminStore.completed.length}',
+    );
+    expect(find.byType(CircularProgressIndicator), findsNWidgets(4));
+    expect(find.text('Queue by zone'), findsOneWidget);
+    await tester.tap(find.text('Completed visits'));
+    await tester.pumpAndSettle();
+    for (final visit in adminStore.completed) {
+      expect(find.text(visit.name), findsWidgets);
+    }
+    Navigator.of(tester.element(find.byType(AppBar))).pop();
+    await tester.pumpAndSettle();
     expect(find.text('Red zone'), findsOneWidget);
     expect(find.text('Yellow zone'), findsOneWidget);
     expect(find.text('Green zone'), findsOneWidget);
-    expect(find.text('Pending Triage'), findsOneWidget);
+    expect(find.text('Pending triage'), findsOneWidget);
     final red = adminStore.active.firstWhere((v) => v.acuity == Acuity.red);
     expect(find.text(red.name), findsNothing);
+    await tester.ensureVisible(find.text('Red zone'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Red zone'));
     await tester.pumpAndSettle();
     expect(find.text(red.name), findsOneWidget);

@@ -126,3 +126,34 @@ Set `PUBLIC_BACKEND_URL` in `backend/.env` to the backend origin reachable from 
 The API creates `patient_family_invitations` and `patient_family_access` on first use. For deployment run `python migrate_family_access.py` beforehand; it preserves existing rows and enables PostgreSQL RLS. Routes are `POST /api/family/invitations`, `GET /api/family/invitations/{token}`, `POST/GET /api/family/requests`, and `PUT /api/family/requests/{viewer_id}`.
 Family responses omit medical profiles and diagnoses. Public sharing links still require the separately configured tracking website.
 PDFs currently persist as bounded base64 documents in `patient_test_tracking.result_documents` (maximum 5 MB per PDF, 8 MB per step payload), rather than a separate Supabase Storage bucket. These documents are staff-only.
+
+
+## Signup email TAC (Gmail)
+
+Signup sends a six-digit TAC from `triagemy.wbb@gmail.com` to the user's
+email address. The code expires after five minutes, permits five failed
+attempts, and can be resent after 60 seconds. Phone numbers are checked for
+format; this flow verifies email ownership rather than phone ownership.
+
+1. Sign into the sender's Google account and enable 2-Step Verification.
+2. Create a Google App Password for TriageMY:
+   https://support.google.com/accounts/answer/185833
+3. Set the following in `backend/.env` (keep this file out of Git):
+
+   ```dotenv
+   TAC_DELIVERY=email
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=465
+   SMTP_USERNAME=triagemy.wbb@gmail.com
+   SMTP_FROM_EMAIL=triagemy.wbb@gmail.com
+   SMTP_PASSWORD=your_google_app_password
+   ```
+
+4. Restart the backend, then request a code from signup and check the
+   recipient's inbox and spam folder. Port 587 with STARTTLS is also supported.
+
+Use the App Password rather than the account's regular password. Without
+SMTP credentials, signup reports that email delivery is not configured.
+Automated tests use explicit `TAC_DELIVERY=test` with `ENVIRONMENT=test`;
+this returns a test-only `debug_code` and sends no email. Production refuses
+that mode. Live SMTP delivery does not return or log the TAC.

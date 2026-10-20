@@ -24,6 +24,9 @@ String agoText(DateTime d) {
 
   final h = minutes ~/ 60;
   final m = minutes % 60;
+  if (h >= 48) {
+    return tr('{d} days {h} hours ago', {'d': h ~/ 24, 'h': h % 24});
+  }
 
   return m == 0
       ? tr('{h}h ago', {'h': h})

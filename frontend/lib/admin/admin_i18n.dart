@@ -43,6 +43,18 @@ String tr(String en, [Map<String, Object?> args = const {}]) {
 }
 
 const Map<String, String> _ms = {
+  'Good morning': 'Selamat pagi',
+  'Good afternoon': 'Selamat petang',
+  'Good evening': 'Selamat malam',
+  'Live': 'Langsung',
+  'Sync unavailable': 'Penyegerakan tidak tersedia',
+  'patients in queue': 'pesakit dalam giliran',
+  'Queue by zone': 'Giliran mengikut zon',
+  'Tap a zone to see patients and track their progress.':
+      'Ketik zon untuk melihat pesakit dan menjejaki perkembangan mereka.',
+  'Pending triage': 'Menunggu triaj',
+  'Awaiting assessment': 'Menunggu penilaian',
+
   'Update results': 'Kemas kini keputusan',
   'Update triage zone': 'Kemas kini zon triaj',
   'Save triage results': 'Simpan keputusan triaj',
@@ -202,6 +214,7 @@ const Map<String, String> _ms = {
   'No patients found': 'Tiada pesakit dijumpai',
   'Try another filter or register a new patient.':
       'Cuba penapis lain atau daftar pesakit baharu.',
+  '{d} days {h} hours ago': '{d} hari {h} jam lalu',
   'Updated {ago}': 'Dikemas kini {ago}',
 
   // ---------------- register ----------------

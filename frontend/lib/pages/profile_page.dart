@@ -1,3 +1,8 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:image_picker/image_picker.dart';
+
 import '../localization.dart';
 
 import 'package:flutter/material.dart';
@@ -32,6 +37,8 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  Uint8List? _photoBytes;
+  bool _photoSaving = false;
   bool isEditing = false;
   bool _saving = false;
   bool _loading = false;
@@ -254,6 +261,10 @@ class _ProfilePageState extends State<ProfilePage> {
             );
         }
 
+        final image = data['photo_data_url'] as String?;
+        _photoBytes = image == null
+            ? null
+            : base64Decode(image.split(',').last);
         fullNameController.text = text('name');
         icController.text = text('ic');
         dateOfBirthController.text = text('date_of_birth');
@@ -331,6 +342,62 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted) showAppSnack(context, error.message);
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _changePhoto() async {
+    if (_photoSaving || _loading) return;
+    if (!AuthService.isAuthenticated) {
+      showAppSnack(context, 'Please log in to add a profile photo.');
+      return;
+    }
+    setState(() => _photoSaving = true);
+    try {
+      final image = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 80,
+      );
+      if (image == null) return;
+      final bytes = await image.readAsBytes();
+      String? type;
+      if (bytes.length >= 12) {
+        if (bytes[0] == 255 && bytes[1] == 216 && bytes[2] == 255) {
+          type = 'jpeg';
+        }
+        if (bytes[0] == 137 &&
+            bytes[1] == 80 &&
+            bytes[2] == 78 &&
+            bytes[3] == 71) {
+          type = 'png';
+        }
+        if (ascii.decode(bytes.sublist(0, 4), allowInvalid: true) == 'RIFF' &&
+            ascii.decode(bytes.sublist(8, 12), allowInvalid: true) == 'WEBP') {
+          type = 'webp';
+        }
+      }
+      if (type == null || bytes.length > 1024 * 1024) {
+        if (mounted) {
+          showAppSnack(
+            context,
+            'Choose a JPEG, PNG or WebP photo smaller than 1 MB.',
+          );
+        }
+        return;
+      }
+      await AuthService.saveProfile({
+        'photo_data_url': 'data:image/$type;base64,${base64Encode(bytes)}',
+      });
+      if (mounted) setState(() => _photoBytes = bytes);
+    } on AuthException catch (error) {
+      if (mounted) showAppSnack(context, error.message);
+    } catch (_) {
+      if (mounted) {
+        showAppSnack(context, 'Could not add your photo. Please try again.');
+      }
+    } finally {
+      if (mounted) setState(() => _photoSaving = false);
     }
   }
 
@@ -509,18 +576,51 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                 ],
                               ),
-                              child: const Icon(
-                                Icons.person_rounded,
-                                size: 46,
-                                color: AppColors.darkTeal,
+                              child: ClipOval(
+                                child: _photoBytes == null
+                                    ? const Icon(
+                                        Icons.person_rounded,
+                                        size: 46,
+                                        color: AppColors.darkTeal,
+                                      )
+                                    : Image.memory(
+                                        _photoBytes!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, error, stack) =>
+                                            const Icon(
+                                              Icons.person_rounded,
+                                              size: 46,
+                                              color: AppColors.darkTeal,
+                                            ),
+                                      ),
                               ),
                             ),
 
                             const SizedBox(height: 14),
 
-                            LocalizedText(
-                              'User Profile',
+                            Text(
+                              fullNameController.text.trim().isEmpty
+                                  ? 'Your profile'
+                                  : fullNameController.text.trim(),
+                              textAlign: TextAlign.center,
                               style: AppText.display,
+                            ),
+                            TextButton.icon(
+                              key: const ValueKey('profile-photo-button'),
+                              onPressed: (_photoSaving || _loading)
+                                  ? null
+                                  : _changePhoto,
+                              icon: const Icon(
+                                Icons.add_a_photo_outlined,
+                                size: 18,
+                              ),
+                              label: Text(
+                                _photoSaving
+                                    ? 'Saving photo...'
+                                    : _photoBytes == null
+                                    ? 'Add photo'
+                                    : 'Change photo',
+                              ),
                             ),
 
                             const SizedBox(height: 4),

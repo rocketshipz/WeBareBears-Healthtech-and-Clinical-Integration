@@ -11,6 +11,7 @@ import 'package:triagemy/admin/patient_lookup.dart';
 import 'package:triagemy/admin/visit_codec.dart';
 import 'package:triagemy/pages/progress_tracking.dart';
 import 'package:triagemy/services/auth_service.dart';
+import 'package:triagemy/theme.dart';
 
 Map<String, dynamic> savedVisit() => {
   'id': 'saved-visit',
@@ -126,6 +127,12 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.text('Progress Tracking'), findsOneWidget);
+        expect(
+          tester
+              .widget<GradientBackground>(find.byType(GradientBackground))
+              .topColor,
+          AppColors.gradientTop,
+        );
         expect(find.text('Queue number'), findsOneWidget);
         expect(find.text('Connected Hospital'), findsOneWidget);
         expect(find.text('Q-SAVED'), findsOneWidget);
@@ -146,6 +153,20 @@ void main() {
         await tester.tap(find.text('Family'));
         await tester.pumpAndSettle();
         expect(find.text('No shared family visits'), findsOneWidget);
+        expect(
+          tester
+              .widget<GradientBackground>(find.byType(GradientBackground))
+              .topColor,
+          const Color(0xFFDCEAFF),
+        );
+        await tester.tap(find.text('Progress'));
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .widget<GradientBackground>(find.byType(GradientBackground))
+              .topColor,
+          AppColors.gradientTop,
+        );
         await tester.pumpWidget(const SizedBox());
       },
       () => MockClient((request) async {

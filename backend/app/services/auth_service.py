@@ -1,4 +1,7 @@
 import hashlib
+from app.core.config import get_settings
+from app.schemas.auth import normalize_phone
+from app.services.email_service import send_tac_email
 import logging
 import os
 import secrets
@@ -11,6 +14,7 @@ from sqlalchemy.orm import Session
 from app.core.database import Base, get_engine, get_session_factory
 from app.models.user import User
 from app.models.user_information import UserInformation
+from app.models.user_profile_photo import UserProfilePhoto
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import (
     AuthTokenResponse,
@@ -49,7 +53,7 @@ def _as_utc(value: datetime) -> datetime:
 
 
 class AuthService:
-    """Service handling email verification codes, user registration, and authentication in PostgreSQL."""
+    """Service handling Email verification codes, user registration, and authentication in PostgreSQL."""
 
     def __init__(self):
         # In-memory store for active login sessions: token -> user_dict
@@ -83,42 +87,46 @@ class AuthService:
         finally:
             session.close()
 
-    def send_verification_code(self, email: str) -> SendCodeResponse:
-        """Generate and store a 6-digit verification code in PostgreSQL."""
+    @staticmethod
+    def _verification_key(email: str, phone: str) -> str:
+        # Bind both contacts without changing the existing verification table.
+        return 'email:' + hashlib.sha256(
+            (email.strip().lower() + '\n' + normalize_phone(phone)).encode()
+        ).hexdigest()
+
+    def send_verification_code(self, email: str, phone: str) -> SendCodeResponse:
         norm_email = email.strip().lower()
-
-        # Generate 6-digit numeric verification code
-        code = f"{secrets.randbelow(900000) + 100000}"
-        expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
-
+        phone = normalize_phone(phone)
+        key = self._verification_key(norm_email, phone)
+        settings = get_settings()
+        test_mode = settings.TAC_DELIVERY == 'test' and settings.ENVIRONMENT in ('test', 'development')
+        if not test_mode and settings.TAC_DELIVERY != 'email':
+            raise ValueError('Unsupported TAC delivery mode. Configure email delivery.')
+        if not test_mode and not settings.SMTP_PASSWORD:
+            raise ValueError('Email verification is not configured. Please contact support.')
         with self._get_db() as session:
             repo = UserRepository(session)
-            repo.save_verification_code(
-                email=norm_email,
-                code=code,
-                expires_at=expires_at,
-            )
+            previous = repo.get_latest_verification_code(key)
+            if previous and datetime.now(timezone.utc) - _as_utc(previous.created_at) < timedelta(seconds=60):
+                raise ValueError('Please wait 60 seconds before requesting another TAC.')
+            code = f'{secrets.randbelow(900000) + 100000}'
+            if not test_mode:
+                send_tac_email(norm_email, code)
+            repo.cleanup_codes_for_email(key)
+            repo.save_verification_code(email=key, code=code,
+                expires_at=datetime.now(timezone.utc) + timedelta(minutes=5))
+        return SendCodeResponse(email=norm_email,
+            message=('Test TAC generated; no email was sent.' if test_mode
+                     else f'TAC sent to {norm_email}. Please check your inbox or spam folder.'),
+            expires_in_seconds=300, debug_code=code if test_mode else None)
 
-        logger.info("=" * 60)
-        logger.info(f"📧 [EMAIL VERIFICATION CODE] Sent to: {norm_email}")
-        logger.info(f"🔑 6-Digit Code: {code}")
-        logger.info(f"⏰ Expires at: {expires_at.isoformat()}")
-        logger.info("=" * 60)
-
-        return SendCodeResponse(
-            email=norm_email,
-            message=f"6-digit verification code sent to {norm_email}.",
-            expires_in_seconds=300,
-            debug_code=code,
-        )
-
-    def verify_code(self, email: str, code: str) -> VerifyCodeResponse:
+    def verify_code(self, email: str, code: str, phone: str) -> VerifyCodeResponse:
         """Verify the 6-digit code against the recorded code in PostgreSQL."""
         norm_email = email.strip().lower()
 
         with self._get_db() as session:
             repo = UserRepository(session)
-            entry = repo.get_latest_verification_code(norm_email)
+            entry = repo.get_latest_verification_code(self._verification_key(norm_email, phone))
 
             if not entry:
                 return VerifyCodeResponse(
@@ -156,7 +164,7 @@ class AuthService:
             return VerifyCodeResponse(
                 verified=True,
                 email=norm_email,
-                message="Email successfully verified.",
+                message="Email address successfully verified.",
             )
 
     def register(self, request: RegisterRequest) -> AuthTokenResponse:
@@ -168,21 +176,15 @@ class AuthService:
         with self._get_db() as session:
             repo = UserRepository(session)
 
-            # Verify email code
+            key = self._verification_key(norm_email, clean_phone)
             if request.code:
-                entry = repo.get_latest_verification_code(norm_email)
-                if (
-                    not entry
-                    or not secrets.compare_digest(entry.code, request.code.strip())
-                    or datetime.now(timezone.utc) > _as_utc(entry.expires_at)
-                ):
-                    raise ValueError("Invalid or expired verification code.")
-            else:
-                entry = repo.get_latest_verification_code(norm_email)
-                if not entry or not entry.verified:
-                    raise ValueError(
-                        "Email has not been verified. Please verify your email first."
-                    )
+                result = self.verify_code(norm_email, request.code, clean_phone)
+                if not result.verified:
+                    raise ValueError(result.message)
+            entry = repo.get_latest_verification_code(key)
+            if (not entry or not entry.verified or entry.attempts >= 5
+                    or datetime.now(timezone.utc) > _as_utc(entry.expires_at)):
+                raise ValueError('Email address has not been verified or TAC has expired. Please request a new TAC.')
 
             # Check duplicate email
             if repo.get_by_email(norm_email):
@@ -237,7 +239,7 @@ class AuthService:
             public_user['date_of_birth'] = birth_date.isoformat()
 
             # Clean up verification codes for this email
-            repo.cleanup_codes_for_email(norm_email)
+            repo.cleanup_codes_for_email(key)
 
             # Generate auth session token
             token = secrets.token_urlsafe(32)
@@ -297,14 +299,29 @@ class AuthService:
             info = session.get(UserInformation, user.id)
             if info is None:
                 raise ValueError("Account information is missing. Please contact support.")
+            photo = session.get(UserProfilePhoto, user.id)
             if changes is not None:
-                for key, value in changes.model_dump(exclude_unset=True).items():
+                updates = changes.model_dump(exclude_unset=True)
+                if 'photo_data_url' in updates:
+                    image = updates.pop('photo_data_url')
+                    if image is None:
+                        if photo is not None:
+                            session.delete(photo)
+                        photo = None
+                    elif photo is None:
+                        photo = UserProfilePhoto(user_id=user.id, photo_data_url=image)
+                        session.add(photo)
+                    else:
+                        photo.photo_data_url = image
+                for key, value in updates.items():
                     setattr(info, key, value)
-                info.medical_info_updated_at = datetime.now(timezone.utc)
+                if updates:
+                    info.medical_info_updated_at = datetime.now(timezone.utc)
                 session.commit()
                 session.refresh(info)
             data = {column.name: getattr(info, column.name) for column in UserInformation.__table__.columns}
-            data.update(name=user.name, ic=user.ic, age=info.age)
+            data.update(name=user.name, ic=user.ic, age=info.age,
+                        photo_data_url=photo.photo_data_url if photo else None)
             return data
 
     def get_user_by_token(self, token: str) -> Optional[Dict[str, Any]]:

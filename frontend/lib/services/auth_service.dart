@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:http/http.dart' as http;
+
 import 'api_service.dart';
 
 /// Custom exception for authentication errors.
@@ -53,7 +55,8 @@ class AuthService {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
 
         // Extract token and user if returned by backend
-        final token = data['data']?['token'] ?? data['token'] ?? data['access_token'];
+        final token =
+            data['data']?['token'] ?? data['token'] ?? data['access_token'];
         if (token != null) {
           _token = token.toString();
           ApiService.authToken = _token;
@@ -84,11 +87,12 @@ class AuthService {
     }
   }
 
-  /// Request a 6-digit email verification code.
+  /// Request a 6-digit Email verification code.
   ///
   /// Sends a POST request to `/auth/send-code`.
   static Future<Map<String, dynamic>> sendVerificationCode({
     required String email,
+    required String phone,
   }) async {
     final url = Uri.parse('${ApiService.baseUrl}/auth/send-code');
 
@@ -97,7 +101,10 @@ class AuthService {
           .post(
             url,
             headers: ApiService.defaultHeaders,
-            body: jsonEncode({'email': email.trim().toLowerCase()}),
+            body: jsonEncode({
+              'email': email.trim().toLowerCase(),
+              'phone': phone.trim(),
+            }),
           )
           .timeout(const Duration(seconds: 12));
 
@@ -128,6 +135,7 @@ class AuthService {
   static Future<bool> verifyCode({
     required String email,
     required String code,
+    required String phone,
   }) async {
     final url = Uri.parse('${ApiService.baseUrl}/auth/verify-code');
 
@@ -139,6 +147,7 @@ class AuthService {
             body: jsonEncode({
               'email': email.trim().toLowerCase(),
               'code': code.trim(),
+              'phone': phone.trim(),
             }),
           )
           .timeout(const Duration(seconds: 10));
@@ -193,7 +202,12 @@ class AuthService {
       payload['name'] = name.trim();
       payload['sex_at_birth'] = sexAtBirth;
       payload['nationality'] = nationality;
-      if (dateOfBirth != null) payload['date_of_birth'] = dateOfBirth.toIso8601String().split('T').first;
+      if (dateOfBirth != null) {
+        payload['date_of_birth'] = dateOfBirth
+            .toIso8601String()
+            .split('T')
+            .first;
+      }
 
       final response = await http
           .post(
@@ -206,7 +220,8 @@ class AuthService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
 
-        final token = data['data']?['token'] ?? data['token'] ?? data['access_token'];
+        final token =
+            data['data']?['token'] ?? data['token'] ?? data['access_token'];
         if (token != null) {
           _token = token.toString();
           ApiService.authToken = _token;
@@ -239,25 +254,41 @@ class AuthService {
 
   static Future<Map<String, dynamic>> loadProfile() => _profileRequest();
 
-  static Future<Map<String, dynamic>> saveProfile(Map<String, dynamic> values) => _profileRequest(values);
+  static Future<Map<String, dynamic>> saveProfile(
+    Map<String, dynamic> values,
+  ) => _profileRequest(values);
 
-  static Future<Map<String, dynamic>> _profileRequest([Map<String, dynamic>? values]) async {
-    if (!isAuthenticated) throw AuthException('Please log in to save your profile.');
+  static Future<Map<String, dynamic>> _profileRequest([
+    Map<String, dynamic>? values,
+  ]) async {
+    if (!isAuthenticated) {
+      throw AuthException('Please log in to save your profile.');
+    }
     final uri = Uri.parse('${ApiService.baseUrl}/auth/profile');
     try {
-      final response = await (values == null
-        ? http.get(uri, headers: ApiService.defaultHeaders)
-        : http.put(uri, headers: ApiService.defaultHeaders, body: jsonEncode(values)))
-        .timeout(const Duration(seconds: 12));
+      final response =
+          await (values == null
+                  ? http.get(uri, headers: ApiService.defaultHeaders)
+                  : http.put(
+                      uri,
+                      headers: ApiService.defaultHeaders,
+                      body: jsonEncode(values),
+                    ))
+              .timeout(const Duration(seconds: 12));
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw AuthException(_parseErrorMessage(response), statusCode: response.statusCode);
+        throw AuthException(
+          _parseErrorMessage(response),
+          statusCode: response.statusCode,
+        );
       }
       final result = jsonDecode(response.body) as Map<String, dynamic>;
       return Map<String, dynamic>.from(result['data'] as Map);
     } on AuthException {
       rethrow;
     } catch (_) {
-      throw AuthException('Could not save or load your profile. Please try again.');
+      throw AuthException(
+        'Could not save or load your profile. Please try again.',
+      );
     }
   }
 

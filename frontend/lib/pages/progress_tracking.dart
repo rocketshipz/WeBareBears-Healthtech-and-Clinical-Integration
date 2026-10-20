@@ -27,6 +27,14 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
   bool showingFamily = false;
   bool viewingFamily = false;
 
+  bool get _familyTheme => showingFamily || viewingFamily;
+  Color get _accent =>
+      _familyTheme ? const Color(0xFF2463B5) : AppColors.darkTeal;
+  Color get _iconAccent =>
+      _familyTheme ? const Color(0xFF347FD1) : AppColors.teal;
+  Color get _surface =>
+      _familyTheme ? const Color(0xFFE5F0FF) : AppColors.paleTeal;
+
   @override
   void initState() {
     super.initState();
@@ -157,6 +165,12 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
       backgroundColor: AppColors.background,
 
       body: GradientBackground(
+        topColor: _familyTheme
+            ? const Color(0xFFDCEAFF)
+            : AppColors.gradientTop,
+        glowColor: _familyTheme
+            ? const Color(0xFF9BC4FF)
+            : AppColors.gradientGlow,
         child: SafeArea(
           bottom: false,
 
@@ -310,7 +324,7 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
         IconButton(
           onPressed: loading ? null : load,
           tooltip: 'Refresh progress',
-          icon: const Icon(Icons.refresh_rounded),
+          icon: Icon(Icons.refresh_rounded),
         ),
         Pressable(
           onTap: _openNotifications,
@@ -435,7 +449,7 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
         height: 46,
 
         decoration: BoxDecoration(
-          color: selected ? AppColors.darkTeal : Colors.transparent,
+          color: selected ? _accent : Colors.transparent,
 
           borderRadius: BorderRadius.circular(13),
         ),
@@ -491,16 +505,12 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
                 height: 50,
 
                 decoration: BoxDecoration(
-                  color: AppColors.paleTeal,
+                  color: _surface,
 
                   borderRadius: BorderRadius.circular(15),
                 ),
 
-                child: const Icon(
-                  Icons.person_rounded,
-                  color: AppColors.teal,
-                  size: 25,
-                ),
+                child: Icon(Icons.person_rounded, color: _iconAccent, size: 25),
               ),
 
               const SizedBox(width: 13),
@@ -552,7 +562,7 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
             padding: const EdgeInsets.all(14),
 
             decoration: BoxDecoration(
-              color: AppColors.paleTeal,
+              color: _surface,
 
               borderRadius: BorderRadius.circular(16),
             ),
@@ -601,7 +611,7 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: AppColors.teal),
+        Icon(icon, size: 18, color: _iconAccent),
 
         const SizedBox(width: 9),
 
@@ -687,7 +697,7 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
               alignment: Alignment.center,
 
               decoration: BoxDecoration(
-                color: active ? AppColors.paleTeal : AppColors.background,
+                color: active ? _surface : AppColors.background,
 
                 borderRadius: BorderRadius.circular(15),
               ),
@@ -698,7 +708,7 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
                 style: AppText.style(
                   15,
                   FontWeight.w700,
-                  active ? AppColors.darkTeal : AppColors.grey,
+                  active ? _accent : AppColors.grey,
                 ),
               ),
             ),
@@ -753,7 +763,7 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
                     style: AppText.style(
                       12,
                       FontWeight.w600,
-                      active ? AppColors.darkTeal : AppColors.grey,
+                      active ? _accent : AppColors.grey,
                     ),
                   ),
 
@@ -769,7 +779,7 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
             const SizedBox(width: 8),
 
             if (active)
-              const Icon(
+              Icon(
                 Icons.arrow_forward_rounded,
                 color: AppColors.grey,
                 size: 18,
@@ -796,7 +806,7 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
-          const Icon(Icons.shield_outlined, color: AppColors.teal, size: 22),
+          Icon(Icons.shield_outlined, color: _iconAccent, size: 22),
 
           const SizedBox(width: 12),
 
@@ -872,11 +882,11 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
 
       badgeText = const Color(0xFF287749);
     } else if (current) {
-      markerColor = AppColors.darkTeal;
+      markerColor = _accent;
 
-      badgeBackground = AppColors.paleTeal;
+      badgeBackground = _surface;
 
-      badgeText = AppColors.darkTeal;
+      badgeText = _accent;
     } else {
       markerColor = const Color(0xFFBBC7C7);
 
@@ -908,19 +918,15 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
                   ),
 
                   child: completed
-                      ? const Icon(
-                          Icons.check_rounded,
-                          color: Colors.white,
-                          size: 18,
-                        )
+                      ? Icon(Icons.check_rounded, color: Colors.white, size: 18)
                       : current
                       ? Center(
                           child: Container(
                             width: 13,
                             height: 13,
 
-                            decoration: const BoxDecoration(
-                              color: AppColors.darkTeal,
+                            decoration: BoxDecoration(
+                              color: _accent,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -963,11 +969,7 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
                           title,
 
                           style: current
-                              ? AppText.style(
-                                  14,
-                                  FontWeight.w700,
-                                  AppColors.darkTeal,
-                                )
+                              ? AppText.style(14, FontWeight.w700, _accent)
                               : AppText.bodyStrong,
                         ),
                       ),
@@ -1028,14 +1030,14 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
             height: 44,
 
             decoration: BoxDecoration(
-              color: AppColors.paleTeal,
+              color: _surface,
 
               borderRadius: BorderRadius.circular(14),
             ),
 
-            child: const Icon(
+            child: Icon(
               Icons.family_restroom_rounded,
-              color: AppColors.teal,
+              color: _iconAccent,
               size: 21,
             ),
           ),
@@ -1083,11 +1085,7 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
-          const Icon(
-            Icons.info_outline_rounded,
-            color: AppColors.teal,
-            size: 21,
-          ),
+          Icon(Icons.info_outline_rounded, color: _iconAccent, size: 21),
 
           const SizedBox(width: 12),
 

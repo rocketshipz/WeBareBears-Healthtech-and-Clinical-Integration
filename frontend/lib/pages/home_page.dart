@@ -1,4 +1,5 @@
 import '../localization.dart';
+
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
@@ -54,10 +55,7 @@ class _MainNavigationState extends State<MainNavigation> {
     Localizations.localeOf(context);
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: IndexedStack(
-        index: currentIndex,
-        children: pages,
-      ),
+      body: IndexedStack(index: currentIndex, children: pages),
       bottomNavigationBar: AppBottomNav(
         selectedIndex: currentIndex,
         onSelected: (index) {
@@ -109,34 +107,37 @@ class _HomePageState extends State<HomePage>
     )..repeat();
 
     // double heartbeat: beat -> beat -> rest
-    heartScale = TweenSequence<double>(
-      [
-        TweenSequenceItem(
-          tween: Tween<double>(begin: 1, end: 1.13)
-              .chain(CurveTween(curve: Curves.easeOut)),
-          weight: 8,
-        ),
-        TweenSequenceItem(
-          tween: Tween<double>(begin: 1.13, end: 1)
-              .chain(CurveTween(curve: Curves.easeIn)),
-          weight: 8,
-        ),
-        TweenSequenceItem(
-          tween: Tween<double>(begin: 1, end: 1.08)
-              .chain(CurveTween(curve: Curves.easeOut)),
-          weight: 7,
-        ),
-        TweenSequenceItem(
-          tween: Tween<double>(begin: 1.08, end: 1)
-              .chain(CurveTween(curve: Curves.easeIn)),
-          weight: 7,
-        ),
-        TweenSequenceItem(
-          tween: ConstantTween<double>(1),
-          weight: 70,
-        ),
-      ],
-    ).animate(heartbeatController);
+    heartScale = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1,
+          end: 1.13,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 8,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.13,
+          end: 1,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 8,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1,
+          end: 1.08,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 7,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.08,
+          end: 1,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 7,
+      ),
+      TweenSequenceItem(tween: ConstantTween<double>(1), weight: 70),
+    ]).animate(heartbeatController);
 
     final ringCurve = CurvedAnimation(
       parent: heartbeatController,
@@ -160,9 +161,7 @@ class _HomePageState extends State<HomePage>
   void _openNotifications() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const NotificationsPage(),
-      ),
+      MaterialPageRoute(builder: (_) => const NotificationsPage()),
     );
   }
 
@@ -227,7 +226,10 @@ class _HomePageState extends State<HomePage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          LocalizedText('Recent activity', style: AppText.heading),
+                          LocalizedText(
+                            'Recent activity',
+                            style: AppText.heading,
+                          ),
                           const SizedBox(height: 12),
                           _buildRecentActivity(),
                         ],
@@ -388,11 +390,7 @@ class _HomePageState extends State<HomePage>
             ),
 
             // heart
-            Positioned(
-              right: 6,
-              top: 40,
-              child: _buildHeart(),
-            ),
+            Positioned(right: 6, top: 40, child: _buildHeart()),
 
             // ECG line
             const Positioned(
@@ -477,10 +475,7 @@ class _HomePageState extends State<HomePage>
                     height: 83,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.softTeal,
-                        width: 2,
-                      ),
+                      border: Border.all(color: AppColors.softTeal, width: 2),
                     ),
                   ),
                 ),
@@ -540,9 +535,9 @@ class _HomePageState extends State<HomePage>
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(14, 13, 12, 13),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.75),
+          color: AppColors.red,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: AppColors.red),
         ),
         child: Row(
           children: [
@@ -550,12 +545,12 @@ class _HomePageState extends State<HomePage>
               width: 44,
               height: 44,
               decoration: const BoxDecoration(
-                color: AppColors.paleTeal,
+                color: Color(0x33FFFFFF),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.medical_information_outlined,
-                color: AppColors.teal,
+                color: Colors.white,
                 size: 21,
               ),
             ),
@@ -566,28 +561,25 @@ class _HomePageState extends State<HomePage>
                 children: [
                   LocalizedText(
                     'Complete your medical profile',
-                    style: AppText.bodyStrong,
+                    style: AppText.bodyStrong.copyWith(color: Colors.white),
                   ),
                   LocalizedText(
                     'Help us provide more relevant guidance.',
-                    style: AppText.caption,
+                    style: AppText.caption.copyWith(color: Colors.white),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.darkTeal,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: LocalizedText(
                 'Complete',
-                style: AppText.style(12, FontWeight.w700, Colors.white),
+                style: AppText.style(12, FontWeight.w700, AppColors.red),
               ),
             ),
           ],
@@ -651,7 +643,9 @@ class _HomePageState extends State<HomePage>
             const Spacer(),
             Row(
               children: [
-                Expanded(child: LocalizedText(title, style: AppText.bodyStrong)),
+                Expanded(
+                  child: LocalizedText(title, style: AppText.bodyStrong),
+                ),
                 const Icon(
                   Icons.arrow_forward_rounded,
                   color: AppColors.grey,
@@ -678,13 +672,13 @@ class _HomePageState extends State<HomePage>
         Row(
           children: [
             Expanded(
-              child: LocalizedText('How TriageMY works', style: AppText.heading),
+              child: LocalizedText(
+                'How TriageMY works',
+                style: AppText.heading,
+              ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 5,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 color: AppColors.paleTeal,
                 borderRadius: BorderRadius.circular(20),
@@ -769,8 +763,12 @@ class _HomePageState extends State<HomePage>
                 ),
                 child: LocalizedText(
                   number,
-                  style: AppText.style(12, FontWeight.w700, Colors.white,
-                      height: 1),
+                  style: AppText.style(
+                    12,
+                    FontWeight.w700,
+                    Colors.white,
+                    height: 1,
+                  ),
                 ),
               ),
             ),
@@ -1124,28 +1122,27 @@ class AppBottomNav extends StatelessWidget {
           selectedIndex: selectedIndex,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           onDestinationSelected: onSelected,
-          labelTextStyle: WidgetStateProperty.resolveWith(
-            (states) {
-              final selected = states.contains(WidgetState.selected);
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            final selected = states.contains(WidgetState.selected);
 
-              return AppText.style(
-                12,
-                selected ? FontWeight.w700 : FontWeight.w500,
-                selected ? AppColors.darkTeal : AppColors.grey,
-              );
-            },
-          ),
+            return AppText.style(
+              12,
+              selected ? FontWeight.w700 : FontWeight.w500,
+              selected ? AppColors.darkTeal : AppColors.grey,
+            );
+          }),
           destinations: [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),
-              selectedIcon:
-                  Icon(Icons.home_rounded, color: AppColors.darkTeal),
+              selectedIcon: Icon(Icons.home_rounded, color: AppColors.darkTeal),
               label: tr('Home'),
             ),
             NavigationDestination(
               icon: Icon(Icons.monitor_heart_outlined),
-              selectedIcon:
-                  Icon(Icons.monitor_heart_rounded, color: AppColors.darkTeal),
+              selectedIcon: Icon(
+                Icons.monitor_heart_rounded,
+                color: AppColors.darkTeal,
+              ),
               label: tr('Triage'),
             ),
             NavigationDestination(
@@ -1153,19 +1150,23 @@ class AppBottomNav extends StatelessWidget {
               selectedIcon: Icon(
                 Icons.timeline_rounded,
                 color: AppColors.darkTeal,
-                ),
-                label: tr('Progress'),
-                ),
+              ),
+              label: tr('Progress'),
+            ),
             NavigationDestination(
               icon: Icon(Icons.local_hospital_outlined),
-              selectedIcon:
-                  Icon(Icons.local_hospital_rounded, color: AppColors.darkTeal),
+              selectedIcon: Icon(
+                Icons.local_hospital_rounded,
+                color: AppColors.darkTeal,
+              ),
               label: tr('Hospitals'),
             ),
             NavigationDestination(
               icon: Icon(Icons.person_outline_rounded),
-              selectedIcon:
-                  Icon(Icons.person_rounded, color: AppColors.darkTeal),
+              selectedIcon: Icon(
+                Icons.person_rounded,
+                color: AppColors.darkTeal,
+              ),
               label: tr('Profile'),
             ),
           ],

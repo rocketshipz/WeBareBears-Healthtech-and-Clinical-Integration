@@ -3,20 +3,42 @@ from datetime import date
 from typing import Optional, Dict, Any, Literal
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-EMAIL_REGEX = re.compile(r"^[\w\.-]+@([\w-]+\.)+[\w-]{2,4}$")
+EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$")
+
+
+def valid_email(value: str) -> str:
+    clean = value.strip().lower()
+    local = clean.split('@')[0]
+    if (len(clean) > 254 or len(local) > 64 or local.startswith('.')
+            or local.endswith('.') or '..' in local or not EMAIL_REGEX.fullmatch(clean)):
+        raise ValueError("Invalid email format")
+    return clean
+
+
+def normalize_phone(value: str) -> str:
+    clean = re.sub(r"[ ()-]", "", value.strip())
+    if clean.startswith('01'):
+        clean = '+6' + clean
+    elif clean.startswith('60'):
+        clean = '+' + clean
+    if not re.fullmatch(r"\+[1-9][0-9]{7,14}", clean):
+        raise ValueError("Enter a valid phone number with country code, e.g. +60123456789")
+    if clean.startswith('+60') and not re.fullmatch(r"\+601[02-9][0-9]{7}|\+6011[0-9]{8}", clean):
+        raise ValueError("Enter a valid Malaysian mobile number")
+    return clean
 
 
 class SendCodeRequest(BaseModel):
-    """Request schema for sending an email verification code."""
+    """Request schema for sending a email verification code."""
     email: str = Field(..., description="User's email address")
+    phone: str
+
+    _phone = field_validator('phone')(normalize_phone)
 
     @field_validator("email")
     @classmethod
     def validate_email_format(cls, v: str) -> str:
-        clean = v.strip().lower()
-        if not EMAIL_REGEX.match(clean):
-            raise ValueError("Invalid email format")
-        return clean
+        return valid_email(v)
 
 
 class SendCodeResponse(BaseModel):
@@ -32,16 +54,16 @@ class SendCodeResponse(BaseModel):
 
 class VerifyCodeRequest(BaseModel):
     """Request schema to verify the 6-digit email code."""
-    email: str = Field(..., description="Email address the code was sent to")
-    code: str = Field(..., min_length=6, max_length=6, description="6-digit verification code")
+    email: str = Field(..., description="Email associated with the signup")
+    phone: str
+
+    _phone = field_validator('phone')(normalize_phone)
+    code: str = Field(..., pattern=r"^[0-9]{6}$", description="6-digit verification code")
 
     @field_validator("email")
     @classmethod
     def validate_email_format(cls, v: str) -> str:
-        clean = v.strip().lower()
-        if not EMAIL_REGEX.match(clean):
-            raise ValueError("Invalid email format")
-        return clean
+        return valid_email(v)
 
 
 class VerifyCodeResponse(BaseModel):
@@ -55,13 +77,23 @@ class RegisterRequest(BaseModel):
     """Request schema for user registration."""
     ic: str = Field(..., min_length=6, description="National Identity Card number (IC)")
     phone: str = Field(..., min_length=8, description="Phone number")
-    email: str = Field(..., description="Verified email address")
+    email: str = Field(..., description="Contact email address")
     password: str = Field(..., min_length=8, description="Password (at least 8 characters)")
     name: str = Field(..., min_length=1, description="Full name")
     sex_at_birth: Literal["male", "female", "intersex"]
     nationality: str = Field(..., min_length=1)
     date_of_birth: Optional[date] = None
     code: Optional[str] = Field(None, description="6-digit verification code if verifying during registration")
+
+    _phone = field_validator('phone')(normalize_phone)
+
+    @field_validator('password')
+    @classmethod
+    def strong_password(cls, value: str) -> str:
+        if not (re.search(r'[A-Z]', value) and re.search(r'[a-z]', value)
+                and re.search(r'[0-9]', value) and re.search(r'[^a-zA-Z0-9\s]', value)):
+            raise ValueError('Password must have at least 8 characters, uppercase, lowercase, a number and a symbol')
+        return value
 
     @model_validator(mode="after")
     def validate_birth_date(self):
@@ -82,10 +114,7 @@ class RegisterRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def validate_email_format(cls, v: str) -> str:
-        clean = v.strip().lower()
-        if not EMAIL_REGEX.match(clean):
-            raise ValueError("Invalid email format")
-        return clean
+        return valid_email(v)
 
 
 class LoginRequest(BaseModel):
