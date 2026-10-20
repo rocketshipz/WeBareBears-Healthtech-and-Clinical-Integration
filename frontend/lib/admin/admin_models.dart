@@ -472,6 +472,7 @@ class Visit {
   /// patient can pass it on to family.
   String patientPhone;
 
+  String? diagnosis;
   String? outcome;
   DateTime? completedAt;
 
@@ -502,6 +503,7 @@ class Visit {
     this.profile = const {},
     this.familySharing = false,
     this.patientPhone = '',
+    this.diagnosis,
     this.outcome,
     this.completedAt,
   }) : id = id ?? newId(),
@@ -564,6 +566,7 @@ class Visit {
     familySharing = o.familySharing;
     shareToken = o.shareToken;
     patientPhone = o.patientPhone;
+    diagnosis = o.diagnosis;
     outcome = o.outcome;
     completedAt = o.completedAt;
 

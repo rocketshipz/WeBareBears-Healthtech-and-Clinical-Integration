@@ -75,6 +75,7 @@ Visit decodeVisit(Map<String, dynamic> data) {
     triage: data['triage'] == null
         ? null
         : TriageSummary.fromJson(Map<String, dynamic>.from(data['triage'])),
+    diagnosis: (data['diagnosis'] as Map?)?['diagnosis']?.toString(),
     outcome: data['outcome'],
     completedAt: visitDate(data['completed_at']),
     version: data['version'] ?? 0,

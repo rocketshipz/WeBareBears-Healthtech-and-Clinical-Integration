@@ -13,6 +13,8 @@ def pytest_configure(config):
     _directory = tempfile.TemporaryDirectory(prefix="triagemy-tests-")
     database = Path(_directory.name) / "tests.db"
     for key, value in {
+        "TAC_DELIVERY": "test",
+        "ENVIRONMENT": "test",
         "DATABASE_URL": "sqlite:///" + database.as_posix(),
         "OPENAI_API_KEY": "dummy-openai-key",
         "OPENAI_BASE_URL": "http://127.0.0.1:1/v1",

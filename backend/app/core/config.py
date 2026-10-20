@@ -25,6 +25,14 @@ class Settings(BaseSettings):
     # Reachable backend origin for family invitations shared outside this device.
     PUBLIC_BACKEND_URL: str = ""
     
+    # Gmail SMTP over TLS. SMTP_PASSWORD must be a Google App Password.
+    TAC_DELIVERY: str = 'email'
+    SMTP_HOST: str = 'smtp.gmail.com'
+    SMTP_PORT: int = 465
+    SMTP_USERNAME: str = 'triagemy.wbb@gmail.com'
+    SMTP_FROM_EMAIL: str = 'triagemy.wbb@gmail.com'
+    SMTP_PASSWORD: str = ''
+
     # Main Agent LLM Configuration (Azure OpenAI, OpenAI-compatible v1 endpoint)
     OPENAI_API_KEY: Optional[str] = None
     OPENAI_MODEL_NAME: str = "gpt-5-mini"  # Azure: the *deployment name*

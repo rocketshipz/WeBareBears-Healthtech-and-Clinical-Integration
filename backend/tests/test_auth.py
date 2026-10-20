@@ -21,7 +21,7 @@ async def test_auth_flow(nationality):
         # 1. Send verification code
         send_res = await client.post(
             "/api/auth/send-code",
-            json={"email": test_email}
+            json={"email": test_email, "phone": test_phone}
         )
         assert send_res.status_code == 200
         send_data = send_res.json()
@@ -32,7 +32,7 @@ async def test_auth_flow(nationality):
         # 2. Verify code
         verify_res = await client.post(
             "/api/auth/verify-code",
-            json={"email": test_email, "code": code}
+            json={"email": test_email, "phone": test_phone, "code": code}
         )
         assert verify_res.status_code == 200
         verify_data = verify_res.json()
@@ -46,6 +46,7 @@ async def test_auth_flow(nationality):
                 "phone": test_phone,
                 "email": test_email,
                 "password": "Password123!",
+                "code": code if nationality == "Malaysia" else None,
                 "name": "Test User",
                 "sex_at_birth": "intersex",
                 "nationality": nationality,
@@ -139,3 +140,22 @@ async def test_auth_flow(nationality):
         assert unauthenticated.status_code == 401
         invalid_token = await client.put("/api/auth/profile", headers={"Authorization": "Bearer invalid"}, json={})
         assert invalid_token.status_code == 401
+
+        # Photo-only updates persist without marking medical information complete.
+        import base64
+        photo = 'data:image/png;base64,' + base64.b64encode(
+            b'\x89PNG\r\n\x1a\n' + b'photo-content').decode()
+        before = (await client.get('/api/auth/profile', headers=headers)).json()['data']['medical_info_updated_at']
+        saved_photo = await client.put('/api/auth/profile', headers=headers,
+                                      json={'photo_data_url': photo})
+        assert saved_photo.status_code == 200, saved_photo.text
+        loaded_photo = await client.get('/api/auth/profile', headers={'Authorization': f'Bearer {other_token}'})
+        assert loaded_photo.json()['data']['photo_data_url'] == photo
+        assert loaded_photo.json()['data']['medical_info_updated_at'] == before
+        invalid_photo = await client.put('/api/auth/profile', headers=headers,
+                                        json={'photo_data_url': 'data:image/png;base64,aGVsbG8='})
+        assert invalid_photo.status_code == 422
+        removed_photo = await client.put('/api/auth/profile', headers=headers,
+                                        json={'photo_data_url': None})
+        assert removed_photo.status_code == 200
+        assert removed_photo.json()['data']['photo_data_url'] is None

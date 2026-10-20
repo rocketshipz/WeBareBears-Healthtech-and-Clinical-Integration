@@ -1,4 +1,5 @@
 import 'localization.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -63,10 +64,8 @@ class AppText {
   static TextStyle get bodyStrong =>
       style(14, FontWeight.w700, AppColors.textDark);
   static TextStyle get caption => style(12, FontWeight.w400, AppColors.grey);
-  static TextStyle get label =>
-      style(12, FontWeight.w600, AppColors.textDark);
-  static TextStyle get input =>
-      style(14, FontWeight.w500, AppColors.textDark);
+  static TextStyle get label => style(12, FontWeight.w600, AppColors.textDark);
+  static TextStyle get input => style(14, FontWeight.w500, AppColors.textDark);
 }
 
 // ============================================================
@@ -131,9 +130,7 @@ void showAppSnack(BuildContext context, String message) {
       SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.textDark,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         content: LocalizedText(
           message,
           style: AppText.style(14, FontWeight.w500, Colors.white),
@@ -179,9 +176,7 @@ void showEmergencyDialog(BuildContext context) {
     builder: (dialogContext) {
       return AlertDialog(
         backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         icon: Container(
           width: 56,
           height: 56,
@@ -437,7 +432,6 @@ class SelectChip extends StatelessWidget {
   }
 }
 
-
 // ============================================================
 // AUTH / FORM HELPERS
 // ============================================================
@@ -446,20 +440,27 @@ class SelectChip extends StatelessWidget {
 /// to near-white, like the sample image.
 class GradientBackground extends StatelessWidget {
   final Widget child;
+  final Color topColor;
+  final Color glowColor;
 
-  const GradientBackground({super.key, required this.child});
+  const GradientBackground({
+    super.key,
+    required this.child,
+    this.topColor = AppColors.gradientTop,
+    this.glowColor = AppColors.gradientGlow,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
       children: [
-        const DecoratedBox(
+        DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [AppColors.gradientTop, AppColors.gradientBottom],
+              colors: [topColor, AppColors.gradientBottom],
               stops: [0.0, 0.55],
             ),
           ),
@@ -475,8 +476,8 @@ class GradientBackground extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.gradientGlow.withValues(alpha: 0.40),
-                    AppColors.gradientGlow.withValues(alpha: 0.0),
+                    glowColor.withValues(alpha: 0.40),
+                    glowColor.withValues(alpha: 0.0),
                   ],
                 ),
               ),
@@ -506,7 +507,10 @@ class BrandWordmark extends StatelessWidget {
         ),
         children: const [
           TextSpan(text: 'Triage'),
-          TextSpan(text: 'MY', style: TextStyle(color: AppColors.teal)),
+          TextSpan(
+            text: 'MY',
+            style: TextStyle(color: AppColors.teal),
+          ),
         ],
       ),
     );
@@ -576,7 +580,8 @@ class StepProgress extends StatelessWidget {
   }
 }
 
-Widget fieldLabel(String text) => LocalizedText(text, style: AppText.bodyStrong);
+Widget fieldLabel(String text) =>
+    LocalizedText(text, style: AppText.bodyStrong);
 
 InputDecoration appInputDecoration({
   required String hint,

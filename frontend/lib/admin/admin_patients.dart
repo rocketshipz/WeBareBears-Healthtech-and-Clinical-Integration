@@ -13,6 +13,7 @@ class PatientsPage extends StatefulWidget {
 
 class _PatientsPageState extends State<PatientsPage> {
   String query = '';
+  bool showDischarged = false;
   @override
   Widget build(BuildContext context) => Scaffold(
     body: GradientBackground(
@@ -24,9 +25,11 @@ class _PatientsPageState extends State<PatientsPage> {
             final patients =
                 adminStore.assignedPatients
                     .where(
-                      (v) => '${v.name} ${v.ic} ${v.queueNo}'
-                          .toLowerCase()
-                          .contains(search),
+                      (v) =>
+                          v.isComplete == showDischarged &&
+                          '${v.name} ${v.ic} ${v.queueNo}'
+                              .toLowerCase()
+                              .contains(search),
                     )
                     .toList()
                   ..sort((a, b) => b.arrivedAt.compareTo(a.arrivedAt));
@@ -41,7 +44,7 @@ class _PatientsPageState extends State<PatientsPage> {
                     Text('Patients', style: AppText.display),
                     const SizedBox(height: 8),
                     Text(
-                      'Patients checked in under your care, including completed visits.',
+                      'Patients currently under your care and discharged visits.',
                       style: AppText.body,
                     ),
                     const SizedBox(height: 24),
@@ -53,6 +56,16 @@ class _PatientsPageState extends State<PatientsPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
+                    SegmentedButton<bool>(
+                      segments: const [
+                        ButtonSegment(value: false, label: Text('Active')),
+                        ButtonSegment(value: true, label: Text('Discharged')),
+                      ],
+                      selected: {showDischarged},
+                      onSelectionChanged: (value) =>
+                          setState(() => showDischarged = value.first),
+                    ),
+                    const SizedBox(height: 16),
                     Text(
                       '${patients.length} patients',
                       style: AppText.bodyStrong,
@@ -64,7 +77,9 @@ class _PatientsPageState extends State<PatientsPage> {
                         decoration: cardDecoration(),
                         child: Text(
                           search.isEmpty
-                              ? 'No patients assigned yet. Check in a patient to start.'
+                              ? (showDischarged
+                                    ? 'No discharged patients.'
+                                    : 'No patients assigned yet. Check in a patient to start.')
                               : 'No patients match your search.',
                           style: AppText.body,
                         ),

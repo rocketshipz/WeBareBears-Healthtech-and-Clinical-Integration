@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc
 
 from app.models.user import User, EmailVerificationCode
+from app.schemas.auth import normalize_phone
 from app.repositories.base import BaseRepository
 
 logger = logging.getLogger(__name__)
@@ -26,10 +27,22 @@ class UserRepository(BaseRepository[User, str]):
             User.email.ilike(email.strip().lower())
         ).first()
 
+    @staticmethod
+    def _phone_aliases(phone: str) -> list[str]:
+        aliases = [phone.strip()]
+        try:
+            normalized = normalize_phone(phone)
+            aliases.append(normalized)
+            if normalized.startswith('+60'):
+                aliases.extend([normalized[2:], normalized[1:]])
+        except ValueError:
+            pass
+        return aliases
+
     def get_by_phone(self, phone: str) -> Optional[User]:
         """Retrieve user by phone number."""
         return self.session.query(User).filter(
-            User.phone == phone.strip()
+            User.phone.in_(self._phone_aliases(phone))
         ).first()
 
     def get_by_ic(self, ic: str) -> Optional[User]:
@@ -51,7 +64,7 @@ class UserRepository(BaseRepository[User, str]):
         return self.session.query(User).filter(
             or_(
                 User.email.ilike(clean_ident.lower()),
-                User.phone == clean_ident,
+                User.phone.in_(self._phone_aliases(clean_ident)),
                 User.ic == clean_ident,
                 User.ic == clean_ic,
             )

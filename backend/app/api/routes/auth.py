@@ -52,13 +52,13 @@ def get_current_user(user: Optional[dict] = Depends(get_optional_user)) -> dict:
     status_code=status.HTTP_200_OK,
     summary="Send 6-digit email verification code",
 )
-async def send_verification_code(
+def send_verification_code(
     request: SendCodeRequest,
     service: AuthService = Depends(get_auth_service),
 ):
     """Sends a 6-digit verification code to the requested email address."""
     try:
-        result = service.send_verification_code(request.email)
+        result = service.send_verification_code(request.email, request.phone)
         return APIResponse(
             success=True,
             data=result,
@@ -83,7 +83,7 @@ async def verify_code(
     service: AuthService = Depends(get_auth_service),
 ):
     """Validates the 6-digit code against the recorded code for the given email."""
-    result = service.verify_code(request.email, request.code)
+    result = service.verify_code(request.email, request.code, request.phone)
     if not result.verified:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
