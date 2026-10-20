@@ -1,11 +1,13 @@
 import '../localization.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../theme.dart';
+import '../services/hospital_service.dart';
 import '../services/location_service.dart';
+import '../widgets/hospital_option_card.dart';
 
 class HospitalsPage extends StatefulWidget {
   const HospitalsPage({super.key});
@@ -15,16 +17,26 @@ class HospitalsPage extends StatefulWidget {
 }
 
 class _HospitalsPageState extends State<HospitalsPage> {
+  /// More than the post-triage page, so search has something to filter.
+  static const int _hospitalCount = 10;
+
   final TextEditingController searchController = TextEditingController();
 
   // Fallback location while waiting for actual location.
   LatLng currentLocation = const LatLng(3.1390, 101.6869);
 
   bool locationLoaded = false;
+  bool hasGps = false;
+
+  // Ranked by the backend (travel time, ED busyness and any triage from the last 24 h).
+  HospitalRecommendations? recommendations;
+  bool loadingHospitals = true;
+  String? hospitalError;
 
   @override
   void initState() {
     super.initState();
+    searchController.addListener(() => setState(() {}));
     _getCurrentLocation();
   }
 
@@ -41,6 +53,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
       setState(() {
         if (position != null) {
           currentLocation = LatLng(position.latitude, position.longitude);
+          hasGps = true;
         }
         locationLoaded = true;
       });
@@ -50,136 +63,52 @@ class _HospitalsPageState extends State<HospitalsPage> {
         locationLoaded = true;
       });
     }
+    await _loadHospitals();
   }
 
-  Future<void> _openGoogleMaps(String hospitalName) async {
-    final String query = Uri.encodeComponent(hospitalName);
-
-    final Uri url = Uri.parse(
-      'https://www.google.com/maps/search/?api=1&query=$query',
-    );
-
-    await launchUrl(url, mode: LaunchMode.externalApplication);
+  Future<void> _loadHospitals() async {
+    setState(() {
+      loadingHospitals = true;
+      hospitalError = null;
+    });
+    try {
+      final result = await HospitalService.fetchRecommendations(
+        currentLocation.latitude,
+        currentLocation.longitude,
+        limit: _hospitalCount,
+      );
+      if (!mounted) return;
+      setState(() {
+        recommendations = result;
+        loadingHospitals = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        loadingHospitals = false;
+        hospitalError = 'Could not load nearby hospitals. Please try again.';
+      });
+    }
   }
 
-  Future<void> _openWaze(String hospitalName) async {
-    final String query = Uri.encodeComponent(hospitalName);
-
-    final Uri url = Uri.parse(
-      'https://waze.com/ul?q=$query&navigate=yes',
-    );
-
-    await launchUrl(url, mode: LaunchMode.externalApplication);
-  }
-
-  void _showDirections(BuildContext context, String hospitalName) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 14, 24, 30),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              LocalizedText('Open directions with', style: AppText.heading),
-              const SizedBox(height: 4),
-              LocalizedText(hospitalName, style: AppText.caption),
-              const SizedBox(height: 14),
-              _routeTile(
-                icon: Icons.map_outlined,
-                title: 'Google Maps',
-                onTap: () {
-                  Navigator.pop(context);
-                  _openGoogleMaps(hospitalName);
-                },
-              ),
-              const SizedBox(height: 10),
-              _routeTile(
-                icon: Icons.navigation_outlined,
-                title: 'Waze',
-                onTap: () {
-                  Navigator.pop(context);
-                  _openWaze(hospitalName);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _routeTile({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return Pressable(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.field,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: const BoxDecoration(
-                color: AppColors.paleTeal,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: AppColors.darkTeal, size: 21),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: LocalizedText(title, style: AppText.bodyStrong)),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 14,
-              color: AppColors.grey,
-            ),
-          ],
-        ),
-      ),
-    );
+  /// Ranked hospitals matching the search box (name or address).
+  List<HospitalOption> get _visibleHospitals {
+    final hospitals = recommendations?.hospitals ?? const <HospitalOption>[];
+    final query = searchController.text.trim().toLowerCase();
+    if (query.isEmpty) return hospitals;
+    return hospitals
+        .where(
+          (h) =>
+              h.name.toLowerCase().contains(query) ||
+              h.address.toLowerCase().contains(query),
+        )
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
     Localizations.localeOf(context);
-    // Sample nearby locations for the prototype.
-    final LatLng hospital1 = LatLng(
-      currentLocation.latitude + 0.008,
-      currentLocation.longitude + 0.004,
-    );
-
-    final LatLng hospital2 = LatLng(
-      currentLocation.latitude - 0.006,
-      currentLocation.longitude + 0.007,
-    );
-
-    final LatLng clinic1 = LatLng(
-      currentLocation.latitude + 0.003,
-      currentLocation.longitude - 0.008,
-    );
+    final hospitals = _visibleHospitals;
 
     return Scaffold(
       body: GradientBackground(
@@ -223,10 +152,13 @@ class _HospitalsPageState extends State<HospitalsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          LocalizedText('Hospitals & Clinics', style: AppText.display),
+                          LocalizedText(
+                            'Hospitals & Clinics',
+                            style: AppText.display,
+                          ),
                           const SizedBox(height: 8),
                           LocalizedText(
-                            'Browse nearby care options.',
+                            'Nearby emergency departments, ranked by travel time and how busy they are.',
                             style: AppText.body,
                           ),
                         ],
@@ -304,9 +236,11 @@ class _HospitalsPageState extends State<HospitalsPage> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: LocalizedText(
-                                locationLoaded
-                                    ? 'Showing hospitals and clinics near your location.'
-                                    : 'Getting your current location...',
+                                !locationLoaded
+                                    ? 'Getting your current location...'
+                                    : hasGps
+                                    ? 'Showing hospitals near your location.'
+                                    : 'Location unavailable. Showing hospitals near Kuala Lumpur.',
                                 style: AppText.style(
                                   12,
                                   FontWeight.w600,
@@ -333,16 +267,15 @@ class _HospitalsPageState extends State<HospitalsPage> {
                             width: double.infinity,
                             height: 230,
                             child: FlutterMap(
+                              key: ValueKey(currentLocation),
                               options: MapOptions(
                                 initialCenter: currentLocation,
-                                initialZoom: 13.5,
+                                initialZoom: 12.5,
                               ),
                               children: [
                                 TileLayer(
-                                  urlTemplate:
-                                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                  userAgentPackageName:
-                                      'com.example.triagemy',
+                                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                  userAgentPackageName: 'com.example.triagemy',
                                 ),
                                 MarkerLayer(
                                   markers: [
@@ -368,35 +301,18 @@ class _HospitalsPageState extends State<HospitalsPage> {
                                       ),
                                     ),
 
-                                    // HOSPITAL 1
-                                    Marker(
-                                      point: hospital1,
-                                      width: 42,
-                                      height: 42,
-                                      child: _mapMarker(
-                                        Icons.local_hospital_rounded,
+                                    for (final h in hospitals)
+                                      Marker(
+                                        point: LatLng(h.latitude, h.longitude),
+                                        width: 42,
+                                        height: 42,
+                                        child: Tooltip(
+                                          message: h.name,
+                                          child: _mapMarker(
+                                            Icons.local_hospital_rounded,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-
-                                    // HOSPITAL 2
-                                    Marker(
-                                      point: hospital2,
-                                      width: 42,
-                                      height: 42,
-                                      child: _mapMarker(
-                                        Icons.local_hospital_rounded,
-                                      ),
-                                    ),
-
-                                    // CLINIC
-                                    Marker(
-                                      point: clinic1,
-                                      width: 42,
-                                      height: 42,
-                                      child: _mapMarker(
-                                        Icons.medical_services_rounded,
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ],
@@ -410,50 +326,45 @@ class _HospitalsPageState extends State<HospitalsPage> {
 
                     LocalizedText('Nearby care', style: AppText.heading),
 
-                    const SizedBox(height: 14),
-
-                    FadeSlideIn(
-                      index: 5,
-                      child: _hospitalCard(
-                        context: context,
-                        name: 'Central General Hospital',
-                        type: 'General Hospital',
-                        distance: '2.3 km',
-                        travelTime: '8 min',
-                        status: 'Open 24/7',
-                        address: '123 Health Avenue',
+                    if (recommendations != null) ...[
+                      const SizedBox(height: 4),
+                      LocalizedText(
+                        hospitalRankingCaption(recommendations!),
+                        style: AppText.caption,
                       ),
-                    ),
+                    ],
 
                     const SizedBox(height: 14),
 
-                    FadeSlideIn(
-                      index: 6,
-                      child: _hospitalCard(
-                        context: context,
-                        name: 'Riverside Medical Centre',
-                        type: 'Private Hospital',
-                        distance: '5.1 km',
-                        travelTime: '15 min',
-                        status: 'Open Now',
-                        address: '88 Riverdale Road',
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    FadeSlideIn(
-                      index: 7,
-                      child: _hospitalCard(
-                        context: context,
-                        name: 'Maple Community Clinic',
-                        type: 'Clinic',
-                        distance: '1.2 km',
-                        travelTime: '5 min',
-                        status: 'Open Now',
-                        address: '45 Maple Road',
-                      ),
-                    ),
+                    if (loadingHospitals)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 30),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (hospitalError != null)
+                      _statusMessage(
+                        hospitalError!,
+                        action: PrimaryButton(
+                          label: 'Try again',
+                          icon: Icons.refresh_rounded,
+                          onPressed: _loadHospitals,
+                        ),
+                      )
+                    else if (hospitals.isEmpty)
+                      _statusMessage(
+                        searchController.text.trim().isEmpty
+                            ? 'No hospitals found near you.'
+                            : 'No nearby hospital matches your search.',
+                      )
+                    else
+                      for (final (i, h) in hospitals.indexed)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: FadeSlideIn(
+                            index: 5 + i,
+                            child: HospitalOptionCard(hospital: h),
+                          ),
+                        ),
                   ],
                 ),
               ),
@@ -471,142 +382,27 @@ class _HospitalsPageState extends State<HospitalsPage> {
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 2),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 6,
-          ),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 6),
         ],
       ),
       child: Icon(icon, color: Colors.white, size: 20),
     );
   }
 
-  Widget _hospitalCard({
-    required BuildContext context,
-    required String name,
-    required String type,
-    required String distance,
-    required String travelTime,
-    required String status,
-    required String address,
-  }) {
+  Widget _statusMessage(String message, {Widget? action}) {
     return Container(
       width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(18),
       decoration: cardDecoration(radius: 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.paleTeal,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: const Icon(
-                  Icons.local_hospital_outlined,
-                  color: AppColors.teal,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    LocalizedText(name, style: AppText.heading),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.location_on_outlined,
-                          size: 15,
-                          color: AppColors.grey,
-                        ),
-                        const SizedBox(width: 4),
-                        LocalizedText('$distance away', style: AppText.caption),
-                        const SizedBox(width: 8),
-                        Container(
-                          width: 3,
-                          height: 3,
-                          decoration: const BoxDecoration(
-                            color: AppColors.grey,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        LocalizedText(travelTime, style: AppText.caption),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 14),
-
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _smallTag(icon: Icons.apartment_rounded, text: type),
-              _smallTag(icon: Icons.schedule_rounded, text: status),
-            ],
-          ),
-
-          const SizedBox(height: 14),
-
-          Row(
-            children: [
-              const Icon(
-                Icons.place_outlined,
-                size: 17,
-                color: AppColors.grey,
-              ),
-              const SizedBox(width: 6),
-              Expanded(child: LocalizedText(address, style: AppText.caption)),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // DIRECTIONS ONLY
-          PrimaryButton(
-            label: 'Directions',
-            icon: Icons.navigation_outlined,
-            onPressed: () {
-              _showDirections(context, name);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _smallTag({
-    required IconData icon,
-    required String text,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: AppColors.field,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 15, color: AppColors.darkTeal),
-          const SizedBox(width: 5),
           LocalizedText(
-            text,
-            style: AppText.style(12, FontWeight.w600, AppColors.darkTeal),
+            message,
+            textAlign: TextAlign.center,
+            style: AppText.body,
           ),
+          if (action != null) ...[const SizedBox(height: 14), action],
         ],
       ),
     );

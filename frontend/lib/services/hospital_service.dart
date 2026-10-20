@@ -84,17 +84,19 @@ class HospitalRecommendations {
 class HospitalService {
   /// Hospitals near [latitude]/[longitude], ranked by the backend using travel
   /// time, ED busyness and the user's triage level. [sessionId] is the triage
-  /// report the user came from, if any.
+  /// report the user came from, if any. [limit] is how many to return (backend default 5).
   static Future<HospitalRecommendations> fetchRecommendations(
     double latitude,
     double longitude, {
     String? sessionId,
+    int? limit,
   }) async {
     final uri = Uri.parse('${ApiService.baseUrl}/hospitals/recommendations')
         .replace(queryParameters: {
       'lat': latitude.toString(),
       'lon': longitude.toString(),
       'session_id': ?sessionId,
+      'limit': ?limit?.toString(),
     });
     final res = await http
         .get(uri, headers: ApiService.defaultHeaders)
