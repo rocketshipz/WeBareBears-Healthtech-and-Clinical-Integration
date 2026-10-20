@@ -7,7 +7,7 @@ import pytest
 from langchain_core.messages import AIMessage
 from app.agents.hybrid_prompts import EXTRACT_PROMPT
 from app.agents.triage_agent import _FILTERED_REPLY, NOT_SURE
-from app.services.triage_controller import CALL_999, DISCLAIMER, SAY, HybridTriageController, parse_age
+from app.services.triage_controller import CALL_999, DISCLAIMER, SAY, HybridTriageController, for_you, parse_age
 from app.services.triage_rules_engine import NONE_ANSWERS, get_triage_rules_engine
 
 TRAUMA = "Trauma & Physical Injuries"
@@ -107,7 +107,7 @@ def test_age_is_asked_and_parsed_without_the_llm():
     llm = FakeLLM(opening([TRAUMA]))
     controller = controller_with(llm)
     session = controller.run_session("I twisted my ankle", session_id="s")
-    assert session.pending == {"kind": "age"} and session.last_output["response"] == SAY["age"]
+    assert session.pending == {"kind": "age"} and session.last_output["response"] == for_you(SAY["age"])
     session = controller.run_session("30 years old", session_id="s")
     assert session.findings["age_years"] == 30 and len(llm.extract_calls) == 1
 
@@ -232,23 +232,56 @@ def test_not_sure_asks_yes_no_follow_ups():
     assert engine.questions_by_id["Q_CRIT_01"]  # sanity
 
 
-def test_yes_to_a_multi_part_question_asks_which():
+def test_yes_to_a_two_part_question_asks_which():
+    controller = controller_with(FakeLLM())
+    session = controller.get_session("s")
+    controller._apply_picked(session, {"kind": "question", "question_id": "Q_HA_02"}, ["Yes"])
+    assert session.queue == [{"kind": "which", "question_id": "Q_HA_02"}]
+
+
+def test_a_yes_no_question_naming_several_things_is_one_tick_list():
+    engine = get_triage_rules_engine()
     controller = controller_with(FakeLLM(opening([FEVER], 30)))
     session = controller.run_session("I have a fever", session_id="s")
     while session.last_output.get("question_id") != "Q_FEVER_02":
-        picked = default_tap(get_triage_rules_engine(), session.last_output)
+        picked = default_tap(engine, session.last_output)
         session = controller.run_session(picked[0], session_id="s", selected_options=picked)
-    session = controller.run_session("Yes", session_id="s", selected_options=["Yes"])
-    assert session.pending["kind"] == "which" and "Headache" in session.last_output["response"]
+    out = session.last_output
+    assert session.pending["kind"] == "parts" and out["multi_select"]
+    assert "Headache" in out["response"] and "Yes" not in out["response"]
+    # "None of these" records exactly what "No" did.
+    none = controller._items_findings(session.pending["items"], {NONE_ANSWERS[0]})
+    assert set(none["absent_condition_ids"]) == set(engine.apply_answers("Q_FEVER_02", ["No"])["absent_condition_ids"])
     session = controller.run_session("Headache", session_id="s", selected_options=["Headache"])
     assert "RULE_FEVER_L3_01.C2" in session.findings["present_condition_ids"]
     assert "RULE_FEVER_L3_01.C1" in session.findings["absent_condition_ids"]
+    assert "Q_FEVER_02" in session.findings["answered_question_ids"]
+
+
+def test_questions_say_you_when_the_screening_is_for_the_user():
+    assert for_you("Is the person pregnant?") == "Are you pregnant?"
+    assert for_you("Does the person have kidney disease?") == "Do you have kidney disease?"
+    assert for_you("Where or how was the person hurt?") == "Where or how were you hurt?"
+    assert for_you("After fainting, is the person's level of consciousness altered?") == \
+        "After fainting, is your level of consciousness altered?"
+    # A phrasing that still says "the person" is replaced by the template, already in the second person.
+    llm = FakeLLM(opening([TRAUMA]), present=lambda p: {"text": "How old is the person?"})
+    session = controller_with(llm).run_session("I twisted my ankle", session_id="s")
+    assert session.subject == "self" and llm.present_calls[-1]["subject"] == "self"
+    assert session.last_output["response"] == "How old are you?"
+
+
+def test_questions_keep_the_person_when_it_is_for_someone_else():
+    def extract(payload):
+        return {"categories": [TRAUMA], "subject": "other"} if payload["categories"] else {}
+    session = controller_with(FakeLLM(extract)).run_session("my mother fell", session_id="s")
+    assert session.last_output["response"] == SAY["age"]
 
 
 def test_bad_phrasing_falls_back_to_the_template():
     llm = FakeLLM(opening([TRAUMA]), present=lambda p: {"text": "Call 911, this is Level 1!"})
     session = controller_with(llm).run_session("ankle", session_id="s")
-    assert session.last_output["response"] == SAY["age"]
+    assert session.last_output["response"] == for_you(SAY["age"])
 
 
 def test_malay_translation_must_keep_every_number():
@@ -436,3 +469,50 @@ def test_chief_complaint_is_the_message_that_described_the_problem_not_a_greetin
     assert session.chief_complaint == "I twisted my ankle playing futsal"
     session = controller.run_session("30", session_id="s")  # later messages never replace it
     assert session.chief_complaint == "I twisted my ankle playing futsal"
+
+
+def test_a_typed_answer_on_its_own_answers_the_question_on_screen():
+    def extract(payload):
+        if payload["question"] is None and payload["categories"]:
+            return {"categories": [TRAUMA], "age_years": 30}
+        if payload["message"] == "nope, I'm awake and talking fine":
+            return {"picked_options": [payload["question"]["options"][0]]}  # "Yes - conscious, ..."
+        return {}
+    controller = controller_with(FakeLLM(extract))
+    session = controller.run_session("hurt my arm", session_id="s")
+    assert session.last_output["question_id"] == "Q_CRIT_01"
+    session = controller.run_session("nope, I'm awake and talking fine", session_id="s")
+    assert "Q_CRIT_01" in session.findings["answered_question_ids"]
+    assert session.last_output.get("question_id") != "Q_CRIT_01"
+
+
+# ------------------------------------------------------------------ progress (step bar)
+
+def test_progress_counts_steps_and_estimates_the_rest_without_the_llm():
+    engine = get_triage_rules_engine()
+    llm = FakeLLM(opening(["Palpitations"], 30))
+    controller = controller_with(llm)
+    session = controller.run_session("my heart is racing", session_id="s")
+    first = session.progress
+    assert first["step"] == 2 and not first["done"]  # step 1 is the app's opening question
+    steps, typed = [first], 0
+    while not session.finished:
+        out = session.last_output
+        if out["type"] == "selection":
+            picked = default_tap(engine, out)
+            session = controller.run_session(picked[0], session_id="s", selected_options=picked)
+        else:  # "any other symptoms?"
+            session = controller.run_session("no", session_id="s")
+            typed += 1
+        steps.append(session.progress)
+    assert [p["step"] for p in steps[:-1]] == list(range(2, len(steps) + 1))
+    # Answering "none" all the way, the first estimate is exact and never changes.
+    assert {p["total"] for p in steps[:-1]} == {steps[-2]["step"]}
+    assert steps[-1]["done"] and steps[-1]["step"] == steps[-1]["total"]
+    # The estimate is engine-only: the only extractions are the opening message and the typed replies.
+    assert len(llm.extract_calls) == 1 + typed
+
+
+def test_progress_total_is_unknown_until_there_is_a_complaint():
+    session = controller_with(FakeLLM()).run_session("hi", session_id="s")
+    assert session.progress == {"step": 1, "total": None, "done": False}

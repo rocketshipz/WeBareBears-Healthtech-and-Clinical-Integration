@@ -66,6 +66,15 @@ class TriageChatRequest(BaseModel):
         None, description="Optional extra details typed alongside a picked option (read as new information)")
 
 
+class TriageProgress(BaseModel):
+    """Where the screening is, for the app's step bar (hybrid mode)."""
+    step: int = Field(..., description="Number of the question on screen (1 = the opening 'main problem' question)")
+    total: Optional[int] = Field(
+        None, description="Estimated number of questions in all, if the remaining answers find nothing new (it can "
+                          "change as answers come in); null until the complaint is known")
+    done: bool = Field(False, description="The screening has finished")
+
+
 class TriageChatResponse(BaseModel):
     """Response from conversational triage interaction."""
     type: str = Field("text", description="'text' (free-text reply) or 'selection' (pick from the options)")
@@ -90,6 +99,7 @@ class TriageChatResponse(BaseModel):
     subject: Optional[str] = Field(
         None, description="Who the screening is for: 'self', 'other', or null if not known (agent mode)")
     assessment: Optional[TriageAssessment] = None
+    progress: Optional[TriageProgress] = Field(None, description="Step bar data (hybrid mode only)")
     recommended_hospitals: List[HospitalRecommendation] = Field(default_factory=list)
 
 

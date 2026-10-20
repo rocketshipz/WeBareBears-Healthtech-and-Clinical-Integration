@@ -35,6 +35,9 @@ class TriageChatReply {
   final String? subject;
   final TriageAssessmentData? assessment;
 
+  /// Step bar data; null when the backend does not send it (agent mode).
+  final TriageProgress? progress;
+
   TriageChatReply({
     required this.type,
     required this.question,
@@ -49,6 +52,7 @@ class TriageChatReply {
     this.reportId,
     this.subject,
     required this.assessment,
+    this.progress,
   });
 
   bool get isSelection => type == 'selection' && options.isNotEmpty;
@@ -77,8 +81,27 @@ class TriageChatReply {
           ? null
           : TriageAssessmentData.fromJson(
               json['assessment'] as Map<String, dynamic>),
+      progress: json['progress'] == null
+          ? null
+          : TriageProgress.fromJson(json['progress'] as Map<String, dynamic>),
     );
   }
+}
+
+/// Where the screening is: question [step] of an estimated [total] (null
+/// until the main problem is known). The total can change as answers come in.
+class TriageProgress {
+  final int step;
+  final int? total;
+  final bool done;
+
+  const TriageProgress({required this.step, this.total, this.done = false});
+
+  factory TriageProgress.fromJson(Map<String, dynamic> json) => TriageProgress(
+        step: (json['step'] as num?)?.toInt() ?? 1,
+        total: (json['total'] as num?)?.toInt(),
+        done: json['done'] == true,
+      );
 }
 
 class TriageAssessmentData {

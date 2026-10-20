@@ -43,6 +43,14 @@ String tr(String text) {
 }
 
 final translationTemplates = <RegExp, String Function(RegExpMatch)>{
+  RegExp(r'^Question (\d+)$'): (m) => 'Soalan ${m[1]}',
+  RegExp(r'^Step (\d+) of (\d+)$'): (m) => 'Langkah ${m[1]} daripada ${m[2]}',
+  RegExp(r'^Step (\d+)$'): (m) => 'Langkah ${m[1]}',
+  RegExp(r'^(\d+) options$'): (m) => '${m[1]} pilihan',
+  RegExp(r'^A few quick questions · about (\d+) min$'): (m) =>
+      'Beberapa soalan ringkas · kira-kira ${m[1]} min',
+  RegExp(r'^(\d+) selected$'): (m) => '${m[1]} dipilih',
+  RegExp(r'^Screening for (.+)$'): (m) => 'Saringan untuk ${m[1]}',
   RegExp(r'^A password reset link has been sent to (.*)$'): (m) =>
       'Pautan tetapan semula kata laluan telah dihantar ke ${m[1]}',
   RegExp(r'^A 6-digit TAC has been sent to (.*)$'): (m) =>
@@ -103,6 +111,32 @@ class LocalizedText extends StatelessWidget {
 }
 
 const malayTranslations = <String, String>{
+  // AI Triage chat
+  'Restart': 'Mula semula',
+  'Restart screening?': 'Mulakan semula saringan?',
+  'Your answers so far will be cleared and the screening will start again.': 'Jawapan anda setakat ini akan dipadam dan saringan akan bermula semula.',
+  'Cancel': 'Batal',
+  'Continue': 'Teruskan',
+  'Retry': 'Cuba lagi',
+  'Send': 'Hantar',
+  'Change': 'Tukar',
+  'OR': 'ATAU',
+  'Choose one': 'Pilih satu',
+  'Tick all that apply': 'Tandakan semua yang berkaitan',
+  'Answer a few quick questions': 'Jawab beberapa soalan ringkas',
+  'A few quick questions': 'Beberapa soalan ringkas',
+  'Show options': 'Tunjuk pilihan',
+  'Hide options': 'Sembunyi pilihan',
+  'Show': 'Tunjuk',
+  'Hide': 'Sembunyi',
+  'Screening complete': 'Saringan selesai',
+  'Screening for you (the account owner)': 'Saringan untuk anda (pemilik akaun)',
+  'This uses your saved health profile (such as your age). Doing this for someone else? Just tell me who it is for, for example "this is for my mother, she is 70".': 'Saringan ini menggunakan profil kesihatan anda yang disimpan (seperti umur anda). Melakukannya untuk orang lain? Beritahu saya untuk siapa, contohnya "ini untuk ibu saya, dia berumur 70 tahun".',
+  'Type your answer': 'Taip jawapan anda',
+  'Or type your answer in your own words': 'Atau taip jawapan anda dengan perkataan sendiri',
+  'Select an answer': 'Pilih jawapan',
+  'This is for my ': 'Ini untuk ',
+  'Assistant is typing': 'Pembantu sedang menaip',
   'Language': 'Bahasa',
   'App language': 'Bahasa aplikasi',
   'e.g. 010101-01-1234': 'cth. 010101-01-1234',

@@ -104,6 +104,7 @@ async def chat_triage(
             assessment=_assessment_from_result(session.triage_result),
             chief_complaint=getattr(session, "chief_complaint", None),
             main_symptom=getattr(session, "main_symptom", None),
+            progress=getattr(session, "progress", None),
         ),
         message="Agent response generated."
     )

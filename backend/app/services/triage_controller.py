@@ -15,11 +15,12 @@ Per turn:
 4. A PRESENT call phrases that step conversationally. Options, the level, the advice and the 999 line are set by
    code; the phrasing is checked and replaced by the plain template if it breaks a rule.
 """
+import copy
 import json
 import logging
 import re
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Dict, List, Optional
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -30,6 +31,7 @@ from app.agents.triage_agent import (
     _strip_code_fence, kb_selection,
 )
 from app.core.llm import get_llm
+from app.services import plain_language
 from app.services.patient_context import profile_findings
 from app.services.triage_rules_engine import COMPOUND_NOTE, CRITICAL_CATEGORY, NONE_ANSWERS, get_triage_rules_engine
 
@@ -52,21 +54,35 @@ SAY = {
     "age": "How old is the patient?",
     "which": "Which of these is it? Tick all that apply.",
     "conditions": "Do any of these apply right now? Tick all that apply.",
+    "parts": "Do any of these apply? Tick all that apply.",
     "other_symptoms": "Are there any other symptoms you have not mentioned yet?",
     "result": "Thank you for answering. Here is the result of the screening.",
     "stop": STOP_TEXT,
 }
-QUESTION_STEPS = {"question", "which", "confirm", "conditions", "complaint", "age", "other_symptoms"}
+QUESTION_STEPS = {"question", "which", "parts", "confirm", "conditions", "complaint", "age", "other_symptoms"}
+CHECKLIST_STEPS = ("which", "parts", "conditions")
 
 CHECKLIST_SIZE = 6  # conditions with no KB question are asked in checklists of this many
+PARTS_CHECKLIST_MIN = 3  # a yes/no KB question naming at least this many things is shown as a tick list
 MAX_REPEATS = 3     # the same step shown this many times in a row: stop with in-person advice
 MAX_ITERATIONS = 25  # evaluate / catch-up rounds per turn
 MAX_LEAD_CHARS = 400
+MAX_ESTIMATE = 30  # questions-left simulation stops here
+ESTIMATE_AGE = 30.0  # age assumed by the simulation when it is not known yet (only the count matters)
 
 _AGE = re.compile(r"(\d+(?:\.\d+)?)\s*(month|mo\b|bulan|week|minggu)?", re.IGNORECASE)
 _BANNED = re.compile(r"\b911\b|\blevel\s*[1-5]\b|\btahap\s*[1-5]\b", re.IGNORECASE)
 _DIGITS = re.compile(r"\d+")
 _YES_NO_PREFIX = re.compile(r"^(yes|no)\s*-\s*", re.IGNORECASE)
+_THE_PERSON = r"the (?:person|patient)"
+# KB questions say "the person"; when the screening is for the user, ask them directly. (pattern, replacement)
+_FOR_YOU = [
+    (re.compile(rf"\b{_THE_PERSON}'s\b", re.IGNORECASE), "your"),
+    (re.compile(rf"\b([IiDdHhWw])(?:s|oes|as) {_THE_PERSON}\b"), None),  # Is / Does / Has / Was the person
+    (re.compile(rf", {_THE_PERSON} (\w+ing)\b", re.IGNORECASE), r", are you \1"),
+    (re.compile(rf"\b{_THE_PERSON}\b", re.IGNORECASE), "you"),
+]
+_VERB_FOR_YOU = {"i": "are", "d": "do", "h": "have", "w": "were"}
 
 
 def parse_age(message: str) -> Optional[float]:
@@ -80,6 +96,16 @@ def parse_age(message: str) -> Optional[float]:
     elif unit.startswith(("week", "minggu")):
         value /= 52
     return round(value, 2) if 0 <= value <= 120 else None
+
+
+def for_you(text: str) -> str:
+    """`text` addressed to the patient themselves ("Is the person pregnant?" -> "Are you pregnant?")."""
+    def verb(match):
+        word = _VERB_FOR_YOU[match.group(1).lower()]
+        return (word.capitalize() if match.group(1).isupper() else word) + " you"
+    for pattern, replacement in _FOR_YOU:
+        text = pattern.sub(replacement or verb, text)
+    return text
 
 
 def _label(when: str) -> str:
@@ -112,6 +138,10 @@ class HybridSession(TriageSession):
     # Level 1-2 conditions the person seems to have described earlier (catch-up). Never recorded from that alone:
     # when their question comes up, the matching option is pre-selected and the person confirms it.
     mentioned: List[str] = field(default_factory=list)
+    option_map: Dict[str, str] = field(default_factory=dict)  # options as shown -> KB labels (plain wording)
+    # Progress for the app's step bar. Step 1 is the app's own opening "what is the main problem?" question.
+    steps_shown: int = 1
+    progress: Optional[Dict[str, Any]] = None
 
 
 class HybridTriageController:
@@ -233,6 +263,7 @@ class HybridTriageController:
                 self._extract(session, note, None, [])
             step = self._next_step(session)
             output = self._render(session, step, f"{message}. {note}" if note else message)
+            session.progress = self._progress(session)
         except Exception as e:
             logger.error(f"[HybridTriageController] Turn failed: {e}")
             if "content_filter" in str(e):
@@ -255,7 +286,7 @@ class HybridTriageController:
         if picked is None and message.strip() in options:
             picked = [message.strip()]
         if pending and picked and all(p in options for p in picked):
-            self._apply_picked(session, pending, picked)
+            self._apply_picked(session, pending, self._to_kb(session, picked))
             return
         if pending and pending["kind"] == "age" and len(message.split()) <= 4:
             age = parse_age(message)
@@ -263,6 +294,11 @@ class HybridTriageController:
                 session.merge_findings({"age_years": age})
                 return
         self._extract(session, message, pending, [o for o in options if o != NOT_SURE])
+
+    @staticmethod
+    def _to_kb(session: HybridSession, picked: List[str]) -> List[str]:
+        """Options as shown (maybe in plain wording) -> the KB labels they stand for."""
+        return [session.option_map.get(p, p) for p in picked]
 
     def _apply_picked(self, session: HybridSession, step: Dict[str, Any], picked: List[str]) -> None:
         """Record option(s) picked for `step`, decided by the KB mapping, never by the LLM."""
@@ -284,7 +320,10 @@ class HybridTriageController:
         items = step["items"]
         if step["kind"] == "confirm":
             picked = [items[0]["label"]] if picked == [YES] else []
-        session.merge_findings(self._items_findings(items, set(picked)))
+        found = self._items_findings(items, set(picked))
+        if step["kind"] == "parts":
+            found["answered_question_ids"] = [step["question_id"]]
+        session.merge_findings(found)
 
     def _match_parts(self, step: Dict[str, Any], picked: List[str]) -> Optional[Dict[str, Any]]:
         """Options worded "Yes - <part>" / "No - <part>" that name exactly one KB part each (e.g. Q_PAED_06)."""
@@ -304,6 +343,14 @@ class HybridTriageController:
         absent = [i for it in items if it["label"] not in chosen
                   for i in it["condition_ids"] + it.get("covers", []) if i not in present]
         return {"present_condition_ids": present, "absent_condition_ids": absent}
+
+    def _applicable(self, items: List[Dict[str, Any]], age_years: Optional[float]) -> List[Dict[str, Any]]:
+        """Items that can apply at this age (e.g. no "hoarse voice (child)" for an adult). The engine ignores the
+        others, so leaving them unanswered changes nothing."""
+        def applies(i):
+            c = self.engine.conditions.get(i)
+            return c is None or self.engine.applies(c.population, age_years)
+        return [it for it in items if any(applies(i) for i in it["condition_ids"] + it.get("covers", []))]
 
     def _items(self, step: Dict[str, Any]) -> List[Dict[str, Any]]:
         """The answerable items of a step: {label, condition_ids, covers?, compound?}."""
@@ -359,7 +406,7 @@ class HybridTriageController:
             if pending["kind"] == "question" and not self.engine.questions_by_id[pending["question_id"]].get(
                     "multi_select"):
                 picked = picked[:1]
-            self._apply_picked(session, pending, picked)
+            self._apply_picked(session, pending, self._to_kb(session, picked))
         present = [i for i in data.get("present") or [] if i in allowed]
         # Ruling out needs a question on screen: a bare "no" cannot rule out things nobody asked about.
         absent = [i for i in data.get("absent") or [] if i in allowed and i not in present] if question else []
@@ -417,12 +464,13 @@ class HybridTriageController:
 
     # ------------------------------------------------------------------ 2-3. choose the next step
 
-    def _next_step(self, session: HybridSession) -> Dict[str, Any]:
+    def _next_step(self, session: HybridSession, catch_up: bool = True) -> Dict[str, Any]:
+        """`catch_up=False`: no LLM call (the questions-left simulation)."""
         f = session.findings
         for _ in range(MAX_ITERATIONS):
             result = self.engine.evaluate(**f)
             session.triage_result = result
-            if self._catch_up(session, result):
+            if catch_up and self._catch_up(session, result):
                 continue
             if result["status"] == "classified":
                 session.queue.clear()
@@ -434,7 +482,7 @@ class HybridTriageController:
                         and not step["items"][0].get("covers"):
                     continue  # already settled
                 if step["kind"] == "which":
-                    step["items"] = self._items(step)
+                    step["items"] = self._applicable(self._items(step), f["age_years"])
                     if not step["items"]:
                         continue
                 return step
@@ -448,7 +496,13 @@ class HybridTriageController:
             if any(m.get("field") == "age_years" for m in missing):
                 return {"kind": "age"}
             if result["suggested_questions"]:
-                return {"kind": "question", "question_id": result["suggested_questions"][0]["question_id"]}
+                step = {"kind": "question", "question_id": result["suggested_questions"][0]["question_id"]}
+                items = self._applicable(self._items(step), f["age_years"])
+                if self.engine.questions_by_id[step["question_id"]]["answers"] == [YES, NO]                         and len(items) >= PARTS_CHECKLIST_MIN:
+                    # A yes/no question naming several things: a tick list of short items, answered once,
+                    # instead of a long sentence and then "which of these" after a "Yes".
+                    step = {"kind": "parts", "question_id": step["question_id"], "items": items}
+                return step
             unasked = [m for m in missing if "condition_id" in m]
             if unasked:
                 # Conditions with no KB question: ask them as a checklist in the KB's own wording.
@@ -471,6 +525,8 @@ class HybridTriageController:
             step = {"kind": "stop"}  # no progress: never loop on the same question
 
         kind, result = step["kind"], session.triage_result or {}
+        if kind in QUESTION_STEPS and kind != "complaint" and session.repeats == 0:
+            session.steps_shown += 1  # a new question (not the same one shown again)
         session.pending = step if kind in QUESTION_STEPS else None
         session.finished = kind in ("result", "stop")
         output: Dict[str, Any] = {"type": "text", "question": None}
@@ -478,20 +534,31 @@ class HybridTriageController:
         if kind == "question":
             q = self.engine.questions_by_id[step["question_id"]]
             output.update(type="selection", **kb_selection(q))
-            say = q["text"]
-        elif kind in ("which", "conditions"):
+            say = plain_language.question(q["question_id"], q["text"])
+        elif kind in CHECKLIST_STEPS:
             options = [it["label"] for it in step["items"]] + [NONE_OPTION]
             output.update(type="selection", response=options + [NOT_SURE], multi_select=True,
                           exclusive_options=[NONE_OPTION, NOT_SURE])
             if step.get("question_id"):
                 output["question_id"] = step["question_id"]
+            if kind == "parts":
+                say = plain_language.question(step["question_id"], say)
         elif kind == "confirm":
             output.update(type="selection", response=[YES, NO])
-            say = f"Is this happening: {step['items'][0]['label']}?"
+            say = f"Is this happening: {plain_language.label(step['items'][0]['label'])}?"
+        if session.subject == "self":
+            say = for_you(say)
 
         suggested = self._suggested(session, step) if output["type"] == "selection" else []
         if suggested:
             output["suggested_options"] = suggested
+        if output["type"] == "selection":
+            # Shown in plain wording when enabled; a tap is mapped back to the KB label in _record.
+            session.option_map = plain_language.options(output["response"])
+            shown = {kb: text for text, kb in session.option_map.items()}
+            for key in ("response", "exclusive_options", "suggested_options"):
+                if key in output:
+                    output[key] = [shown.get(o, o) for o in output[key]]
         before, after = self._fixed_lines(session, kind, result)
         lead, fixed = self._phrase(session, kind, say, message, output.get("response") or [], before + after,
                                    mentioned="; ".join(session.facts)[:200] if suggested else None)
@@ -502,6 +569,53 @@ class HybridTriageController:
             output["response"] = text
         return output
 
+    # ------------------------------------------------------------------ progress
+
+    def _progress(self, session: HybridSession) -> Dict[str, Any]:
+        """{step, total, done} for the app's step bar. `total` is an estimate (None until the complaint is known)."""
+        step = session.steps_shown
+        if session.finished:
+            return {"step": step, "total": step, "done": True}
+        left = self._questions_left(session)
+        return {"step": step, "total": None if left is None else step + left, "done": False}
+
+    def _questions_left(self, session: HybridSession) -> Optional[int]:
+        """Questions after the one on screen if every remaining answer is the "none" answer, worked out by the
+        engine alone on a copy of the session (no LLM call). Roughly an upper bound: a positive answer usually
+        settles the level sooner, though a follow-up ("which", "Not sure", a new complaint) can add a few. It is
+        recomputed every turn, so it corrects itself. None while the complaint is not known yet."""
+        step = session.pending
+        if not step or step["kind"] == "complaint":
+            return None
+        sim = copy.deepcopy(replace(session, messages=[]))
+        left, seen = -1, set()
+        while step and step["kind"] in QUESTION_STEPS and left < MAX_ESTIMATE:
+            signature = json.dumps(step, sort_keys=True)
+            if step["kind"] == "complaint" or signature in seen:
+                break
+            seen.add(signature)
+            left += 1
+            self._answer_none(sim, step)
+            step = self._next_step(sim, catch_up=False)
+        return max(left, 0)
+
+    def _answer_none(self, sim: HybridSession, step: Dict[str, Any]) -> None:
+        """Record the "none" answer to `step` (simulation only)."""
+        kind = step["kind"]
+        if kind == "age":
+            sim.merge_findings({"age_years": ESTIMATE_AGE})
+        elif kind == "confirm":
+            self._apply_picked(sim, step, [NO])
+        elif kind in CHECKLIST_STEPS:
+            self._apply_picked(sim, step, [NONE_OPTION])
+        elif kind == "question":
+            q = self.engine.questions_by_id[step["question_id"]]
+            options = [o for o in kb_selection(q)["response"] if o != NOT_SURE]
+            nones = [o for o in options if o in q.get("none_answers", []) or o == NO or o in NONE_ANSWERS]
+            # No none answer (e.g. only severity bands): the last option, usually the least urgent.
+            self._apply_picked(sim, step, nones[:1] or options[-1:])
+        # other_symptoms: asked once; with nothing new the screening goes on
+
     def _suggested(self, session: HybridSession, step: Dict[str, Any]) -> List[str]:
         """Options covering what the person already mentioned (session.mentioned), to show pre-selected."""
         mentioned = set(session.mentioned)
@@ -509,7 +623,7 @@ class HybridTriageController:
             return []
         if step["kind"] == "confirm":
             return [YES] if mentioned & set(step["items"][0]["condition_ids"]) else []
-        if step["kind"] in ("which", "conditions"):
+        if step["kind"] in CHECKLIST_STEPS:
             return [it["label"] for it in step["items"] if mentioned & set(it["condition_ids"])]
         if step["kind"] != "question":
             return []
@@ -548,7 +662,8 @@ class HybridTriageController:
         """Conversational wording for `say` (+ fixed lines translated for Malay). Falls back to the template."""
         translate = session.language != "en"
         payload = {"language": session.language, "user_said": message[:300], "step": kind, "say": say,
-                   "options": options[:10], "fixed": fixed if translate else []}
+                   "options": options[:10], "fixed": fixed if translate else [],
+                   "subject": session.subject or "unknown"}
         if session.profile_note:
             payload["patient_note"], session.profile_note = session.profile_note, None  # mentioned once
         if mentioned:
@@ -560,7 +675,7 @@ class HybridTriageController:
             session.template_fallbacks += 1
             return say, fixed
         lead = data.get("text")
-        if not self._lead_ok(lead, "?" in say):
+        if not self._lead_ok(lead, "?" in say, session.subject == "self"):
             logger.warning(f"[HybridTriageController] Phrasing rejected, using the template: {lead!r}")
             session.template_fallbacks += 1
             lead = say
@@ -572,9 +687,11 @@ class HybridTriageController:
         return lead.strip(), fixed
 
     @staticmethod
-    def _lead_ok(lead: Any, must_ask: bool) -> bool:
+    def _lead_ok(lead: Any, must_ask: bool, for_self: bool = False) -> bool:
         if not isinstance(lead, str) or not lead.strip() or len(lead) > MAX_LEAD_CHARS:
             return False
         if _BANNED.search(lead):
             return False
+        if for_self and re.search(rf"\b{_THE_PERSON}\b", lead, re.IGNORECASE):
+            return False  # the user is the patient: they are "you"
         return "?" in lead or not must_ask  # a question must still be asked

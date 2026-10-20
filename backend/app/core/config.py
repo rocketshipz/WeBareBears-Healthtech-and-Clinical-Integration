@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     # /triage/chat engine: "agent" (LLM tool-calling loop) or "hybrid" (code runs the screening; the LLM only
     # reads free text and phrases replies). See app/services/triage_controller.py.
     TRIAGE_MODE: str = "agent"
+    # Hybrid mode: show questions and options in the everyday wording of app/tools/plain_language.json (display
+    # only; taps are mapped back to the KB labels). Off until the wording has been clinically reviewed.
+    PLAIN_LANGUAGE: bool = False
 
     # Embedding Model Configuration (Google Gemini)
     GEMINI_API_KEY: Optional[str] = None
