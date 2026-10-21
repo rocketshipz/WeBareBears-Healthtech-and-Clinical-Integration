@@ -126,6 +126,7 @@ const malayTranslations = <String, String>{
   'Answer a few quick questions': 'Jawab beberapa soalan ringkas',
   'A few quick questions': 'Beberapa soalan ringkas',
   'Show options': 'Tunjuk pilihan',
+  'Tap to answer': 'Ketik untuk menjawab',
   'Hide options': 'Sembunyi pilihan',
   'Show': 'Tunjuk',
   'Hide': 'Sembunyi',

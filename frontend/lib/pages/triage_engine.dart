@@ -93,7 +93,8 @@ class _TriagePageState extends State<TriagePage> {
   final Set<String> _checked = {}; // ticked options of a multi-select question
   bool _loading = false;
   // Options panel slid down to a slim bar, so the chat can use the screen.
-  bool _panelCollapsed = false;
+  // Starts collapsed for every question; the user taps the bar to answer.
+  bool _panelCollapsed = true;
   String? _error;
 
   /// Bumped on restart so a reply to the old session is ignored.
@@ -132,6 +133,7 @@ class _TriagePageState extends State<TriagePage> {
       _noteController.clear();
       _dropdownValue = null;
       _checked.clear();
+      _panelCollapsed = true;
       _loading = true;
       _error = null;
     });
@@ -150,7 +152,7 @@ class _TriagePageState extends State<TriagePage> {
         _chiefComplaint = reply.chiefComplaint ?? _chiefComplaint;
         _mainSymptom = reply.mainSymptom ?? _mainSymptom;
         _current = reply;
-        _panelCollapsed = false; // a new question always shows its options
+        _panelCollapsed = true; // a new question starts hidden until tapped
         _progress = reply.progress ?? _progress;
         _loading = false;
         _messages.add(_ChatMessage(reply.text, fromUser: false));
@@ -265,7 +267,7 @@ class _TriagePageState extends State<TriagePage> {
       _lastSelected = null;
       _lastNote = null;
       _current = null;
-      _panelCollapsed = false;
+      _panelCollapsed = true;
       _progress = const TriageProgress(step: 1);
       _dropdownValue = null;
       _checked.clear();
@@ -920,7 +922,7 @@ class _TriagePageState extends State<TriagePage> {
     if (picked.isNotEmpty) {
       summary = current.multiSelect ? '${picked.length} selected' : picked.first;
     } else {
-      summary = '${current.options.length} options';
+      summary = 'Tap to answer';
     }
     return Pressable(
       scale: 0.98,
