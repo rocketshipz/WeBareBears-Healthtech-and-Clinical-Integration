@@ -4,15 +4,16 @@ The mobile client application for the MedicTri Emergency Triage & Hospital Routi
 
 ## Overview
 
-The mobile frontend provides:
-- Patient triage assessment questionnaire and symptom input
-- Real-time communication with the FastAPI backend
-- Hospital recommendations, routing, and emergency facility status
+One app with two sides, chosen on the start screen:
+- **Patient**: triage chat (`/api/triage/chat`), triage report with PDF export, hospital recommendations and map, visit progress, family access, profile. English and Malay.
+- **Admin (hospital staff)**: emergency queue, check-in, stage logging, tests, diagnosis notes and patient lookup.
+
+The primary demo target is Flutter Web (Chrome). The backend must be running (see the [root README](../README.md)).
 
 ## Getting Started
 
 ### Prerequisites
-- [Flutter SDK](https://flutter.dev/docs/get-started/install) (3.13.4 or higher)
+- [Flutter SDK](https://flutter.dev/docs/get-started/install) (Dart SDK 3.x)
 - Android Studio / Xcode / VS Code with Flutter extension
 - An emulator or physical device
 
@@ -45,17 +46,23 @@ flutter run -d windows
 ```
 frontend/
 ├── lib/
-│   ├── main.dart                 # Application entry point
-│   └── screens/
-│       └── login_screen.dart     # Authentication & initial screen
-├── test/
-│   └── widget_test.dart          # Widget tests
-├── android/                      # Android native project files
-├── ios/                          # iOS native project files
-├── web/                          # Web platform files
-├── windows/                      # Windows desktop files
-├── macos/                        # macOS desktop files
-├── linux/                        # Linux desktop files
-├── pubspec.yaml                  # Flutter package dependencies
-└── analysis_options.yaml         # Lint rules & static analysis configuration
+│   ├── main.dart                 # Entry point → role selection (patient / admin)
+│   ├── theme.dart                # Gradient design system
+│   ├── localization.dart         # English / Malay strings
+│   ├── countries.dart            # Country list for sign-up
+│   ├── screens/                  # Role selection, login, sign-up, forgot password
+│   ├── pages/                    # Home, triage chat, report, routing, hospitals map, progress, profile, notifications
+│   ├── admin/                    # Staff app: queue, check-in, patient detail, diagnosis, PDF, i18n
+│   ├── services/                 # API base URL, auth, triage chat, hospitals, GPS
+│   └── widgets/                  # Hospital card, family access card, visit history
+├── test/                         # Widget and unit tests
+├── web/ android/ ios/ ...        # Platform projects
+└── pubspec.yaml
+```
+
+## Checks
+
+```bash
+flutter analyze
+flutter test
 ```

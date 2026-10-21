@@ -32,7 +32,7 @@ class AdminStore extends ChangeNotifier {
     if (_repo.isDemo) _seed();
   }
 
-  /// Called once at start-up (see main_admin.dart).
+  /// Swaps the data source (used by tests to switch between demo and API).
   void useRepository(AdminRepository repo) {
     _stopListening?.call();
     _debounce?.cancel();

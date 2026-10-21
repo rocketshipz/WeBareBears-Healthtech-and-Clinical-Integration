@@ -1,126 +1,195 @@
-# MedicTri - Medical Emergency Triage & Hospital Routing System
+# TriageMY (MedicTri)
 
-A mobile-based first-level medical emergency triage and hospital routing system.
+First-level emergency triage and hospital routing for patients in Malaysia.
 
-## Overview
+A patient describes what is wrong in a chat. The app works out how urgent it is using the **Malaysian Triage Scale (MTS) 2019**, then recommends nearby hospitals ranked by travel time and how busy each emergency department is. Hospital staff use the same app to check patients in and log each stage of the visit, and family members can follow the visit's progress.
 
-MedicTri provides immediate emergency triage assessments and intelligently routes patients to appropriate healthcare facilities based on clinical urgency, specialty requirements, and facility proximity.
+> Hackathon / demo project. TriageMY does not diagnose and does not replace a clinician. In an emergency, call **999** (or **112** from a mobile phone).
 
-## System Architecture
+---
 
-```
-Flutter Mobile App (Frontend)
-       ↓
-  Backend API (FastAPI)
-       ↓
- Medical Triage Agent
- ├── Triage Tool
- ├── Patient History Tool
- ├── Hospital Data Tool
- ├── Hospital Routing Tool
- └── Embedding Tool
-       ↓
- Database / Data Sources (PostgreSQL / Supabase)
-```
+## Features
 
-## Repository Structure
+**Patients**
+- **Triage chat.** A guided screening that asks the MTS discriminator questions and ends with a level (1 Resuscitation to 5 Routine), advice for that level, and "call 999" when needed. It works in English and Malay.
+- **Triage report.** Shows the result and main symptom, and exports a PDF.
+- **Hospital routing.** Recommends hospitals from the patient's live GPS location, ranked by travel time (live Google traffic when configured) and how busy each ED is, weighted by the triage level.
+- **Hospitals tab.** A map of nearby facilities with name and address search.
+- **Progress tracking.** Follow the stages of an ED visit (check-in, tests, results).
+- **Family access.** Invite a family member through a one-time link (for example by WhatsApp). The patient approves the request and can revoke it at any time.
 
-- `backend/`: FastAPI backend service, Agentic AI, deterministic triage tools, and data access layer.
-  - `backend/app/`: Core application modules (API, agents, tools, services, models, schemas, repositories, core).
-  - `backend/data/`: Data storage directories (`patients/`, `triage/`, `hospitals/`).
-  - `backend/tests/`: Integration and unit tests.
-- `frontend/`: Flutter mobile frontend application (`triagemy`).
-  - `frontend/lib/`: Mobile application code and UI screens.
-  - `frontend/android/`, `ios/`, `web/`, `windows/`, `macos/`, `linux/`: Platform support configurations.
+**Hospital staff** (choose "Admin" on the start screen)
+- Live emergency queue, check-in, one-tap stage logging, tests, diagnosis and treatment notes, and patient lookup by IC.
 
-## Getting Started
+## How triage works
 
-### 1. Backend Service (FastAPI)
-
-1. Open a terminal and navigate to `backend/`:
-   ```bash
-   cd backend
-   ```
-2. Create and activate the virtual environment (first time only):
-   ```powershell
-   # Create virtual environment
-   python -m venv venv
-   
-   # Activate (Windows)
-   .\venv\Scripts\Activate.ps1
-
-3. Create and activate a Python virtual environment, then install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Configure your `.env` (copy from `.env.example`).
-5. Run the backend server:
-   ```bash
-   python main.py
-   ```
-   Or using Uvicorn:
-   ```bash
-   uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-   ```
-See [backend/README.md](backend/README.md) for full backend documentation.
-
-### 2. Frontend Application (Flutter)
-
-1. Open a terminal and navigate to `frontend/`:
-   ```bash
-   cd frontend
-   ```
-2. Install Flutter packages:
-   ```bash
-   flutter pub get
-   ```
-3. Run the application:
-   ```bash
-   flutter run
-   ```
-See [frontend/README.md](frontend/README.md) for full mobile client documentation.
-
-## AI Architecture
+The triage level is **never decided by the LLM**. It is computed by a deterministic rules engine from a knowledge base built from the MTS 2019 PDF (Appendix 8):
 
 ```
-                         USER
-                           │
-                           ▼
-                ┌────────────────────┐
-                │   AGENTIC AI       │
-                │   One LLM          │
-                └─────────┬──────────┘
-                          │
-             ┌────────────┼────────────┐
-             │            │            │
-             ▼            ▼            ▼
-       Triage Tool   Health Tool   Hospital Tool
-             │            │            │
-             ▼            ▼            ▼
-      Triage JSON     User Health    Hospital DB
-      Principles      History        + Live Status
-             │            │            │
-             └────────────┼────────────┘
-                          │
-                          ▼
-                  Embedding Search
-                          │
-                          ▼
-                 Relevant information
-                          │
-                          ▼
-                  Agent reasoning
-                          │
-            ┌─────────────┴─────────────┐
-            ▼                           ▼
-      TRIAGE RESULT              HOSPITAL OPTIONS
-      RED/YELLOW/GREEN           distance / ETA /
-                                  waiting / capability
-            │                           │
-            └─────────────┬─────────────┘
-                          ▼
-                    REPORT TOOL
-                          │
-                          ▼
-                  Patient Report
+patient message ─► LLM extracts facts as condition IDs ─► rules engine ─► level + advice
+                   (and phrases the questions)            (mts_screening_kb.json)
 ```
+
+- The engine keeps asking the next most urgent tier of questions until every more urgent condition has been ruled out. Only then is the level final.
+- Hospital routing uses the level but can never change it.
+- There are two chat modes (`TRIAGE_MODE`):
+  - `hybrid`: code drives the flow, and the LLM only turns free text into answers and phrases each question. About 8k tokens per screening.
+  - `agent` (default): an LLM tool-calling loop. About 50k tokens per screening.
+
+The full contract (what the LLM may and may not do, how the KB maps to the PDF, the levels) is in [CLAUDE.md](CLAUDE.md) §4. The source PDF is [`malaysiantriagescalenewrevised2019.pdf`](malaysiantriagescalenewrevised2019.pdf).
+
+## Architecture
+
+```
+┌──────────────────────────────────────────────┐
+│ Flutter app (web / Android), "triagemy"      │
+│ patient side + staff side                    │
+└──────────────────────┬───────────────────────┘
+                       │ REST/JSON under /api
+┌──────────────────────▼───────────────────────┐
+│ FastAPI backend                              │
+│ routes → services → repositories             │
+├──────────────┬───────────────┬───────────────┤
+│ Triage       │ Routing       │ Auth, profile,│
+│ rules engine │ Haversine +   │ progress,     │
+│ + LLM (Azure │ Google Routes │ family access │
+│ gpt-4.1-mini)│ + ED activity │               │
+└──────────────┴───────┬───────┴───────────────┘
+                       ▼
+          PostgreSQL / Supabase (SQLite fallback)
+```
+
+| Layer | Stack |
+|---|---|
+| Frontend | Flutter 3.x / Dart 3.x, Material 3, `flutter_map`, `geolocator`, `pdf` + `printing`, `http` |
+| Backend | Python 3.11+, FastAPI, Pydantic v2, SQLAlchemy, APScheduler |
+| LLM | Azure OpenAI `gpt-4.1-mini` via `langchain-openai`, temperature 0 |
+| Embeddings | Google Gemini `gemini-embedding-2` |
+| Maps | Google Routes API (live traffic) and Places API (location checks), both optional |
+| Database | Supabase PostgreSQL, falling back to local SQLite when no credentials are set |
+
+## Repository layout
+
+```
+MedicTri/
+├── backend/
+│   ├── main.py                  # entry point: python main.py
+│   ├── app/
+│   │   ├── api/routes/          # auth, triage, hospitals, patients, progress, family, admin, health
+│   │   ├── agents/              # MedicalTriageAgent + prompts (agent and hybrid modes)
+│   │   ├── services/            # triage_rules_engine, triage_controller, routing, traffic, auth, ...
+│   │   ├── repositories/        # data access
+│   │   ├── models/ schemas/     # SQLAlchemy entities and Pydantic schemas
+│   │   ├── core/                # config, database, llm, location_detector, scheduler
+│   │   ├── tools/               # LangChain tools + mts_screening_kb.json (the triage rules)
+│   │   └── templates/           # family invitation page
+│   ├── scripts/                 # triage evaluation, hospital location check, wait-label update
+│   ├── migrate_*.py             # one-off database migrations (see below)
+│   ├── setup_staff_passwords.py
+│   └── tests/
+├── frontend/
+│   └── lib/
+│       ├── main.dart            # entry point → role selection (patient / admin)
+│       ├── screens/             # login, sign-up, forgot password, role selection
+│       ├── pages/               # home, triage chat, report, routing, hospitals, progress, profile
+│       ├── admin/               # staff app (queue, check-in, patient detail, ...)
+│       ├── services/            # API clients, GPS
+│       └── widgets/
+├── malaysiantriagescalenewrevised2019.pdf   # source for the triage KB
+└── CLAUDE.md                    # rules and notes for developers and AI agents
+```
+
+## Getting started
+
+### Prerequisites
+- Python 3.11+
+- Flutter SDK 3.x (Chrome for web)
+- An Azure OpenAI deployment (needed for the triage chat)
+- Optional: Supabase/PostgreSQL credentials, a Google Maps Platform key, and a Gmail App Password for sign-up codes
+
+### 1. Backend
+
+```powershell
+cd backend
+python -m venv venv
+.\venv\Scripts\Activate.ps1          # macOS/Linux: source venv/bin/activate
+pip install -r requirements.txt
+copy .env.example .env               # then fill in your keys
+python main.py
+```
+
+The API runs at `http://127.0.0.1:8000` under `/api`. Swagger UI is at `/docs`.
+
+### 2. Frontend
+
+```powershell
+cd frontend
+flutter pub get
+flutter run -d chrome
+```
+
+The app calls `http://localhost:8000/api` on web and `http://10.0.2.2:8000/api` on the Android emulator (`lib/services/api_service.dart`). Browser geolocation needs `localhost` or HTTPS.
+
+VS Code users can start both together with the **Full Stack (Backend + Frontend)** launch configuration.
+
+## Configuration
+
+All settings are in `backend/.env` (template: [`backend/.env.example`](backend/.env.example)). `backend/app/core/config.py` holds the defaults.
+
+| Variable | Purpose |
+|---|---|
+| `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL_NAME` | Azure OpenAI endpoint and deployment for the triage LLM |
+| `TRIAGE_MODE` | `agent` (default) or `hybrid` |
+| `PLAIN_LANGUAGE` | Everyday wording for questions in hybrid mode. Keep it off until the wording has been clinically reviewed |
+| `GEMINI_API_KEY` / `GOOGLE_API_KEY` | Gemini embeddings |
+| `GOOGLE_MAPS_API_KEY` | Live traffic and location checks. Without it, routing uses a 35 km/h estimate |
+| `DATABASE_URL` or `POSTGRES_DB_*` | Supabase/PostgreSQL. Without them, a local SQLite file is used |
+| `PUBLIC_BACKEND_URL` | Public origin for family invitation links |
+| `TAC_DELIVERY`, `SMTP_*` | Email verification codes for sign-up (Gmail SMTP) |
+
+Never commit `.env`.
+
+## Testing
+
+```powershell
+cd backend;  .\venv\Scripts\python.exe -m pytest -q
+cd frontend; flutter analyze; flutter test
+```
+
+To evaluate triage end to end with a scripted patient (writes to `backend/scripts/sim_results/`, which is gitignored):
+
+```powershell
+cd backend
+python scripts/scripted_triage_eval.py --oracle-only           # engine only, no LLM calls
+python scripts/scripted_triage_eval.py --mode hybrid --only 1,2,3
+```
+
+## Database maintenance
+
+Run these once, from `backend/`, against an existing database. Each one keeps existing rows.
+
+| Script | What it does |
+|---|---|
+| `migrate_triage_reports.py` | Brings `patient_triage_reports` up to the current schema |
+| `migrate_patient_progress.py`, then `migrate_patient_relationships.py` | Progress-tracking tables and their foreign keys |
+| `migrate_family_access.py` | Family invitation and access tables, with RLS |
+| `setup_staff_passwords.py` | Sets the default staff password and repairs uninitialised hashes |
+| `scripts/verify_hospital_locations.py [--only-new]` | Checks hospital coordinates against Google Places |
+| `scripts/update_wait_labels.py` | Runs the ED activity-label update once (it also runs on a schedule) |
+
+More detail on staff accounts, progress tracking, family access and email setup is in [backend/README.md](backend/README.md).
+
+## Known gaps
+
+- `POST /api/triage/assess` is a placeholder that always returns `URGENT`. The app uses `/api/triage/chat`.
+- The agent tools `route_to_recommended_hospital`, `query_hospital_facilities` and `search_medical_embeddings` are placeholders. Routing is done by `GET /api/hospitals/recommendations`.
+- Triage chat sessions are kept in memory and are lost when the backend restarts. Classified screenings are saved as reports.
+- `frontend/test/localization_test.dart` ("Profile switch saves language…") currently fails.
+
+## Roadmap
+
+1. Reduce token use in agent mode by trimming old turns from the history sent to the LLM.
+2. Shorten paediatric screenings by adding a first-look checklist for children.
+3. Turn the remaining multi-part yes/no questions into option lists.
+4. Review the Azure content-filter settings so self-harm messages reach the screening.
+5. Add the chat transcript to the PDF report.
