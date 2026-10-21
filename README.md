@@ -145,9 +145,38 @@ All settings are in `backend/.env` (template: [`backend/.env.example`](backend/.
 | `GOOGLE_MAPS_API_KEY` | Live traffic and location checks. Without it, routing uses a 35 km/h estimate |
 | `DATABASE_URL` or `POSTGRES_DB_*` | Supabase/PostgreSQL. Without them, a local SQLite file is used |
 | `PUBLIC_BACKEND_URL` | Public origin for family invitation links |
+| `CORS_ORIGINS` | Browser origins allowed to call the API, comma-separated (default `*`). localhost on any port is always allowed |
 | `TAC_DELIVERY`, `SMTP_*` | Email verification codes for sign-up (Gmail SMTP) |
+| `EMAIL_PROVIDER`, `BREVO_API_KEY` | `smtp` (default) or `brevo`, which sends the same email through Brevo's HTTP API for hosts that block SMTP |
 
 Never commit `.env`.
+
+## Deployment
+
+The frontend is a static site (for example on Vercel), and the backend runs separately over HTTPS. Local development needs neither of the settings below: without them the app uses `localhost` as before.
+
+**Backend.** Host it as **one long-running instance**, for example on Render, Railway, Fly.io or Azure App Service. Serverless hosting does not work, because triage chat sessions are kept in memory and APScheduler runs background jobs.
+
+On Render's free tier:
+- Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`, root directory `backend`.
+- The service sleeps after 15 minutes idle and loses chats in progress. Keep it awake with a free pinger (e.g. cron-job.org) on `/api/health` every 10 minutes.
+- SMTP ports are blocked, so set `EMAIL_PROVIDER=brevo` and `BREVO_API_KEY` (see [backend/README.md](backend/README.md#signup-email-tac-gmail)).
+- Use Supabase's Session pooler URL for `DATABASE_URL`, because Render cannot reach Supabase's IPv6-only direct host.
+
+In the backend's environment, set:
+- `CORS_ORIGINS=https://<your-app>.vercel.app`
+- `PUBLIC_BACKEND_URL=https://<your-backend>`
+- the usual keys from `.env.example`
+
+**Frontend.** Vercel has no Flutter SDK, so build locally and upload the output:
+
+```powershell
+cd frontend
+flutter build web --release --dart-define=API_BASE_URL=https://<your-backend>/api
+vercel deploy build/web --prod
+```
+
+`web/vercel.json` is copied into the build. It sends every path to `index.html` and stops browsers caching the app shell, so users get new releases. Anything passed with `--dart-define` ends up readable in the browser bundle, so never put secrets there.
 
 ## Testing
 
