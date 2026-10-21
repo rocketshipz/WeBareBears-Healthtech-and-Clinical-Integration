@@ -26,6 +26,7 @@ class _MainNavigationState extends State<MainNavigation> {
   late int currentIndex = widget.initialIndex;
 
   late final List<Widget> pages;
+  final profileKey = GlobalKey<ProfilePageState>();
 
   @override
   void initState() {
@@ -42,11 +43,15 @@ class _MainNavigationState extends State<MainNavigation> {
         onMedicalHistory: () {
           setState(() => currentIndex = 4);
         },
+        onCompleteProfile: () {
+          setState(() => currentIndex = 4);
+          profileKey.currentState?.startEditing();
+        },
       ),
       const TriagePage(),
       const ProgressTrackingPage(),
       const HospitalsPage(),
-      const ProfilePage(),
+      ProfilePage(key: profileKey),
     ];
   }
 
@@ -73,12 +78,14 @@ class _MainNavigationState extends State<MainNavigation> {
 class HomePage extends StatefulWidget {
   final VoidCallback onStartTriage;
   final VoidCallback onMedicalHistory;
+  final VoidCallback? onCompleteProfile;
   final VoidCallback onHospitals;
 
   const HomePage({
     super.key,
     required this.onStartTriage,
     required this.onMedicalHistory,
+    this.onCompleteProfile,
     required this.onHospitals,
   });
 
@@ -530,7 +537,7 @@ class _HomePageState extends State<HomePage>
 
   Widget _buildProfileReminder() {
     return Pressable(
-      onTap: widget.onMedicalHistory,
+      onTap: widget.onCompleteProfile ?? widget.onMedicalHistory,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(14, 13, 12, 13),

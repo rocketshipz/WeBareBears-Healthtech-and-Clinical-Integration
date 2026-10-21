@@ -33,10 +33,11 @@ class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<ProfilePage> createState() => ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class ProfilePageState extends State<ProfilePage> {
+  final _personalSectionKey = GlobalKey();
   Uint8List? _photoBytes;
   bool _photoSaving = false;
   bool isEditing = false;
@@ -536,16 +537,35 @@ class _ProfilePageState extends State<ProfilePage> {
                     // HEADER
                     FadeSlideIn(
                       index: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Column(
                         children: [
-                          const BrandWordmark(),
                           Row(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
+                              TextButton.icon(
+                                onPressed: _saving ? null : _logout,
+                                icon: const Icon(
+                                  Icons.logout_rounded,
+                                  size: 16,
+                                ),
+                                label: const Text('Log out'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: AppColors.red,
+                                  textStyle: AppText.caption,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                ),
+                              ),
+                              const Spacer(),
                               _languageDropdown(),
-                              const SizedBox(width: 8),
-                              _editButton(),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const BrandWordmark(),
+                              if (!isEditing) _editButton(),
                             ],
                           ),
                         ],
@@ -642,6 +662,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     const FamilyAccessCard(),
                     const SizedBox(height: 24),
                     FadeSlideIn(
+                      key: _personalSectionKey,
                       index: 2,
                       child: _section(
                         icon: Icons.person_outline_rounded,
@@ -933,24 +954,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
 
                     const SizedBox(height: 24),
-                    PrimaryButton(
-                      label: 'Log out',
-                      icon: Icons.logout_rounded,
-                      color: AppColors.red,
-                      onPressed: _saving
-                          ? null
-                          : () {
-                              AuthService.logout();
-                              profileData.value = {};
-                              profileCompleted.value = false;
-                              Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => const RoleSelectionScreen(),
-                                ),
-                                (route) => false,
-                              );
-                            },
-                    ),
+                    if (isEditing)
+                      PrimaryButton(
+                        key: const ValueKey('profile-save-button'),
+                        label: _saving ? 'Saving...' : 'Save',
+                        icon: Icons.check_rounded,
+                        onPressed: (_saving || _loading) ? null : _saveProfile,
+                      ),
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -1002,6 +1012,33 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> startEditing() async {
+    if (_saving) return;
+    if (AuthService.isAuthenticated && !_profileLoaded) await _loadProfile();
+    if (!mounted || (AuthService.isAuthenticated && !_profileLoaded)) return;
+    setState(() => isEditing = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final section = _personalSectionKey.currentContext;
+      if (section != null) {
+        Scrollable.ensureVisible(
+          section,
+          duration: const Duration(milliseconds: 250),
+        );
+      }
+    });
+  }
+
+  void _logout() {
+    AuthService.logout();
+    profileData.value = {};
+    profileCompleted.value = false;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(builder: (_) => const RoleSelectionScreen()),
+      (route) => false,
     );
   }
 
