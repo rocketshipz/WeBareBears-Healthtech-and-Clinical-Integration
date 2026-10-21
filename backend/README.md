@@ -41,8 +41,6 @@ backend/
 │   └── main.py                 # FastAPI application definition
 ├── scripts/                    # Triage evaluation, hospital location check, wait-label update
 ├── tests/                      # Automated test suite
-├── migrate_*.py                # One-off database migrations
-├── setup_staff_passwords.py    # Staff password bootstrap
 ├── .env.example                # Example environment variables
 ├── requirements.txt            # Python dependencies
 └── main.py                     # Convenience entry point
@@ -94,17 +92,13 @@ Store the resulting hash in `staff_login.password_hash`. The old `ADMIN_STAFF_ID
 Patient lookup is staff-only: `GET /api/admin/patients?ic=...`.
 Triage reports are saved by the server: once a logged-in screening on `POST /api/triage/chat` is classified, it is stored in `patient_triage_reports`, keyed by the triage `session_id`, built from the rules engine result (clients cannot post a report or level).
 If the screening was for someone else, the user can link it to that person's account with `PUT /api/triage/reports/{session_id}/subject` (`{"ic": "..."}`), so staff find it when that person checks in.
-Existing databases: run `python migrate_triage_reports.py` once (renames `id` to `session_id`, adds `subject`, `subject_user_id`, `updated_at`; keeps existing rows).
 The admin queue and progress now use the authenticated API and the three existing Supabase patient tables. They persist across app restarts.
 
-Staff starter passwords default to `triagemy123` (PBKDF2 hashed). Run `python setup_staff_passwords.py` once to configure the database default and repair uninitialized passwords. Existing valid hashes are preserved. Staff can change their password from Account > Change password by entering their current password and confirming a new one.
+Staff starter passwords default to `triagemy123` (PBKDF2 hashed). Staff can change their password from Account > Change password by entering their current password and confirming a new one.
 
 ## Patient progress database connection
 
 Use the existing `DATABASE_URL` configuration. No Supabase secret or service key is sent to Flutter.
-Run `python migrate_patient_progress.py` once against the configured database, then restart the API.
-Then run `python migrate_patient_relationships.py` to link the existing hospital, patient, visit and staff keys.
-The migration preserves existing rows and enables RLS without granting new direct client access.
 
 - `patient_progress` holds check-ins, hospital/department assignment, queue numbers, visit state, audit history, sharing consent and an optimistic version counter.
   `hospital_id` references `hospital_data.hospital_id`; staff accounts use the same canonical key. Hospital names remain display values. `assigned_staff_account_id` references `staff_login.id`, while the existing `assigned_staff_id` remains the display/login code.
@@ -120,7 +114,7 @@ Family progress uses `/api/progress/family` and requires an explicit patient-app
 In Profile, create an invitation and share it through WhatsApp. The recipient opens the link, logs in with their own TriageMY account and sends a request. The patient accepts/rejects in Profile, and can revoke access anytime. Approved family members use Progress > Family. Approval covers the patient's visits until revoked.
 Each invitation permits exactly one submitted request and expires after 24 hours if unused. Opening links or WhatsApp previews does not consume them. Claims use an atomic database update, so simultaneous requests cannot reuse a link. Only token hashes are stored. Create separate invitations for separate family members.
 Set `PUBLIC_BACKEND_URL` in `backend/.env` to the backend origin reachable from recipients' phones (for example `https://api.your-domain.com`, with any reverse proxy path prefix). If unset, links use the incoming API request origin; emulator/localhost addresses are only useful for local testing. The shared page is served by the backend and needs no separate tracking website.
-The API creates `patient_family_invitations` and `patient_family_access` on first use. For deployment run `python migrate_family_access.py` beforehand; it preserves existing rows and enables PostgreSQL RLS. Routes are `POST /api/family/invitations`, `GET /api/family/invitations/{token}`, `POST/GET /api/family/requests`, and `PUT /api/family/requests/{viewer_id}`.
+The API creates `patient_family_invitations` and `patient_family_access` on first use. Routes are `POST /api/family/invitations`, `GET /api/family/invitations/{token}`, `POST/GET /api/family/requests`, and `PUT /api/family/requests/{viewer_id}`.
 Family responses omit medical profiles and diagnoses. Public sharing links still require the separately configured tracking website.
 PDFs currently persist as bounded base64 documents in `patient_test_tracking.result_documents` (maximum 5 MB per PDF, 8 MB per step payload), rather than a separate Supabase Storage bucket. These documents are staff-only.
 

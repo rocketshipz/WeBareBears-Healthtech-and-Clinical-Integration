@@ -42,7 +42,7 @@ TRAUMA = "Trauma & Physical Injuries"
 BREATHING = "Trouble breathing"
 BLEEDING = "Bleeding or injury"
 LIMB, FALL, HEAD = "Arm, leg, hand or foot", "A fall", "Head, face or neck"
-MILD_PAIN, MOD_PAIN, NO_PAIN = "Mild pain (1-3)", "Moderate pain (4-7)", "No pain (0)"
+MILD_PAIN, MOD_PAIN, NO_PAIN = "Can still do normal activities", "The pain makes normal activities hard", "No pain (0)"
 
 # (id, name, opening message, age, categories the complaint belongs to, answer sheet, expected level)
 # Answer values: an option prefix, a list of prefixes (multi-select), or {"tap": ..., "say": ...} where "say"
@@ -83,9 +83,9 @@ SCENARIOS = [
      {"Q_CRIT_05": MILD_PAIN, "Q_CP_01": "Started more than 6 hours ago", "Q_CP_05": "Persisting mild pain"}, 4),
     # --- headache
     (13, "Mild headache only", "I have a headache, 35", 35, ["Headache"],
-     {"Q_CRIT_05": MILD_PAIN, "Q_HA_03": "Mild pain", "Q_HA_06": "Yes"}, 5),
+     {"Q_CRIT_05": MILD_PAIN, "Q_HA_03": "Can still do normal activities", "Q_HA_06": "Yes"}, 5),
     (14, "SAFETY thunderclap headache", "Worst headache of my life, came on suddenly, 50 years old", 50,
-     ["Headache"], {"Q_CRIT_05": "Severe pain (8-10)", "Q_HA_01": {"tap": "Yes", "say": "Very sudden onset"}}, 2),
+     ["Headache"], {"Q_CRIT_05": "Cannot do anything", "Q_HA_01": {"tap": "Yes", "say": "Very sudden onset"}}, 2),
     # --- abdomen / GI
     (15, "Abdominal pain 6/10", "I have stomach pain, 28", 28, ["Abdominal Pain"],
      {"Q_CRIT_05": MOD_PAIN, "Q_ABD_01": "Moderate pain"}, 3),
@@ -127,7 +127,7 @@ SCENARIOS = [
     (30, "Thoughts of self-harm", "I keep thinking about hurting myself, I'm 24", 24, ["Psychiatric & Behavioural"],
      {"Q_CRIT_05": NO_PAIN, "Q_PSY_02": "Yes"}, 3),
     (31, "Chronic back pain", "I have back pain, had it for years, 45", 45, ["Low Back Pain"],
-     {"Q_CRIT_05": MILD_PAIN, "Q_LBP_03": "Yes"}, 5),
+     {"Q_CRIT_05": MILD_PAIN, "Q_LBP_03": ["Long-term"]}, 5),
     (32, "Mild palpitations", "My heart is racing a bit, 30", 30, ["Palpitations"],
      {"Q_CRIT_05": NO_PAIN, "Q_PALP_03": ["Mild symptoms"]}, 5),
     (33, "Early pregnancy bleeding", "I'm 8 weeks pregnant and spotting blood, 29", 29,
@@ -143,7 +143,7 @@ SCENARIOS = [
      ["Chest Pain & Cardiac Symptoms"],
      {"Q_CRIT_05": MILD_PAIN, "Q_CP_01": "Started more than 6 hours ago", "Q_CP_05": "Persisting mild pain"}, 4),
     (36, "PROFILE self: mild headache", "I have a headache", 21, ["Headache"],
-     {"Q_CRIT_05": MILD_PAIN, "Q_HA_03": "Mild pain", "Q_HA_06": "Yes"}, 5),
+     {"Q_CRIT_05": MILD_PAIN, "Q_HA_03": "Can still do normal activities", "Q_HA_06": "Yes"}, 5),
     (37, "PROFILE unclear: fever+headache", "Fever and headache since yesterday", 21, ["Fever"],
      {"Q_CRIT_05": MILD_PAIN, "Q_FEVER_02": {"tap": "Yes", "say": "Headache"}}, 3),
     (38, "PROFILE other: child with cold", "My 5 year old son has a cough and runny nose", 5, [RESP],
@@ -177,7 +177,7 @@ SCENARIOS += [
      {"Q_CRIT_02A": "Not sure", "Q_CRIT_05": NO_PAIN, "Q_RESP_05": "Yes"}, 4),
     (44, "SWITCH to mother mid-chat", "I fell and hit my head", 45, [TRAUMA], HEAD_SHEET, 5),
     (45, "NEW SYMPTOM mid-chat", "I have a headache, 35", 35, ["Headache", "Chest Pain & Cardiac Symptoms"],
-     {"Q_CRIT_05": MILD_PAIN, "Q_HA_03": "Mild pain", "Q_HA_06": "Yes",
+     {"Q_CRIT_05": MILD_PAIN, "Q_HA_03": "Can still do normal activities", "Q_HA_06": "Yes",
       "Q_CP_01": "Started more than 6 hours ago", "Q_CP_05": "Persisting mild pain"}, 4),
     (46, "DANGER sign mid-chat", "my dad has a stomach ache, he is 60", 60, ["Abdominal Pain"], {}, 1),
     (47, "USER ASKS a question mid-chat", "I'm wheezing, I have asthma. 22 years old", 22, [RESP],

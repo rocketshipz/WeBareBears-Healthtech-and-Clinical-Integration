@@ -80,7 +80,8 @@ def test_missing_information_and_questions_tell_the_agent_what_each_answer_sets(
     # Answer options that set nothing needed at this tier are still listed, with no conditions.
     pain = next(q for q in res["suggested_questions"] if q["question_id"] == "Q_CRIT_05")
     by_when = {part["when"]: part["condition_ids"] for part in pain["maps_to"]}
-    assert by_when["Severe pain (8-10)"] and by_when["Moderate pain (4-7)"] == []
+    assert by_when["Cannot do anything or sleep because of the pain - the worst pain (8-10)"]
+    assert by_when["The pain makes normal activities hard (4-7)"] == []
     bleeding = next(m for m in res["missing_information"] if m["condition"] == "Bleeding PR or PO")
     assert bleeding["ask_as"]
 

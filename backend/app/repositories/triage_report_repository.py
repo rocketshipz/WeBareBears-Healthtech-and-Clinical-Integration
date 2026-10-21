@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def ensure_table(session: Session) -> None:
-    """Create the table on a fresh database (existing ones are migrated by migrate_triage_reports.py)."""
+    """Create the table on a fresh database."""
     SavedReport.__table__.create(session.get_bind(), checkfirst=True)
 
 

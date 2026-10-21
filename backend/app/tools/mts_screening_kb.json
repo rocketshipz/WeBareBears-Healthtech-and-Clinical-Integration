@@ -433,12 +433,12 @@
         {
           "question_id": "Q_CRIT_05",
           "population": "all",
-          "text": "Is there chest pain or other pain? How severe is it on a scale of 0 to 10?",
+          "text": "Is there chest pain or other pain? How bad is it right now, from 0 (no pain) to 10 (worst pain imaginable)?",
           "answers": [
             "Severe chest pain",
-            "Severe pain (8-10)",
-            "Moderate pain (4-7)",
-            "Mild pain (1-3)",
+            "Cannot do anything or sleep because of the pain - the worst pain (8-10)",
+            "The pain makes normal activities hard (4-7)",
+            "Can still do normal activities - mild pain (1-3)",
             "No pain (0)"
           ],
           "maps_to": [
@@ -449,20 +449,20 @@
               ]
             },
             {
-              "when": "Severe pain (8-10)",
+              "when": "Cannot do anything or sleep because of the pain - the worst pain (8-10)",
               "condition_ids": [
                 "RULE_CRIT_L2_01.C3"
               ]
             },
             {
-              "when": "Moderate pain (4-7)",
+              "when": "The pain makes normal activities hard (4-7)",
               "condition_ids": [
                 "RULE_CRIT_L3_01.C7"
               ]
             }
           ],
           "none_answers": [
-            "Mild pain (1-3)",
+            "Can still do normal activities - mild pain (1-3)",
             "No pain (0)"
           ]
         },
@@ -2985,22 +2985,22 @@
         {
           "question_id": "Q_HA_03",
           "population": "all",
-          "text": "How severe is your headache on a 0 to 10 scale?",
+          "text": "How bad is the headache right now, from 0 (no pain) to 10 (worst pain imaginable)?",
           "answers": [
-            "Severe pain (above 7)",
-            "Pain score above 4",
-            "Mild pain (4 or below)"
+            "Cannot do anything or sleep because of the headache - the worst pain (8-10)",
+            "The headache makes normal activities hard (5-7)",
+            "Can still do normal activities - mild headache (0-4)"
           ],
           "maps_to": [
             {
-              "when": "Severe pain (above 7)",
+              "when": "Cannot do anything or sleep because of the headache - the worst pain (8-10)",
               "condition_ids": [
                 "RULE_HA_L2_01.C3",
                 "RULE_HA_PAED_L1_01.C3"
               ]
             },
             {
-              "when": "Pain score above 4",
+              "when": "The headache makes normal activities hard (5-7)",
               "condition_ids": [
                 "RULE_HA_L3_01.C3",
                 "RULE_HA_PAED_L2_01.C3"
@@ -3963,7 +3963,7 @@
             "A joint looks out of place (dislocated)",
             "Numbness, tingling, or cannot move a finger / toe properly",
             "Problem with a cast or splint",
-            "The injury is to the hand",
+            "A serious hand injury - crushed, possibly broken, or a deep cut (a small cut or graze does not count)",
             "None of these"
           ],
           "none_answers": [
@@ -4034,7 +4034,7 @@
               ]
             },
             {
-              "when": "The injury is to the hand",
+              "when": "A serious hand injury - crushed, possibly broken, or a deep cut (a small cut or graze does not count)",
               "condition_ids": [
                 "RULE_TRAUMA_L3_01.C13",
                 "RULE_TRAUMA_PAED_L2_01.C14"
@@ -5663,7 +5663,7 @@
         {
           "question_id": "Q_ENT_02",
           "population": "all",
-          "text": "Is there an active nosebleed, difficulty swallowing, or a tracheostomy? For a child: severe pain (above 7) or a hoarse voice?",
+          "text": "Is there an active nosebleed, difficulty swallowing (cannot swallow food, drinks or saliva; pain when swallowing alone does not count), or a tracheostomy? For a child: severe pain (above 7) or a hoarse voice?",
           "answers": [
             "Yes",
             "No"
@@ -5677,7 +5677,7 @@
               ]
             },
             {
-              "when": "Difficulty swallowing",
+              "when": "Difficulty swallowing - cannot swallow food, drinks or saliva (pain when swallowing alone does not count)",
               "condition_ids": [
                 "RULE_ENT_L3_01.C2",
                 "RULE_ENT_PAED_L2_01.C2"
@@ -6538,19 +6538,29 @@
         {
           "question_id": "Q_FEVER_04",
           "population": "all",
-          "text": "Is the fever gone, the patient tolerating oral intake and mobilizing independently?",
+          "text": "Which of these best describes the person now?",
           "answers": [
-            "Yes",
-            "No"
+            "Fever has gone, eating and drinking, and walking about without help",
+            "Still has a fever, but eating and drinking, and walking about without help",
+            "Neither of these"
           ],
           "maps_to": [
             {
-              "when": "Fever gone, tolerating oral intake and mobilizing independently",
+              "when": "Fever has gone, eating and drinking, and walking about without help",
               "condition_ids": [
                 "RULE_FEVER_L5_01.C1",
                 "RULE_FEVER_PAED_L4_01.C1"
               ]
+            },
+            {
+              "when": "Still has a fever, but eating and drinking, and walking about without help",
+              "condition_ids": [
+                "RULE_FEVER_L5_01.C2"
+              ]
             }
+          ],
+          "none_answers": [
+            "Neither of these"
           ]
         },
         {
@@ -6662,7 +6672,8 @@
           "rule_id": "RULE_FEVER_L5_01",
           "population": "adult",
           "conditions": [
-            "Not currently febrile, tolerating orally and mobilizing independently"
+            "Not currently febrile, tolerating orally and mobilizing independently",
+            "Currently febrile with no other features, tolerating orally and mobilizing independently"
           ],
           "triage_level": "Level 5",
           "source_basis": {
@@ -8063,19 +8074,29 @@
         {
           "question_id": "Q_LBP_03",
           "population": "all",
-          "text": "Is the back pain chronic with no associated symptoms?",
+          "text": "Which of these describe the back pain? Tick all that apply.",
+          "multi_select": true,
           "answers": [
-            "Yes",
-            "No"
+            "Long-term (chronic) back pain",
+            "Only the back pain - no other symptoms with it",
+            "Neither of these"
           ],
           "maps_to": [
             {
-              "when": "Chronic back pain with no associated symptoms",
+              "when": "Long-term (chronic) back pain",
               "condition_ids": [
-                "RULE_LBP_L5_01.C1",
+                "RULE_LBP_L5_01.C1"
+              ]
+            },
+            {
+              "when": "Only the back pain - no other symptoms with it",
+              "condition_ids": [
                 "RULE_LBP_L5_01.C2"
               ]
             }
+          ],
+          "none_answers": [
+            "Neither of these"
           ]
         }
       ],
@@ -9295,6 +9316,7 @@
     "Criteria that a person cannot give by questionnaire or verbally are excluded: measurements (SpO2, BP, ECG, CRT, glucose, temperature), clinician-judged impressions ('Septic / Toxic', 'Toxic appearance', 'Septic appearance', 'Airway unprotected', 'Airway reflexes lost', 'Requires assisted breathing', 'Abnormal posturing', 'Appears unwell', 'Distracting pain', suspected / possible vascular injury, suspected intra-abdominal bleeding / ectopic / AAA, compartment syndrome, 'Airway threatened') and staff decisions ('Need for sedation', 'Need for restraint', 'Inter-facility transfers', 'Referred cases'). 'Likely / possible' impressions that a person can describe in plain words (e.g. likely rib fractures, possible pelvic injury) are kept.",
     "Syncope Level 4 'Full recovery, no deficits' is qualified 'and no history of previous syncope' (product decision, approved). The source lists Level 5 as the same findings plus 'History of syncope' but never says Level 4 excludes it; without the qualifier a person with a previous syncope matches both and, because higher urgency wins, Level 5 could never be reached.",
     "Patient-facing question wording (approved product decision, Oct 2026). Rule conditions and levels are unchanged; only how they are asked changed. Critical First Look starts with one tick-all-that-apply checklist (Q_CRIT_02A): trouble breathing, bleeding or injury, pale/bluish skin with cold peripheries, or none. An option that is not ticked rules out the items it `covers`; a ticked option `opens` its detailed list. Laypeople picking from long clinical lists over-selected Level 1 items (e.g. a cough read as 'abnormal breathing sounds'). 'No trouble breathing' also covers the breathing items repeated in the respiratory and paediatric lists (not observed-only signs such as retractions or nasal flaring). Clinical terms have lay descriptions: 'Abnormal breathing sounds' = harsh / high-pitched, gurgling or snoring noise with every breath, not a cough, phlegm or blocked nose; 'Incessant cough' = non-stop coughing fits without catching breath; 'airway intact' (wheeze) = able to talk normally. Questions whose options can co-exist are multi_select; options not ticked are absent. Multi-part yes/no questions became explicit option lists with none_answers so each answer maps to conditions without interpretation.",
-    "Trauma (approved product decision, Oct 2026): the PDF lists trauma as separate rows (Chest / Abdo Trauma, Trauma Head Neck, Trauma Limb, Fall, Wounds / Skin; p.7, 8, 10, 11 and paeds p.15-18). The KB keeps one rule per level, so questions now follow the rows: an injury-area checklist (Q_TRAUMA_00) opens each row's list, and a row not ticked rules out (covers) that row's items. E.g. pregnancy, anticoagulant use, high-risk mechanism and elderly come from the Chest / Abdo row only and are not asked for a limb injury. End-state items (Mild symptoms, Unlikely fractures, Mobilizing well, Low-risk mechanisms, No symptoms) are never ruled out by area. 'Elderly' (Chest / Abdo) is read as > 65 like elsewhere in this KB; it and the paediatric 'Child < 5' items are decided from age. Lay wording: 'Unlikely fractures' + 'Mild symptoms' = can still use it / bear weight and it does not look broken; 'Small bone fractures likely, moving fingers / toes' = might be a small broken bone (e.g. finger or toe) but can move fingers / toes; 'Proximal long bone fractures' = possible broken thigh or upper-arm bone; 'Amputation proximal to wrist' = arm or leg cut off above the wrist or ankle, 'Distal amputation' = finger, toe or part of the hand / foot; 'Limb injury / deformity' (Fall) = an arm or leg looks deformed or badly injured. Limb Pain / Swelling: 'Generalized oedema' = swelling all over the body, not only the painful area (a swollen injured ankle is not generalized oedema); 'Not able to bear weight' = cannot put any weight on the leg."
+    "Trauma (approved product decision, Oct 2026): the PDF lists trauma as separate rows (Chest / Abdo Trauma, Trauma Head Neck, Trauma Limb, Fall, Wounds / Skin; p.7, 8, 10, 11 and paeds p.15-18). The KB keeps one rule per level, so questions now follow the rows: an injury-area checklist (Q_TRAUMA_00) opens each row's list, and a row not ticked rules out (covers) that row's items. E.g. pregnancy, anticoagulant use, high-risk mechanism and elderly come from the Chest / Abdo row only and are not asked for a limb injury. End-state items (Mild symptoms, Unlikely fractures, Mobilizing well, Low-risk mechanisms, No symptoms) are never ruled out by area. 'Elderly' (Chest / Abdo) is read as > 65 like elsewhere in this KB; it and the paediatric 'Child < 5' items are decided from age. Lay wording: 'Unlikely fractures' + 'Mild symptoms' = can still use it / bear weight and it does not look broken; 'Small bone fractures likely, moving fingers / toes' = might be a small broken bone (e.g. finger or toe) but can move fingers / toes; 'Proximal long bone fractures' = possible broken thigh or upper-arm bone; 'Amputation proximal to wrist' = arm or leg cut off above the wrist or ankle, 'Distal amputation' = finger, toe or part of the hand / foot; 'Limb injury / deformity' (Fall) = an arm or leg looks deformed or badly injured. Limb Pain / Swelling: 'Generalized oedema' = swelling all over the body, not only the painful area (a swollen injured ankle is not generalized oedema); 'Not able to bear weight' = cannot put any weight on the leg.",
+    "Low-acuity wording (approved product decision, Oct 2026). Rule conditions and levels are unchanged; only how they are asked changed, because people with mild symptoms over-reported Level 2-3 items. Pain-score options lead with what the person can still do and give the number second (8-10 = cannot do anything or sleep, the worst pain; middle band = the pain makes normal activities hard; mild = can still do normal activities), because people anchor on a number and rate an ordinary pain 5/10 while still working: Critical First Look Q_CRIT_05 keeps the source bands 8-10 / 4-7 / 1-3 (p.3-4, 6), and headache Q_HA_03 asks the source 'Pain score > 7' / '> 4' (p.8, paeds p.17) as 8-10 / 5-7 / 0-4. ENT 'Difficulty swallowing' (Q_ENT_02; p.8, paeds p.16) = cannot swallow food, drinks or saliva; pain when swallowing alone (an ordinary sore throat) does not count. Trauma 'Hand injuries' (Level 3, Trauma Limb row; p.7-11) = a serious hand injury: crushed, possibly broken, or a deep cut; a small cut or graze goes to the Wounds / Skin questions. Low back pain Level 5 (p.9) lists 'Chronic symptoms' and 'No associated symptoms' as separate conditions; Q_LBP_03 asks them as two options so either one can match (one combined yes/no left a new, uncomplicated back ache with no level). Adult fever with no other features (product decision, approved Oct 2026). The adult Fever row (p.8) has no level for a person who still has a fever and none of the listed modifiers, unless they are elderly (> 65 = Level 4); 'Not currently febrile, tolerating orally and mobilizing independently' is Level 5. RULE_FEVER_L5_01 adds 'Currently febrile with no other features, tolerating orally and mobilizing independently' (C2), the same level the source gives a fever with no warning signs in the Dengue row (p.7). The more urgent fever items are always ruled out first, and the elderly stay Level 4. Paediatric fever is unchanged. Fever 'Headache' (Level 3 adult, Level 2 paediatric; p.8, 17) is kept exactly as in the source, so fever with any headache stays Level 3 for adults."
   ]
 }

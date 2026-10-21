@@ -228,7 +228,7 @@ def test_ambiguous_contradictory_or_unknown_answers_are_left_to_the_agent(engine
     assert engine.apply_answer("Q_CRIT_02", "Something else") is None
     assert engine.apply_answer("NOPE", "Yes") is None
     assert engine.apply_answers(CHECKLIST, [SKIN, "None of these"]) is None
-    assert engine.apply_answers("Q_CRIT_05", ["Mild pain (1-3)", "No pain (0)"]) is None  # single choice
+    assert engine.apply_answers("Q_CRIT_05", ["Can still do normal activities - mild pain (1-3)", "No pain (0)"]) is None  # single choice
 
 
 def test_kb_question_structure(engine):
@@ -248,6 +248,7 @@ def test_kb_question_structure(engine):
 
 # ------------------------------------------------------------------ compound condition (onset > 6 H AND moderate)
 CHEST = "Chest Pain & Cardiac Symptoms"
+MILD = "Can still do normal activities - mild pain (1-3)"
 OVER_6H = "Started more than 6 hours ago"
 
 
@@ -257,7 +258,7 @@ OVER_6H = "Started more than 6 hours ago"
 ])
 def test_chest_pain_onset_and_severity_combine_without_the_llm(engine, pain_now, level):
     assert engine.apply_answer("Q_CP_01", OVER_6H) is not None  # half of a compound: still mappable
-    res, _ = screen(engine, [CHEST], 30, {"Q_CRIT_05": "Mild pain (1-3)", "Q_CP_01": OVER_6H, "Q_CP_05": pain_now})
+    res, _ = screen(engine, [CHEST], 30, {"Q_CRIT_05": MILD, "Q_CP_01": OVER_6H, "Q_CP_05": pain_now})
     assert res["triage_level"] == level
 
 

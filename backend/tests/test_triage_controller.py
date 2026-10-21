@@ -93,7 +93,7 @@ def test_taps_need_no_extraction_and_follow_the_engine_order():
     llm = FakeLLM(opening([TRAUMA], 21))
     controller = controller_with(llm)
     session, asked = drive(controller, "sprained ankle, i am 21", {
-        "Q_TRAUMA_00": [LIMB], "Q_CRIT_05": "Mild pain", "Q_TRAUMA_07": "Mild - can still use it",
+        "Q_TRAUMA_00": [LIMB], "Q_CRIT_05": "Can still do normal activities", "Q_TRAUMA_07": "Mild - can still use it",
         "Q_LIMB_04": "Yes"})
     assert session.triage_result["status"] == "classified" and session.triage_result["triage_level"] == 5
     assert len(llm.extract_calls) == 1  # the opening message only; every tap went straight to the engine
@@ -167,7 +167,7 @@ def test_catch_up_fills_in_reported_facts_but_never_rules_out():
     session = controller.run_session("twisted ankle, pain 6/10, no chest pain, 30", session_id="s")
     assert session.findings["absent_condition_ids"] == []
     session, asked = drive(controller, "", {"Q_TRAUMA_00": [LIMB], "Q_TRAUMA_07": "Mild - can still use it",
-                                            "Q_CRIT_05": "Moderate pain"})
+                                            "Q_CRIT_05": "The pain makes normal activities hard"})
     assert "Q_CRIT_05" in asked  # a volunteered negative does not skip the Level 2 pain question
     assert session.triage_result["triage_level"] == 3
     catch_ups = [p for p in llm.extract_calls if p["message"] == "pain 6/10"]

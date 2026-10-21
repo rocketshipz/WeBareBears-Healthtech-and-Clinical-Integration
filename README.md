@@ -32,9 +32,8 @@ patient message ─► LLM extracts facts as condition IDs ─► rules engine �
 
 - The engine keeps asking the next most urgent tier of questions until every more urgent condition has been ruled out. Only then is the level final.
 - Hospital routing uses the level but can never change it.
-- There are two chat modes (`TRIAGE_MODE`):
-  - `hybrid`: code drives the flow, and the LLM only turns free text into answers and phrases each question. About 8k tokens per screening.
-  - `agent` (default): an LLM tool-calling loop. About 50k tokens per screening.
+- The chat runs in `hybrid` mode (`TRIAGE_MODE`, default): code drives the flow, and the LLM only turns free text into answers and phrases each question. About 8k tokens per screening.
+  - The older `agent` mode (an LLM tool-calling loop, about 50k tokens per screening) is kept for comparison only.
 
 The full contract (what the LLM may and may not do, how the KB maps to the PDF, the levels) is in [CLAUDE.md](CLAUDE.md) §4. The source PDF is [`malaysiantriagescalenewrevised2019.pdf`](malaysiantriagescalenewrevised2019.pdf).
 
@@ -84,8 +83,6 @@ MedicTri/
 │   │   ├── tools/               # LangChain tools + mts_screening_kb.json (the triage rules)
 │   │   └── templates/           # family invitation page
 │   ├── scripts/                 # triage evaluation, hospital location check, wait-label update
-│   ├── migrate_*.py             # one-off database migrations (see below)
-│   ├── setup_staff_passwords.py
 │   └── tests/
 ├── frontend/
 │   └── lib/
@@ -139,7 +136,7 @@ All settings are in `backend/.env` (template: [`backend/.env.example`](backend/.
 | Variable | Purpose |
 |---|---|
 | `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL_NAME` | Azure OpenAI endpoint and deployment for the triage LLM |
-| `TRIAGE_MODE` | `agent` (default) or `hybrid` |
+| `TRIAGE_MODE` | `hybrid` (default) or the legacy `agent` |
 | `PLAIN_LANGUAGE` | Everyday wording for questions in hybrid mode. Keep it off until the wording has been clinically reviewed |
 | `GEMINI_API_KEY` / `GOOGLE_API_KEY` | Gemini embeddings |
 | `GOOGLE_MAPS_API_KEY` | Live traffic and location checks. Without it, routing uses a 35 km/h estimate |
@@ -193,18 +190,15 @@ To evaluate triage end to end with a scripted patient (writes to `backend/script
 cd backend
 python scripts/scripted_triage_eval.py --oracle-only           # engine only, no LLM calls
 python scripts/scripted_triage_eval.py --mode hybrid --only 1,2,3
+python scripts/actor_triage_eval.py --only 13 --runs 2        # LLM plays the patient (low-acuity cases)
 ```
 
 ## Database maintenance
 
-Run these once, from `backend/`, against an existing database. Each one keeps existing rows.
+Run these from `backend/`.
 
 | Script | What it does |
 |---|---|
-| `migrate_triage_reports.py` | Brings `patient_triage_reports` up to the current schema |
-| `migrate_patient_progress.py`, then `migrate_patient_relationships.py` | Progress-tracking tables and their foreign keys |
-| `migrate_family_access.py` | Family invitation and access tables, with RLS |
-| `setup_staff_passwords.py` | Sets the default staff password and repairs uninitialised hashes |
 | `scripts/verify_hospital_locations.py [--only-new]` | Checks hospital coordinates against Google Places |
 | `scripts/update_wait_labels.py` | Runs the ED activity-label update once (it also runs on a schedule) |
 
@@ -219,8 +213,7 @@ More detail on staff accounts, progress tracking, family access and email setup 
 
 ## Roadmap
 
-1. Reduce token use in agent mode by trimming old turns from the history sent to the LLM.
-2. Shorten paediatric screenings by adding a first-look checklist for children.
-3. Turn the remaining multi-part yes/no questions into option lists.
+1. Shorten paediatric screenings by adding a first-look checklist for children.
+2. Turn the remaining multi-part yes/no questions into option lists.
 4. Review the Azure content-filter settings so self-harm messages reach the screening.
 5. Add the chat transcript to the PDF report.

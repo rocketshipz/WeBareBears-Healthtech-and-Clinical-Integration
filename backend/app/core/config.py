@@ -45,9 +45,9 @@ class Settings(BaseSettings):
     OPENAI_BASE_URL: Optional[str] = None
     OPENAI_TEMPERATURE: float = 0.0
 
-    # /triage/chat engine: "agent" (LLM tool-calling loop) or "hybrid" (code runs the screening; the LLM only
-    # reads free text and phrases replies). See app/services/triage_controller.py.
-    TRIAGE_MODE: str = "agent"
+    # /triage/chat engine: "hybrid" (code runs the screening; the LLM only reads free text and phrases replies;
+    # see app/services/triage_controller.py) or "agent" (legacy LLM tool-calling loop).
+    TRIAGE_MODE: str = "hybrid"
     # Hybrid mode: show questions and options in the everyday wording of app/tools/plain_language.json (display
     # only; taps are mapped back to the KB labels). Off until the wording has been clinically reviewed.
     PLAIN_LANGUAGE: bool = False
