@@ -56,9 +56,12 @@ def test_question_maps_point_at_real_conditions_of_the_same_category_and_populat
             for part in q.get("maps_to", []):
                 # A checklist option may only open / rule out other items (`opens`, `covers`, any category).
                 assert part["when"] and (part["condition_ids"] or part.get("covers")), (q["question_id"], part)
+                # A part with `screen_categories` sets conditions only in the categories it adds.
+                allowed = {category, *part.get("screen_categories", [])}
+                assert set(part.get("screen_categories", [])) <= set(engine.categories), (q["question_id"], part)
                 for condition_id in part["condition_ids"]:
                     c = engine.conditions[condition_id]
-                    assert c.category == category, (q["question_id"], condition_id)
+                    assert c.category in allowed, (q["question_id"], condition_id)
                     if q["population"] != "all":
                         assert c.population in ("all", q["population"]), (q["question_id"], condition_id)
 

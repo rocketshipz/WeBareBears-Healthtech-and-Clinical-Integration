@@ -12,6 +12,8 @@ from app.services.triage_rules_engine import NONE_ANSWERS, get_triage_rules_engi
 
 TRAUMA = "Trauma & Physical Injuries"
 FEVER = "Fever"
+SEVERE_FEVER_HEADACHE = "Headache that makes normal activities hard, or worse (pain 5-10)"
+MILD_FEVER_HEADACHE = "Mild headache - can still do normal activities (pain 0-4)"
 LIMB = "Arm, leg, hand or foot"
 
 
@@ -248,14 +250,44 @@ def test_a_yes_no_question_naming_several_things_is_one_tick_list():
         session = controller.run_session(picked[0], session_id="s", selected_options=picked)
     out = session.last_output
     assert session.pending["kind"] == "parts" and out["multi_select"]
-    assert "Headache" in out["response"] and "Yes" not in out["response"]
+    assert SEVERE_FEVER_HEADACHE in out["response"] and "Yes" not in out["response"]
     # "None of these" records exactly what "No" did.
     none = controller._items_findings(session.pending["items"], {NONE_ANSWERS[0]})
     assert set(none["absent_condition_ids"]) == set(engine.apply_answers("Q_FEVER_02", ["No"])["absent_condition_ids"])
-    session = controller.run_session("Headache", session_id="s", selected_options=["Headache"])
+    session = controller.run_session(SEVERE_FEVER_HEADACHE, session_id="s", selected_options=[SEVERE_FEVER_HEADACHE])
     assert "RULE_FEVER_L3_01.C2" in session.findings["present_condition_ids"]
     assert "RULE_FEVER_L3_01.C1" in session.findings["absent_condition_ids"]
     assert "Q_FEVER_02" in session.findings["answered_question_ids"]
+
+
+@pytest.mark.parametrize("age, headache, level", [
+    (30, MILD_FEVER_HEADACHE, 4),     # Headache 'Associated fever' (adult)
+    (30, SEVERE_FEVER_HEADACHE, 3),   # Fever 'Headache with pain score > 4' (adult)
+    (9, MILD_FEVER_HEADACHE, 3),      # Headache 'Associated fever' (paediatric)
+    (9, SEVERE_FEVER_HEADACHE, 2),    # Fever 'Headache with pain score > 4' (paediatric)
+])
+def test_fever_with_headache_is_graded_by_pain(age, headache, level):
+    controller = controller_with(FakeLLM(opening([FEVER], age)))
+    session, asked = drive(controller, "I have a fever and a headache", {
+        "Q_CRIT_05": "Can still do normal activities", "Q_FEVER_02": headache,
+        "Q_PAED_06": "No - active and comfortable"})
+    result = session.triage_result
+    assert result["status"] == "classified" and result["triage_level"] == level
+    if headache == MILD_FEVER_HEADACHE:
+        assert "Headache" in session.findings["categories"]
+        assert any(q.startswith("Q_HA_") for q in asked)  # the Headache red flags are still asked
+
+
+def test_not_choosing_the_mild_headache_rules_nothing_out_under_headache():
+    engine = get_triage_rules_engine()
+    found = engine.apply_answers("Q_FEVER_02", ["No"])
+    assert "RULE_HA_L4_01.C4" not in found["absent_condition_ids"]
+    assert "RULE_FEVER_L3_01.C2" in found["absent_condition_ids"]
+    assert "categories" not in found
+    controller = controller_with(FakeLLM())
+    items = controller._items({"kind": "question", "question_id": "Q_FEVER_02"})
+    assert controller._items_findings(items, {MILD_FEVER_HEADACHE})["categories"] == ["Headache"]
+    assert "RULE_HA_L4_01.C4" not in controller._items_findings(items, {SEVERE_FEVER_HEADACHE})["absent_condition_ids"]
 
 
 def test_questions_say_you_when_the_screening_is_for_the_user():

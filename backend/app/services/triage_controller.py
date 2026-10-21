@@ -340,9 +340,11 @@ class HybridTriageController:
     def _items_findings(items: List[Dict[str, Any]], chosen: set) -> Dict[str, Any]:
         """Chosen items present (except compound halves, decided by the engine), unchosen items ruled out."""
         present = [i for it in items if it["label"] in chosen and not it.get("compound") for i in it["condition_ids"]]
-        absent = [i for it in items if it["label"] not in chosen
+        absent = [i for it in items if it["label"] not in chosen and not it.get("screen_categories")
                   for i in it["condition_ids"] + it.get("covers", []) if i not in present]
-        return {"present_condition_ids": present, "absent_condition_ids": absent}
+        categories = list(dict.fromkeys(c for it in items if it["label"] in chosen
+                                        for c in it.get("screen_categories", [])))
+        return {"present_condition_ids": present, "absent_condition_ids": absent, "categories": categories}
 
     def _applicable(self, items: List[Dict[str, Any]], age_years: Optional[float]) -> List[Dict[str, Any]]:
         """Items that can apply at this age (e.g. no "hoarse voice (child)" for an adult). The engine ignores the
@@ -350,7 +352,8 @@ class HybridTriageController:
         def applies(i):
             c = self.engine.conditions.get(i)
             return c is None or self.engine.applies(c.population, age_years)
-        return [it for it in items if any(applies(i) for i in it["condition_ids"] + it.get("covers", []))]
+        return [it for it in items if it.get("screen_categories")
+                or any(applies(i) for i in it["condition_ids"] + it.get("covers", []))]
 
     def _items(self, step: Dict[str, Any]) -> List[Dict[str, Any]]:
         """The answerable items of a step: {label, condition_ids, covers?, compound?}."""
@@ -359,11 +362,13 @@ class HybridTriageController:
         q = self.engine.questions_by_id[step["question_id"]]
         items = []
         for part in q.get("maps_to", []):
-            if not (part["condition_ids"] or part.get("covers")):
+            if not (part["condition_ids"] or part.get("covers") or part.get("screen_categories")):
                 continue
             item = {"label": _label(part["when"]), "condition_ids": list(part["condition_ids"])}
             if part.get("covers"):
                 item["covers"] = part["covers"]
+            if part.get("screen_categories"):
+                item["screen_categories"] = part["screen_categories"]
             if COMPOUND_NOTE in part["when"]:
                 item["compound"] = True
             items.append(item)
@@ -479,7 +484,7 @@ class HybridTriageController:
             while session.queue:
                 step = session.queue.pop(0)
                 if step["kind"] == "confirm" and set(step["items"][0]["condition_ids"]) <= known \
-                        and not step["items"][0].get("covers"):
+                        and not step["items"][0].get("covers") and not step["items"][0].get("screen_categories"):
                     continue  # already settled
                 if step["kind"] == "which":
                     step["items"] = self._applicable(self._items(step), f["age_years"])

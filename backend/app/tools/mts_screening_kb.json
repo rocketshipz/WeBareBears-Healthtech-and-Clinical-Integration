@@ -6475,10 +6475,20 @@
               ]
             },
             {
-              "when": "Headache",
+              "when": "Headache that makes normal activities hard, or worse (pain 5-10)",
               "condition_ids": [
                 "RULE_FEVER_L3_01.C2",
                 "RULE_FEVER_PAED_L2_01.C3"
+              ]
+            },
+            {
+              "when": "Mild headache - can still do normal activities (pain 0-4)",
+              "condition_ids": [
+                "RULE_HA_L4_01.C4",
+                "RULE_HA_PAED_L3_01.C4"
+              ],
+              "screen_categories": [
+                "Headache"
               ]
             },
             {
@@ -6633,7 +6643,7 @@
           "population": "adult",
           "conditions": [
             "Limb / joint swelling",
-            "Headache",
+            "Headache with pain score > 4",
             "Toxin / drug reactions",
             "Poor oral intake"
           ],
@@ -6721,7 +6731,7 @@
           "conditions": [
             "Fever > 5 days (child)",
             "Limb / joint swelling",
-            "Headache",
+            "Headache with pain score > 4",
             "Toxin / drug reactions",
             "Infant < 3 months"
           ],
@@ -9285,7 +9295,8 @@
     "maps_to": "On each question: a list of {when, condition_ids}. 'when' is the plain-language part of the question or answer option; 'condition_ids' are the <rule_id>.C<n> conditions it sets. Only IDs applicable to the patient's age are used.",
     "yes_no_questions": "A 'No' (or a normal answer) means every listed condition is absent. A 'Yes' to a multi-part question means at least one part is present: ask which one and record only the part(s) the person confirms.",
     "age_derived": "On a rule: {C<n>: {field, op, value}} marks a condition that is decided by age_years alone (present if the comparison holds, otherwise absent). Do not ask the person.",
-    "unmapped_conditions": "A condition that no question maps to must still be resolved from what the person has said; never assume it absent."
+    "unmapped_conditions": "A condition that no question maps to must still be resolved from what the person has said; never assume it absent.",
+    "screen_categories": "On a question part: complaint categories to add to the screening when that part is chosen (e.g. a mild headache with a fever is screened under Headache). The part's condition_ids (in that other category) are set present when it is chosen, but never ruled out when it is not: not choosing it says nothing about that category."
   },
   "primary_triage_pass_criteria": {
     "purpose": "Items the source lists under the 'Secondary Triage' column (no level). They mean no primary-triage danger sign and are NOT triage conditions.",
@@ -9317,6 +9328,7 @@
     "Syncope Level 4 'Full recovery, no deficits' is qualified 'and no history of previous syncope' (product decision, approved). The source lists Level 5 as the same findings plus 'History of syncope' but never says Level 4 excludes it; without the qualifier a person with a previous syncope matches both and, because higher urgency wins, Level 5 could never be reached.",
     "Patient-facing question wording (approved product decision, Oct 2026). Rule conditions and levels are unchanged; only how they are asked changed. Critical First Look starts with one tick-all-that-apply checklist (Q_CRIT_02A): trouble breathing, bleeding or injury, pale/bluish skin with cold peripheries, or none. An option that is not ticked rules out the items it `covers`; a ticked option `opens` its detailed list. Laypeople picking from long clinical lists over-selected Level 1 items (e.g. a cough read as 'abnormal breathing sounds'). 'No trouble breathing' also covers the breathing items repeated in the respiratory and paediatric lists (not observed-only signs such as retractions or nasal flaring). Clinical terms have lay descriptions: 'Abnormal breathing sounds' = harsh / high-pitched, gurgling or snoring noise with every breath, not a cough, phlegm or blocked nose; 'Incessant cough' = non-stop coughing fits without catching breath; 'airway intact' (wheeze) = able to talk normally. Questions whose options can co-exist are multi_select; options not ticked are absent. Multi-part yes/no questions became explicit option lists with none_answers so each answer maps to conditions without interpretation.",
     "Trauma (approved product decision, Oct 2026): the PDF lists trauma as separate rows (Chest / Abdo Trauma, Trauma Head Neck, Trauma Limb, Fall, Wounds / Skin; p.7, 8, 10, 11 and paeds p.15-18). The KB keeps one rule per level, so questions now follow the rows: an injury-area checklist (Q_TRAUMA_00) opens each row's list, and a row not ticked rules out (covers) that row's items. E.g. pregnancy, anticoagulant use, high-risk mechanism and elderly come from the Chest / Abdo row only and are not asked for a limb injury. End-state items (Mild symptoms, Unlikely fractures, Mobilizing well, Low-risk mechanisms, No symptoms) are never ruled out by area. 'Elderly' (Chest / Abdo) is read as > 65 like elsewhere in this KB; it and the paediatric 'Child < 5' items are decided from age. Lay wording: 'Unlikely fractures' + 'Mild symptoms' = can still use it / bear weight and it does not look broken; 'Small bone fractures likely, moving fingers / toes' = might be a small broken bone (e.g. finger or toe) but can move fingers / toes; 'Proximal long bone fractures' = possible broken thigh or upper-arm bone; 'Amputation proximal to wrist' = arm or leg cut off above the wrist or ankle, 'Distal amputation' = finger, toe or part of the hand / foot; 'Limb injury / deformity' (Fall) = an arm or leg looks deformed or badly injured. Limb Pain / Swelling: 'Generalized oedema' = swelling all over the body, not only the painful area (a swollen injured ankle is not generalized oedema); 'Not able to bear weight' = cannot put any weight on the leg.",
-    "Low-acuity wording (approved product decision, Oct 2026). Rule conditions and levels are unchanged; only how they are asked changed, because people with mild symptoms over-reported Level 2-3 items. Pain-score options lead with what the person can still do and give the number second (8-10 = cannot do anything or sleep, the worst pain; middle band = the pain makes normal activities hard; mild = can still do normal activities), because people anchor on a number and rate an ordinary pain 5/10 while still working: Critical First Look Q_CRIT_05 keeps the source bands 8-10 / 4-7 / 1-3 (p.3-4, 6), and headache Q_HA_03 asks the source 'Pain score > 7' / '> 4' (p.8, paeds p.17) as 8-10 / 5-7 / 0-4. ENT 'Difficulty swallowing' (Q_ENT_02; p.8, paeds p.16) = cannot swallow food, drinks or saliva; pain when swallowing alone (an ordinary sore throat) does not count. Trauma 'Hand injuries' (Level 3, Trauma Limb row; p.7-11) = a serious hand injury: crushed, possibly broken, or a deep cut; a small cut or graze goes to the Wounds / Skin questions. Low back pain Level 5 (p.9) lists 'Chronic symptoms' and 'No associated symptoms' as separate conditions; Q_LBP_03 asks them as two options so either one can match (one combined yes/no left a new, uncomplicated back ache with no level). Adult fever with no other features (product decision, approved Oct 2026). The adult Fever row (p.8) has no level for a person who still has a fever and none of the listed modifiers, unless they are elderly (> 65 = Level 4); 'Not currently febrile, tolerating orally and mobilizing independently' is Level 5. RULE_FEVER_L5_01 adds 'Currently febrile with no other features, tolerating orally and mobilizing independently' (C2), the same level the source gives a fever with no warning signs in the Dengue row (p.7). The more urgent fever items are always ruled out first, and the elderly stay Level 4. Paediatric fever is unchanged. Fever 'Headache' (Level 3 adult, Level 2 paediatric; p.8, 17) is kept exactly as in the source, so fever with any headache stays Level 3 for adults."
+    "Low-acuity wording (approved product decision, Oct 2026). Rule conditions and levels are unchanged; only how they are asked changed, because people with mild symptoms over-reported Level 2-3 items. Pain-score options lead with what the person can still do and give the number second (8-10 = cannot do anything or sleep, the worst pain; middle band = the pain makes normal activities hard; mild = can still do normal activities), because people anchor on a number and rate an ordinary pain 5/10 while still working: Critical First Look Q_CRIT_05 keeps the source bands 8-10 / 4-7 / 1-3 (p.3-4, 6), and headache Q_HA_03 asks the source 'Pain score > 7' / '> 4' (p.8, paeds p.17) as 8-10 / 5-7 / 0-4. ENT 'Difficulty swallowing' (Q_ENT_02; p.8, paeds p.16) = cannot swallow food, drinks or saliva; pain when swallowing alone (an ordinary sore throat) does not count. Trauma 'Hand injuries' (Level 3, Trauma Limb row; p.7-11) = a serious hand injury: crushed, possibly broken, or a deep cut; a small cut or graze goes to the Wounds / Skin questions. Low back pain Level 5 (p.9) lists 'Chronic symptoms' and 'No associated symptoms' as separate conditions; Q_LBP_03 asks them as two options so either one can match (one combined yes/no left a new, uncomplicated back ache with no level). Adult fever with no other features (product decision, approved Oct 2026). The adult Fever row (p.8) has no level for a person who still has a fever and none of the listed modifiers, unless they are elderly (> 65 = Level 4); 'Not currently febrile, tolerating orally and mobilizing independently' is Level 5. RULE_FEVER_L5_01 adds 'Currently febrile with no other features, tolerating orally and mobilizing independently' (C2), the same level the source gives a fever with no warning signs in the Dengue row (p.7). The more urgent fever items are always ruled out first, and the elderly stay Level 4. Paediatric fever is unchanged.",
+    "Fever with headache (product decision, approved Oct 2026). The Fever row lists 'Headache' (Level 3 adult, Level 2 paediatric; p.8, 17) without a severity, so any headache with a fever matched it, although the source's own Headache row grades headache by pain score and gives 'Associated fever' its own lower level (Level 4 adult, Level 3 paediatric; p.8, 17). The Fever condition is qualified 'Headache with pain score > 4', the same threshold as the Headache row's Level 3 adult / Level 2 paediatric 'Pain score > 4'. Q_FEVER_02 asks the headache as two options: pain 5-10 sets that condition; a mild headache (0-4) sets nothing in the Fever row; it sets the Headache row's 'Associated fever' (the fever is already known) and adds the Headache category (`screen_categories` on the question part), so the Headache row's red flags (sudden onset, neck pain, neuro deficits, visual / speech or gait difficulty, pain) are still screened. Fever with a mild headache and no red flag is therefore Level 4 adult / Level 3 paediatric instead of Level 3 / Level 2."
   ]
 }

@@ -45,7 +45,7 @@ CASES = [
     (3, "Fever + sore throat + headache", "I have fever, sore throat and headache",
      "You are 25. Fever since yesterday (felt hot, 38.2 on a home thermometer). Sore throat, hurts to swallow but "
      "you can eat and drink. Mild headache that came with the fever. No rash, no vomiting, walking around fine.",
-     {3}, "PDF: adult fever + headache = Level 3"),
+     {4}, "fever + mild headache = Headache 'Associated fever' (KB product decision, Oct 2026)"),
     (4, "Fever + sore throat", "I have a fever and sore throat",
      "You are 30. Fever since yesterday (37.9 at home). Sore throat, hurts to swallow, but eating and drinking "
      "fine. No headache, no rash, no vomiting, no breathing trouble. Walking around normally.", {4, 5}, ""),

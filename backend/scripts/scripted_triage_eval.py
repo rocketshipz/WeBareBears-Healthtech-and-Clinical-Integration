@@ -101,7 +101,8 @@ SCENARIOS = [
      {"Q_CRIT_05": NO_PAIN, "Q_VD_01": "Coffee-ground vomit, black stools"}, 3),
     # --- fever
     (20, "Fever with headache", "I have a fever and headache, 30", 30, ["Fever"],
-     {"Q_CRIT_05": MILD_PAIN, "Q_FEVER_02": {"tap": "Yes", "say": "Headache"}}, 3),
+     {"Q_CRIT_05": MILD_PAIN, "Q_FEVER_02": {"tap": "Yes", "say": "Mild headache"},
+      "Q_HA_03": "Can still do normal activities"}, 4),
     (21, "Infant 2 months with fever", "My 2 month old baby has a fever", 0.17, ["Fever"],
      {"Q_CRIT_05": NO_PAIN, "Q_PAED_06": "No - active and comfortable"}, 2),
     # --- critical / neuro
@@ -145,7 +146,8 @@ SCENARIOS = [
     (36, "PROFILE self: mild headache", "I have a headache", 21, ["Headache"],
      {"Q_CRIT_05": MILD_PAIN, "Q_HA_03": "Can still do normal activities", "Q_HA_06": "Yes"}, 5),
     (37, "PROFILE unclear: fever+headache", "Fever and headache since yesterday", 21, ["Fever"],
-     {"Q_CRIT_05": MILD_PAIN, "Q_FEVER_02": {"tap": "Yes", "say": "Headache"}}, 3),
+     {"Q_CRIT_05": MILD_PAIN, "Q_FEVER_02": {"tap": "Yes", "say": "Mild headache"},
+      "Q_HA_03": "Can still do normal activities"}, 4),
     (38, "PROFILE other: child with cold", "My 5 year old son has a cough and runny nose", 5, [RESP],
      {"Q_CRIT_05": NO_PAIN, "Q_RESP_08": "Yes", "Q_PAED_06": "No - active and comfortable"}, 3),
 ]
@@ -168,7 +170,7 @@ SCENARIOS += [
       "Q_LIMB_04": {"type": "yes", "tap": "Yes"}}, 5),
     (40, "MALAY: fever + headache", "Saya demam dan sakit kepala sejak semalam, umur 30", 30, ["Fever"],
      {"Q_CRIT_05": {"type": "sakit sikit je, dalam 2/10", "tap": MILD_PAIN},
-      "Q_FEVER_02": {"tap": "Yes", "say": "Headache"}}, 3),
+      "Q_FEVER_02": {"tap": "Yes", "say": "Mild headache"}, "Q_HA_03": "Can still do normal activities"}, 4),
     (41, "MULTI-FACT opening message", "twisted my ankle playing futsal, pain is about 6/10, I'm 24, no bleeding",
      24, [TRAUMA], {"Q_TRAUMA_00": [LIMB], "Q_CRIT_05": MOD_PAIN, "Q_TRAUMA_07": "Mild - can still use it"}, 3),
     (42, "NOT SURE on the first-look list", "I'm coughing, I'm 30", 30, [RESP],

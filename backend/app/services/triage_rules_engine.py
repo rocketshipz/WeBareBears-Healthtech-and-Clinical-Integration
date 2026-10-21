@@ -184,7 +184,9 @@ class TriageRulesEngine:
         found = {"present_condition_ids": [], "absent_condition_ids": [], "answered_question_ids": [question_id]}
 
         def ruled_out(unchosen):
-            return list(dict.fromkeys(i for p in unchosen for i in p["condition_ids"] + p.get("covers", [])))
+            # A part that sends the complaint to another category rules nothing out there when not chosen.
+            return list(dict.fromkeys(i for p in unchosen if not p.get("screen_categories")
+                                      for i in p["condition_ids"] + p.get("covers", [])))
 
         is_none = [a in NONE_ANSWERS or a in q.get("none_answers", []) or (yes_no and a == "No") for a in answers]
         if any(is_none):
@@ -216,6 +218,10 @@ class TriageRulesEngine:
         found["present_condition_ids"] = present
         found["absent_condition_ids"] = [i for i in ruled_out([p for p in parts if p not in chosen])
                                          if i not in still_open]
+        # A part may send the complaint to another category (e.g. fever with a mild headache -> Headache).
+        categories = list(dict.fromkeys(c for p in chosen for c in p.get("screen_categories", [])))
+        if categories:
+            found["categories"] = categories
         return found
 
     def _source_reference(self, rule_id: str) -> dict:
@@ -342,6 +348,8 @@ class TriageRulesEngine:
                         entry = {"when": part["when"], "condition_ids": [i for i in part["condition_ids"] if i in tier_ids]}
                         if part.get("covers"):
                             entry["covers"] = part["covers"]
+                        if part.get("screen_categories"):
+                            entry["screen_categories"] = part["screen_categories"]
                         maps_to.append(entry)
                     resolves = any(p["condition_ids"] or tier_ids & set(p.get("covers", [])) for p in maps_to)
                     if maps_to and not resolves:

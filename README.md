@@ -52,7 +52,7 @@ The full contract (what the LLM may and may not do, how the KB maps to the PDF, 
 │ Triage       │ Routing       │ Auth, profile,│
 │ rules engine │ Haversine +   │ progress,     │
 │ + LLM (Azure │ Google Routes │ family access │
-│ gpt-4.1-mini)│ + ED activity │               │
+│ gpt-5-mini)│ + ED activity │               │
 └──────────────┴───────┬───────┴───────────────┘
                        ▼
           PostgreSQL / Supabase (SQLite fallback)
@@ -62,8 +62,7 @@ The full contract (what the LLM may and may not do, how the KB maps to the PDF, 
 |---|---|
 | Frontend | Flutter 3.x / Dart 3.x, Material 3, `flutter_map`, `geolocator`, `pdf` + `printing`, `http` |
 | Backend | Python 3.11+, FastAPI, Pydantic v2, SQLAlchemy, APScheduler |
-| LLM | Azure OpenAI `gpt-4.1-mini` via `langchain-openai`, temperature 0 |
-| Embeddings | Google Gemini `gemini-embedding-2` |
+| LLM | Azure OpenAI `gpt-5-mini` via `langchain-openai`, temperature 0 |
 | Maps | Google Routes API (live traffic) and Places API (location checks), both optional |
 | Database | Supabase PostgreSQL, falling back to local SQLite when no credentials are set |
 
@@ -190,7 +189,7 @@ To evaluate triage end to end with a scripted patient (writes to `backend/script
 cd backend
 python scripts/scripted_triage_eval.py --oracle-only           # engine only, no LLM calls
 python scripts/scripted_triage_eval.py --mode hybrid --only 1,2,3
-python scripts/actor_triage_eval.py --only 13 --runs 2        # LLM plays the patient (low-acuity cases)
+python scripts/actor_triage_eval.py --runs 2        # LLM plays the patient
 ```
 
 ## Database maintenance
@@ -203,17 +202,3 @@ Run these from `backend/`.
 | `scripts/update_wait_labels.py` | Runs the ED activity-label update once (it also runs on a schedule) |
 
 More detail on staff accounts, progress tracking, family access and email setup is in [backend/README.md](backend/README.md).
-
-## Known gaps
-
-- `POST /api/triage/assess` is a placeholder that always returns `URGENT`. The app uses `/api/triage/chat`.
-- The agent tools `route_to_recommended_hospital`, `query_hospital_facilities` and `search_medical_embeddings` are placeholders. Routing is done by `GET /api/hospitals/recommendations`.
-- Triage chat sessions are kept in memory and are lost when the backend restarts. Classified screenings are saved as reports.
-- `frontend/test/localization_test.dart` ("Profile switch saves language…") currently fails.
-
-## Roadmap
-
-1. Shorten paediatric screenings by adding a first-look checklist for children.
-2. Turn the remaining multi-part yes/no questions into option lists.
-4. Review the Azure content-filter settings so self-harm messages reach the screening.
-5. Add the chat transcript to the PDF report.

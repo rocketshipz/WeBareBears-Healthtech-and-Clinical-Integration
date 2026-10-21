@@ -21,7 +21,7 @@ Flutter Mobile App
 
 ## AI Model Structure
 
-- **Main Agent Model (Azure OpenAI)**: Powers reasoning, multi-turn clinical triage dialogs, and tool calling via `ChatOpenAI` against an Azure OpenAI v1 endpoint (default deployment: `gpt-4.1-mini`).
+- **Main Agent Model (Azure OpenAI)**: Powers reasoning, multi-turn clinical triage dialogs, and tool calling via `ChatOpenAI` against an Azure OpenAI v1 endpoint (default deployment: `gpt-5-mini`).
 - **Embedding Model (Google Gemini)**: Powers semantic vector search over medical protocols, MTS guidelines, and symptom embeddings via `GoogleGenerativeAIEmbeddings` (default: `gemini-embedding-2`).
 
 ## Directory Structure
