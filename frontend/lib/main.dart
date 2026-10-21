@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'localization.dart';
 import 'screens/role_selection_screen.dart';
+import 'widgets/phone_frame.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +22,7 @@ class TriageMYApp extends StatelessWidget {
       locale: locale,
       supportedLocales: const [Locale('en'), Locale('ms')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      builder: (context, child) => PhoneFrame(child: child!),
       home: const RoleSelectionScreen(),
     ),
   );

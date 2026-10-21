@@ -2,7 +2,7 @@ import logging
 import re
 import time
 from difflib import SequenceMatcher
-from typing import List, Optional, Sequence
+from typing import List, Optional, Sequence, Tuple
 
 import httpx
 from sqlalchemy.orm import Session
@@ -77,13 +77,22 @@ def classify(distance_km: Optional[float], threshold_km: float) -> str:
     return "mismatch" if distance_km > threshold_km else "match"
 
 
-def search_places(query: str, api_key: str) -> List[dict]:
+PLACE_FIELDS = "places.id,places.displayName,places.location,places.formattedAddress"
+
+
+def search_places(query: str, api_key: str, field_mask: str = PLACE_FIELDS,
+                  near: Optional[Tuple[float, float]] = None, radius_m: float = 2000.0,
+                  timeout: float = 15) -> List[dict]:
+    """Places Text Search (New). `near` (lat, lon) biases results to a circle around that point."""
+    body = {"textQuery": query, "regionCode": "MY", "maxResultCount": 3}
+    if near is not None:
+        body["locationBias"] = {"circle": {"center": {"latitude": near[0], "longitude": near[1]},
+                                           "radius": radius_m}}
     resp = httpx.post(
         PLACES_SEARCH_URL,
-        json={"textQuery": query, "regionCode": "MY", "maxResultCount": 3},
-        headers={"X-Goog-Api-Key": api_key,
-                 "X-Goog-FieldMask": "places.id,places.displayName,places.location,places.formattedAddress"},
-        timeout=15,
+        json=body,
+        headers={"X-Goog-Api-Key": api_key, "X-Goog-FieldMask": field_mask},
+        timeout=timeout,
     )
     resp.raise_for_status()
     return resp.json().get("places", [])

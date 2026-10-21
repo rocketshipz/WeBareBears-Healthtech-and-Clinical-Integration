@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 import 'api_service.dart';
 
-/// One ranked hospital from GET /hospitals/recommendations.
+/// One ranked hospital or (for Level 4-5) walk-in clinic from GET /hospitals/recommendations.
 class HospitalOption {
   final String id;
   final String name;
@@ -29,6 +29,15 @@ class HospitalOption {
   /// Driving distance, set only with live traffic.
   final double? roadDistanceKm;
 
+  /// True for a walk-in clinic (no emergency department).
+  final bool isClinic;
+
+  /// Clinics only: public or private.
+  final String? clinicType;
+
+  /// Clinics only: open (confirmed by Google opening hours) or unknown.
+  final String? openStatus;
+
   const HospitalOption({
     required this.id,
     required this.name,
@@ -44,6 +53,9 @@ class HospitalOption {
     this.googlePlaceId,
     this.liveTraffic = false,
     this.roadDistanceKm,
+    this.isClinic = false,
+    this.clinicType,
+    this.openStatus,
   });
 
   factory HospitalOption.fromJson(Map<String, dynamic> json) {
@@ -64,6 +76,9 @@ class HospitalOption {
       googlePlaceId: hospital['google_place_id'] as String?,
       liveTraffic: json['travel_time_source'] == 'traffic',
       roadDistanceKm: (json['road_distance_km'] as num?)?.toDouble(),
+      isClinic: hospital['facility_type'] == 'clinic',
+      clinicType: hospital['clinic_type'] as String?,
+      openStatus: hospital['open_status'] as String?,
     );
   }
 }
@@ -74,10 +89,15 @@ class HospitalRecommendations {
   final double? triageAgeHours;
   final List<HospitalOption> hospitals;
 
+  /// Walk-in clinics ranked separately, only when there is no recent triage
+  /// and clinics were requested.
+  final List<HospitalOption> clinics;
+
   const HospitalRecommendations({
     required this.triageLevelUsed,
     required this.triageAgeHours,
     required this.hospitals,
+    this.clinics = const [],
   });
 }
 
@@ -85,19 +105,24 @@ class HospitalService {
   /// Hospitals near [latitude]/[longitude], ranked by the backend using travel
   /// time, ED busyness and the user's triage level. [sessionId] is the triage
   /// report the user came from, if any. [limit] is how many to return (backend default 5).
+  /// [clinics]: with no recent triage, also rank this many walk-in clinics (separate list).
   static Future<HospitalRecommendations> fetchRecommendations(
     double latitude,
     double longitude, {
     String? sessionId,
     int? limit,
+    int? clinics,
   }) async {
     final uri = Uri.parse('${ApiService.baseUrl}/hospitals/recommendations')
-        .replace(queryParameters: {
-      'lat': latitude.toString(),
-      'lon': longitude.toString(),
-      'session_id': ?sessionId,
-      'limit': ?limit?.toString(),
-    });
+        .replace(
+          queryParameters: {
+            'lat': latitude.toString(),
+            'lon': longitude.toString(),
+            'session_id': ?sessionId,
+            'limit': ?limit?.toString(),
+            'clinics': ?clinics?.toString(),
+          },
+        );
     final res = await http
         .get(uri, headers: ApiService.defaultHeaders)
         .timeout(const Duration(seconds: 20));
@@ -112,6 +137,23 @@ class HospitalService {
       hospitals: (data['recommendations'] as List)
           .map((e) => HospitalOption.fromJson(e as Map<String, dynamic>))
           .toList(),
+      clinics: (data['clinic_recommendations'] as List? ?? [])
+          .map((e) => HospitalOption.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
+  }
+
+  /// Stops the user's recent triage result from shaping the ranking (the
+  /// triage report itself is kept). Needs a logged-in user.
+  static Future<void> clearRecentTriage() async {
+    final res = await http
+        .delete(
+          Uri.parse('${ApiService.baseUrl}/hospitals/triage-context'),
+          headers: ApiService.defaultHeaders,
+        )
+        .timeout(const Duration(seconds: 20));
+    if (res.statusCode != 200) {
+      throw Exception('Could not clear triage result (${res.statusCode})');
+    }
   }
 }

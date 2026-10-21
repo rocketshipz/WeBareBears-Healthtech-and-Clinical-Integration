@@ -164,17 +164,19 @@ On Render's free tier:
 - Use Supabase's Session pooler URL for `DATABASE_URL`, because Render cannot reach Supabase's IPv6-only direct host.
 
 In the backend's environment, set:
-- `CORS_ORIGINS=https://<your-app>.vercel.app`
-- `PUBLIC_BACKEND_URL=https://<your-backend>`
+- `CORS_ORIGINS=https://triagemy-fe.vercel.app/`
+- `PUBLIC_BACKEND_URL=https://triagemy.onrender.com`
 - the usual keys from `.env.example`
 
 **Frontend.** Vercel has no Flutter SDK, so build locally and upload the output:
 
 ```powershell
 cd frontend
-flutter build web --release --dart-define=API_BASE_URL=https://<your-backend>/api
+flutter build web --release --dart-define=API_BASE_URL=https://triagemy.onrender.com/api
 vercel deploy build/web --prod
 ```
+
+Or run `.\deploy_web.ps1 -ApiBaseUrl https://triagemy.onrender.com/api` from `frontend/`, which does both. It remembers the URL, so later deploys are just `.\deploy_web.ps1`, and `-Preview` makes a preview deployment instead.
 
 `web/vercel.json` is copied into the build. It sends every path to `index.html` and stops browsers caching the app shell, so users get new releases. Anything passed with `--dart-define` ends up readable in the browser bundle, so never put secrets there.
 

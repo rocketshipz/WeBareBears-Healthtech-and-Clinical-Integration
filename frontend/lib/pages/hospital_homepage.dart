@@ -17,8 +17,10 @@ class HospitalsPage extends StatefulWidget {
 }
 
 class _HospitalsPageState extends State<HospitalsPage> {
-  /// More than the post-triage page, so search has something to filter.
-  static const int _hospitalCount = 10;
+  /// With no recent triage: 5 hospitals and 5 walk-in clinics, ranked separately.
+  /// After a Level 4-5 triage the hospital list holds clinics first and one ED.
+  static const int _hospitalCount = 5;
+  static const int _clinicCount = 5;
 
   final TextEditingController searchController = TextEditingController();
 
@@ -32,6 +34,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
   HospitalRecommendations? recommendations;
   bool loadingHospitals = true;
   String? hospitalError;
+  bool clearingTriage = false;
 
   @override
   void initState() {
@@ -76,6 +79,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
         currentLocation.latitude,
         currentLocation.longitude,
         limit: _hospitalCount,
+        clinics: _clinicCount,
       );
       if (!mounted) return;
       setState(() {
@@ -91,12 +95,68 @@ class _HospitalsPageState extends State<HospitalsPage> {
     }
   }
 
-  /// Ranked hospitals matching the search box (name or address).
-  List<HospitalOption> get _visibleHospitals {
-    final hospitals = recommendations?.hospitals ?? const <HospitalOption>[];
+  /// Asks, then stops the recent triage result from shaping the ranking and reloads.
+  Future<void> _confirmClearTriage() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: LocalizedText('Clear triage result?', style: AppText.heading),
+        content: LocalizedText(
+          'Hospitals and clinics will no longer be ranked for your recent triage result. '
+          'Your triage report is kept.',
+          style: AppText.body,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: LocalizedText(
+              'Cancel',
+              style: AppText.style(14, FontWeight.w600, AppColors.grey),
+            ),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.darkTeal,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: LocalizedText(
+              'Clear',
+              style: AppText.style(14, FontWeight.w700, Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => clearingTriage = true);
+    try {
+      await HospitalService.clearRecentTriage();
+      if (!mounted) return;
+      setState(() => clearingTriage = false);
+      await _loadHospitals();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => clearingTriage = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: LocalizedText(
+            'Could not clear the triage result. Please try again.',
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Items matching the search box (name or address).
+  List<HospitalOption> _matching(List<HospitalOption> items) {
     final query = searchController.text.trim().toLowerCase();
-    if (query.isEmpty) return hospitals;
-    return hospitals
+    if (query.isEmpty) return items;
+    return items
         .where(
           (h) =>
               h.name.toLowerCase().contains(query) ||
@@ -105,10 +165,20 @@ class _HospitalsPageState extends State<HospitalsPage> {
         .toList();
   }
 
+  /// Ranked hospitals (or, after a Level 4-5 triage, clinics and one ED) matching the search.
+  List<HospitalOption> get _visibleHospitals =>
+      _matching(recommendations?.hospitals ?? const <HospitalOption>[]);
+
+  /// Separately ranked clinics (no recent triage only) matching the search.
+  List<HospitalOption> get _visibleClinics =>
+      _matching(recommendations?.clinics ?? const <HospitalOption>[]);
+
   @override
   Widget build(BuildContext context) {
     Localizations.localeOf(context);
     final hospitals = _visibleHospitals;
+    final clinics = _visibleClinics;
+    final splitLists = recommendations?.clinics.isNotEmpty ?? false;
 
     return Scaffold(
       body: GradientBackground(
@@ -158,7 +228,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
                           ),
                           const SizedBox(height: 8),
                           LocalizedText(
-                            'Nearby emergency departments, ranked by travel time and how busy they are.',
+                            'Nearby emergency departments and walk-in clinics, ranked by travel time.',
                             style: AppText.body,
                           ),
                         ],
@@ -239,7 +309,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
                                 !locationLoaded
                                     ? 'Getting your current location...'
                                     : hasGps
-                                    ? 'Showing hospitals near your location.'
+                                    ? 'Showing hospitals and clinics near your location.'
                                     : 'Location unavailable. Showing hospitals near Kuala Lumpur.',
                                 style: AppText.style(
                                   12,
@@ -301,7 +371,7 @@ class _HospitalsPageState extends State<HospitalsPage> {
                                       ),
                                     ),
 
-                                    for (final h in hospitals)
+                                    for (final h in [...hospitals, ...clinics])
                                       Marker(
                                         point: LatLng(h.latitude, h.longitude),
                                         width: 42,
@@ -309,7 +379,9 @@ class _HospitalsPageState extends State<HospitalsPage> {
                                         child: Tooltip(
                                           message: h.name,
                                           child: _mapMarker(
-                                            Icons.local_hospital_rounded,
+                                            h.isClinic
+                                                ? Icons.medical_services_rounded
+                                                : Icons.local_hospital_rounded,
                                           ),
                                         ),
                                       ),
@@ -332,6 +404,33 @@ class _HospitalsPageState extends State<HospitalsPage> {
                         hospitalRankingCaption(recommendations!),
                         style: AppText.caption,
                       ),
+                      if (recommendations!.triageLevelUsed != null)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: clearingTriage || loadingHospitals
+                                ? null
+                                : _confirmClearTriage,
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              size: 16,
+                              color: AppColors.darkTeal,
+                            ),
+                            label: LocalizedText(
+                              'Clear triage result',
+                              style: AppText.style(
+                                13,
+                                FontWeight.w700,
+                                AppColors.darkTeal,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
 
                     const SizedBox(height: 14),
@@ -350,21 +449,27 @@ class _HospitalsPageState extends State<HospitalsPage> {
                           onPressed: _loadHospitals,
                         ),
                       )
-                    else if (hospitals.isEmpty)
+                    else if (splitLists) ...[
+                      _sectionTitle('Hospitals'),
+                      ..._cards(
+                        hospitals,
+                        'No nearby hospital matches your search.',
+                      ),
+                      const SizedBox(height: 8),
+                      _sectionTitle('Clinics'),
+                      ..._cards(
+                        clinics,
+                        'No nearby clinic matches your search.',
+                        startIndex: hospitals.length,
+                      ),
+                    ] else if (hospitals.isEmpty)
                       _statusMessage(
                         searchController.text.trim().isEmpty
                             ? 'No hospitals found near you.'
                             : 'No nearby hospital matches your search.',
                       )
                     else
-                      for (final (i, h) in hospitals.indexed)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 14),
-                          child: FadeSlideIn(
-                            index: 5 + i,
-                            child: HospitalOptionCard(hospital: h),
-                          ),
-                        ),
+                      ..._cards(hospitals, ''),
                   ],
                 ),
               ),
@@ -373,6 +478,35 @@ class _HospitalsPageState extends State<HospitalsPage> {
         ),
       ),
     );
+  }
+
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: LocalizedText(
+        title,
+        style: AppText.style(16, FontWeight.w800, AppColors.textDark),
+      ),
+    );
+  }
+
+  /// Ranked cards, or [emptyMessage] when the search hides them all.
+  List<Widget> _cards(
+    List<HospitalOption> items,
+    String emptyMessage, {
+    int startIndex = 0,
+  }) {
+    if (items.isEmpty) return [_statusMessage(emptyMessage)];
+    return [
+      for (final (i, h) in items.indexed)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: FadeSlideIn(
+            index: 5 + startIndex + i,
+            child: HospitalOptionCard(hospital: h),
+          ),
+        ),
+    ];
   }
 
   Widget _mapMarker(IconData icon) {

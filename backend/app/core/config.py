@@ -81,6 +81,10 @@ class Settings(BaseSettings):
     ROUTING_TRAFFIC_TIMEOUT_SECONDS: float = 3.0
     ROUTING_TRAFFIC_CACHE_SECONDS: int = 300
     HOSPITAL_LOCATION_MISMATCH_KM: float = 1.0  # DB vs Google location further apart than this = mismatch
+    # Level 4-5 routing to clinics: opening hours from Google Places (Enterprise SKU), cached per clinic
+    # for 30 days in clinic_place_check. Off, or no key: clinic hours are shown as not verified.
+    CLINIC_HOURS_LOOKUP: bool = True
+    CLINIC_HOURS_TIMEOUT_SECONDS: float = 3.0
 
     model_config = SettingsConfigDict(
         env_file=(".env", "../.env"),

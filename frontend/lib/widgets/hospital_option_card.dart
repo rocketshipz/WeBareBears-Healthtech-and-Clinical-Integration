@@ -11,14 +11,22 @@ import '../theme.dart';
 String hospitalRankingCaption(HospitalRecommendations recommendations) {
   final level = recommendations.triageLevelUsed;
   if (level == null) {
+    if (recommendations.clinics.isNotEmpty) {
+      return 'No recent triage. Hospitals are ranked by travel time and how busy '
+          'each emergency department is. Clinics are ranked by travel time and opening hours.';
+    }
     return 'No triage in the last 24 hours. Ranked by distance and how busy each emergency department is.';
   }
   final hours = recommendations.triageAgeHours ?? 0;
   final ago = hours < 1 ? 'less than an hour ago' : '${hours.round()} h ago';
+  if (recommendations.hospitals.any((h) => h.isClinic)) {
+    return 'Ranked for your Level $level triage result ($ago). A walk-in clinic '
+        'is suitable. The emergency department is listed in case symptoms get worse.';
+  }
   return 'Ranked for your Level $level triage result ($ago).';
 }
 
-/// A ranked hospital: badges, ED activity, travel time and a "View Route" button.
+/// A ranked hospital or clinic: badges, ED activity or opening hours, travel time and a "View Route" button.
 class HospitalOptionCard extends StatelessWidget {
   final HospitalOption hospital;
 
@@ -146,10 +154,10 @@ class HospitalOptionCard extends StatelessWidget {
     );
   }
 
-  /// Capitalised ED activity label, e.g. "Very busy".
-  String _activityLabel(String? level) {
-    if (level == null || level.isEmpty) return 'Unknown';
-    return level[0].toUpperCase() + level.substring(1);
+  /// Capitalised label, e.g. "Very busy" for ED activity or "Private" for a clinic type.
+  String _capitalised(String? value) {
+    if (value == null || value.isEmpty) return 'Unknown';
+    return value[0].toUpperCase() + value.substring(1);
   }
 
   @override
@@ -233,20 +241,43 @@ class HospitalOptionCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Expanded(
-                  child: _infoItem(
-                    icon: Icons.local_hospital_outlined,
-                    value: _activityLabel(hospital.activityLevel),
-                    label: 'ED activity',
+                if (hospital.isClinic) ...[
+                  Expanded(
+                    child: _infoItem(
+                      icon: Icons.storefront_outlined,
+                      value: _capitalised(
+                        hospital.openStatus == 'open'
+                            ? 'open now'
+                            : 'call ahead',
+                      ),
+                      label: hospital.openStatus == 'open'
+                          ? 'Google hours'
+                          : 'Hours not verified',
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: _infoItem(
-                    icon: Icons.bed_outlined,
-                    value: hospital.availableEdSpaces?.toString() ?? '-',
-                    label: 'ED spaces free',
+                  Expanded(
+                    child: _infoItem(
+                      icon: Icons.medical_services_outlined,
+                      value: _capitalised(hospital.clinicType),
+                      label: 'Clinic',
+                    ),
                   ),
-                ),
+                ] else ...[
+                  Expanded(
+                    child: _infoItem(
+                      icon: Icons.local_hospital_outlined,
+                      value: _capitalised(hospital.activityLevel),
+                      label: 'ED activity',
+                    ),
+                  ),
+                  Expanded(
+                    child: _infoItem(
+                      icon: Icons.bed_outlined,
+                      value: hospital.availableEdSpaces?.toString() ?? '-',
+                      label: 'ED spaces free',
+                    ),
+                  ),
+                ],
                 Expanded(
                   child: _infoItem(
                     icon: hospital.liveTraffic
