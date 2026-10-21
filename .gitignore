@@ -104,3 +104,6 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Evaluation outputs (scripts/scripted_triage_eval.py)
+backend/scripts/sim_results/

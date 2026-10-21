@@ -16,7 +16,7 @@ Flutter Mobile App
  ├── Hospital Routing Tool (Geo-Routing & Recommendation)
  └── Embedding Tool (Semantic Medical Knowledge Search)
        ↓
- Database / Data Sources (PostgreSQL / Supabase & Data Files)
+ Database (PostgreSQL / Supabase)
 ```
 
 ## AI Model Structure
@@ -29,23 +29,20 @@ Flutter Mobile App
 ```
 backend/
 ├── app/
-│   ├── api/
-│   │   └── routes/             # FastAPI route handlers (health, triage)
-│   ├── agents/                 # Medical Triage Agent & system prompts
-│   ├── tools/                  # 5 LangChain tools for triage & routing
-│   ├── services/               # Core business logic services
-│   ├── models/                 # Domain entities (patient, hospital, triage)
+│   ├── api/routes/             # auth, triage, hospitals, patients, progress, family, admin, health
+│   ├── agents/                 # MedicalTriageAgent, agent + hybrid prompts
+│   ├── services/               # Business logic (rules engine, hybrid controller, routing, auth, ...)
+│   ├── repositories/           # Data access (PostgreSQL / Supabase)
+│   ├── models/                 # SQLAlchemy entities
 │   ├── schemas/                # Pydantic validation models
-│   ├── repositories/           # Data access layers (PostgreSQL/Supabase)
-│   ├── core/                   # Configuration, DB session, & LLM client
+│   ├── core/                   # Config, DB session, LLM client, location maths, scheduler
+│   ├── tools/                  # LangChain tools + mts_screening_kb.json (triage rules)
+│   ├── templates/              # Family invitation page
 │   └── main.py                 # FastAPI application definition
-│
-├── data/
-│   ├── patients/               # Placeholder for patient health datasets
-│   ├── triage/                 # Placeholder for clinical triage rules
-│   └── hospitals/              # Placeholder for hospital facility datasets
-│
+├── scripts/                    # Triage evaluation, hospital location check, wait-label update
 ├── tests/                      # Automated test suite
+├── migrate_*.py                # One-off database migrations
+├── setup_staff_passwords.py    # Staff password bootstrap
 ├── .env.example                # Example environment variables
 ├── requirements.txt            # Python dependencies
 └── main.py                     # Convenience entry point

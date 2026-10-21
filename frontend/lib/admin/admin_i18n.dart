@@ -172,23 +172,8 @@ const Map<String, String> _ms = {
   'Progress tracking link replaced (old link revoked)':
       'Pautan penjejakan kemajuan diganti (pautan lama dibatalkan)',
 
-  // ---------------- landing ----------------
-  'Hospital staff portal': 'Portal kakitangan hospital',
-  'Log each stage of a patient\'s emergency visit so patients and families always know what happens next.': 'Rekod setiap peringkat lawatan kecemasan pesakit supaya pesakit dan keluarga sentiasa tahu apa yang berlaku seterusnya.',
-  'Live emergency queue': 'Giliran kecemasan secara langsung',
-  'See every patient, their zone and current stage.':
-      'Lihat setiap pesakit, zon dan peringkat semasa mereka.',
-  'One-tap progress logging': 'Rekod kemajuan dengan satu ketikan',
-  'Start and complete each stage in seconds.':
-      'Mula dan selesaikan setiap peringkat dalam beberapa saat.',
-  'Family updates': 'Makluman untuk keluarga',
-  'Authorised family can follow the visit in the app.':
-      'Keluarga yang dibenarkan boleh mengikuti lawatan dalam aplikasi.',
-  'Staff login': 'Log masuk kakitangan',
-  'Not hospital staff? ': 'Bukan kakitangan hospital? ',
-  'Open the patient app': 'Buka aplikasi pesakit',
-
   // ---------------- login ----------------
+  'Staff login': 'Log masuk kakitangan',
   'Sign in to update patient progress.':
       'Log masuk untuk mengemas kini kemajuan pesakit.',
   'Select hospital': 'Pilih hospital',

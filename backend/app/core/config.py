@@ -82,9 +82,6 @@ class Settings(BaseSettings):
     ROUTING_TRAFFIC_CACHE_SECONDS: int = 300
     HOSPITAL_LOCATION_MISMATCH_KM: float = 1.0  # DB vs Google location further apart than this = mismatch
 
-    # Data Directory
-    DATA_DIR: str = str(Path(__file__).resolve().parent.parent.parent / "data")
-    
     model_config = SettingsConfigDict(
         env_file=(".env", "../.env"),
         env_file_encoding="utf-8",
