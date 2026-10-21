@@ -40,10 +40,12 @@ app = FastAPI(
     debug=settings.DEBUG
 )
 
-# Enable CORS for Flutter mobile application
+# Enable CORS for the Flutter web app. Local dev servers (random localhost ports) are always allowed.
+cors_origins = [o.strip().rstrip("/") for o in settings.CORS_ORIGINS.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust for production
+    allow_origins=cors_origins,
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

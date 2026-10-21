@@ -154,3 +154,13 @@ SMTP credentials, signup reports that email delivery is not configured.
 Automated tests use explicit `TAC_DELIVERY=test` with `ENVIRONMENT=test`;
 this returns a test-only `debug_code` and sends no email. Production refuses
 that mode. Live SMTP delivery does not return or log the TAC.
+
+### Hosts that block SMTP (e.g. Render free tier)
+
+Send the same email through Brevo's HTTP API instead. The free plan allows 300 emails a day.
+
+1. Create a Brevo account. Under Senders, add and verify `triagemy.wbb@gmail.com`.
+2. Create an API key (SMTP & API → API Keys).
+3. Set `EMAIL_PROVIDER=brevo` and `BREVO_API_KEY=<key>`. `SMTP_FROM_EMAIL` stays the sender, and the other `SMTP_*` values are not needed.
+
+Leave `EMAIL_PROVIDER=smtp` (the default) for local development with Gmail.

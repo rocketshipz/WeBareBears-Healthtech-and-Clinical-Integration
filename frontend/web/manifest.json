@@ -1,11 +1,11 @@
 {
-    "name": "triagemy",
-    "short_name": "triagemy",
+    "name": "TriageMY",
+    "short_name": "TriageMY",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0D5C63",
+    "theme_color": "#0D5C63",
+    "description": "TriageMY: emergency triage using the Malaysian Triage Scale and hospital routing.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

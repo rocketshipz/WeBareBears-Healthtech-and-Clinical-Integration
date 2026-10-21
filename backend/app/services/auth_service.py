@@ -1,7 +1,7 @@
 import hashlib
 from app.core.config import get_settings
 from app.schemas.auth import normalize_phone
-from app.services.email_service import send_tac_email
+from app.services.email_service import email_configured, send_tac_email
 import logging
 import os
 import secrets
@@ -102,7 +102,7 @@ class AuthService:
         test_mode = settings.TAC_DELIVERY == 'test' and settings.ENVIRONMENT in ('test', 'development')
         if not test_mode and settings.TAC_DELIVERY != 'email':
             raise ValueError('Unsupported TAC delivery mode. Configure email delivery.')
-        if not test_mode and not settings.SMTP_PASSWORD:
+        if not test_mode and not email_configured():
             raise ValueError('Email verification is not configured. Please contact support.')
         with self._get_db() as session:
             repo = UserRepository(session)

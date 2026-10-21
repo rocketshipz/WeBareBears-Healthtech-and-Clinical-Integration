@@ -24,9 +24,15 @@ class Settings(BaseSettings):
     PORT: int = 8000
     # Reachable backend origin for family invitations shared outside this device.
     PUBLIC_BACKEND_URL: str = ""
+    # Comma-separated browser origins allowed by CORS (e.g. "https://triagemy.vercel.app").
+    # "*" allows any origin. localhost / 127.0.0.1 on any port are always allowed for local dev.
+    CORS_ORIGINS: str = "*"
     
-    # Gmail SMTP over TLS. SMTP_PASSWORD must be a Google App Password.
+    # Signup TAC email. EMAIL_PROVIDER: 'smtp' (Gmail SMTP over TLS; SMTP_PASSWORD must be a Google App
+    # Password) or 'brevo' (HTTP API, for hosts that block SMTP ports). Both send from SMTP_FROM_EMAIL.
     TAC_DELIVERY: str = 'email'
+    EMAIL_PROVIDER: str = 'smtp'
+    BREVO_API_KEY: str = ''
     SMTP_HOST: str = 'smtp.gmail.com'
     SMTP_PORT: int = 465
     SMTP_USERNAME: str = 'triagemy.wbb@gmail.com'

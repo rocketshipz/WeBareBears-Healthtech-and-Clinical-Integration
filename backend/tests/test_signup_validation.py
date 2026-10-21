@@ -48,7 +48,7 @@ def test_password_policy(password):
 
 def configure_email(monkeypatch):
     settings = get_settings()
-    for field, value in dict(TAC_DELIVERY='email', SMTP_HOST='smtp.gmail.com',
+    for field, value in dict(TAC_DELIVERY='email', EMAIL_PROVIDER='smtp', SMTP_HOST='smtp.gmail.com',
                              SMTP_PORT=465, SMTP_USERNAME='triagemy.wbb@gmail.com',
                              SMTP_FROM_EMAIL='triagemy.wbb@gmail.com',
                              SMTP_PASSWORD='test app password').items():
@@ -145,3 +145,65 @@ def test_production_cannot_use_debug_delivery(monkeypatch):
     monkeypatch.setattr(settings, 'ENVIRONMENT', 'production')
     with pytest.raises(ValueError, match='Unsupported TAC delivery'):
         AuthService().send_verification_code('production@example.com', '0123456795')
+
+
+def configure_brevo(monkeypatch):
+    settings = configure_email(monkeypatch)
+    monkeypatch.setattr(settings, 'EMAIL_PROVIDER', 'brevo')
+    monkeypatch.setattr(settings, 'BREVO_API_KEY', 'test-brevo-key')
+    monkeypatch.setattr(settings, 'SMTP_PASSWORD', '')  # Brevo does not need SMTP credentials
+    return settings
+
+
+def test_brevo_delivery_uses_http_api_not_smtp(monkeypatch):
+    configure_brevo(monkeypatch)
+    service = AuthService()
+    with patch('app.services.email_service.httpx.post') as post, \
+            patch('app.services.email_service.smtplib.SMTP_SSL') as smtp:
+        sent = service.send_verification_code('brevo@example.com', '0123456796')
+    smtp.assert_not_called()
+    assert sent.debug_code is None
+    assert post.call_args.args == ('https://api.brevo.com/v3/smtp/email',)
+    assert post.call_args.kwargs['headers']['api-key'] == 'test-brevo-key'
+    payload = post.call_args.kwargs['json']
+    assert payload['to'] == [{'email': 'brevo@example.com'}]
+    assert payload['sender'] == {'name': 'TriageMY', 'email': 'triagemy.wbb@gmail.com'}
+    with service._get_db() as session:
+        code = UserRepository(session).get_latest_verification_code(
+            service._verification_key('brevo@example.com', '0123456796')).code
+    assert code in payload['textContent']
+
+
+def test_brevo_failure_does_not_store_code(monkeypatch):
+    import httpx
+    configure_brevo(monkeypatch)
+    service = AuthService()
+    with patch('app.services.email_service.httpx.post', side_effect=httpx.ConnectError('down')):
+        with pytest.raises(ValueError, match='Unable to send email TAC'):
+            service.send_verification_code('brevo-fail@example.com', '0123456797')
+    with service._get_db() as session:
+        assert UserRepository(session).get_latest_verification_code(
+            service._verification_key('brevo-fail@example.com', '0123456797')) is None
+
+
+def test_brevo_without_api_key_never_sends(monkeypatch):
+    settings = configure_brevo(monkeypatch)
+    monkeypatch.setattr(settings, 'BREVO_API_KEY', '')
+    with patch('app.services.email_service.httpx.post') as post:
+        with pytest.raises(ValueError, match='not configured'):
+            AuthService().send_verification_code('brevo-missing@example.com', '0123456798')
+    post.assert_not_called()
+
+
+def test_brevo_rejection_is_logged_without_secrets(monkeypatch, caplog):
+    import httpx
+    settings = configure_brevo(monkeypatch)
+    monkeypatch.setattr(settings, 'BREVO_API_KEY', 'xsmtpsib-secret-value')
+    request = httpx.Request('POST', 'https://api.brevo.com/v3/smtp/email')
+    response = httpx.Response(401, json={'message': 'Key not found', 'code': 'unauthorized'},
+                              request=request)
+    with patch('app.services.email_service.httpx.post', return_value=response):
+        with pytest.raises(ValueError, match='Unable to send email TAC'):
+            AuthService().send_verification_code('brevo-401@example.com', '0123456799')
+    assert 'Key not found' in caplog.text and 'xkeysib-' in caplog.text
+    assert 'secret-value' not in caplog.text
