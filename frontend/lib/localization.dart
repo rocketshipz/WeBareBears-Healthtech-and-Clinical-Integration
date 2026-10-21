@@ -53,6 +53,10 @@ final translationTemplates = <RegExp, String Function(RegExpMatch)>{
   RegExp(r'^Screening for (.+)$'): (m) => 'Saringan untuk ${m[1]}',
   RegExp(r'^A password reset link has been sent to (.*)$'): (m) =>
       'Pautan tetapan semula kata laluan telah dihantar ke ${m[1]}',
+  RegExp(
+    r'^If an account is registered to (.*), a (?:6-digit )?reset code has been sent to it\.$',
+  ): (m) =>
+      'Jika akaun berdaftar dengan ${m[1]}, kod tetapan semula 6 digit telah dihantar kepadanya.',
   RegExp(r'^A 6-digit TAC has been sent to (.*)$'): (m) =>
       'TAC 6 digit telah dihantar ke ${m[1]}',
   RegExp(r'^Outcome: (.*) \((.*)\)$'): (m) =>
@@ -205,6 +209,27 @@ const malayTranslations = <String, String>{
   "Email link verified.": "Pautan e-mel disahkan.",
   "Email verified. You can now create a new password.":
       "E-mel disahkan. Anda kini boleh mencipta kata laluan baharu.",
+  "Enter your registered email address and we'll send you a 6-digit code to reset your password.":
+      "Masukkan alamat e-mel berdaftar anda dan kami akan menghantar kod 6 digit untuk menetapkan semula kata laluan anda.",
+  "Send Reset Code": "Hantar Kod Tetapan Semula",
+  "Sending code...": "Menghantar kod...",
+  "Verify code": "Sahkan kod",
+  "Verify Code": "Sahkan Kod",
+  "Verifying...": "Mengesahkan...",
+  "Enter 6-Digit Code": "Masukkan Kod 6 Digit",
+  "Enter 6-digit code": "Masukkan kod 6 digit",
+  "Change email": "Tukar e-mel",
+  "Resend Code": "Hantar Semula Kod",
+  "Changing password...": "Menukar kata laluan...",
+  "Code verified. You can now create a new password.":
+      "Kod disahkan. Anda kini boleh mencipta kata laluan baharu.",
+  "Use 8+ characters with uppercase, lowercase, a number and a symbol.":
+      "Gunakan 8+ aksara dengan huruf besar, huruf kecil, nombor dan simbol.",
+  "Please enter a valid email address.": "Sila masukkan alamat e-mel yang sah.",
+  "Please enter the 6-digit verification code.":
+      "Sila masukkan kod pengesahan 6 digit.",
+  "Password needs at least 8 characters, uppercase, lowercase, a number and a symbol.":
+      "Kata laluan memerlukan sekurang-kurangnya 8 aksara, huruf besar, huruf kecil, nombor dan simbol.",
   "Account created successfully!": "Akaun berjaya dicipta!",
   "Your phone number is verified using TAC before your account is activated.": "Nombor telefon anda disahkan menggunakan TAC sebelum akaun anda diaktifkan.",
   "Home": "Utama",

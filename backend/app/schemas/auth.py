@@ -28,6 +28,13 @@ def normalize_phone(value: str) -> str:
     return clean
 
 
+def strong_password(value: str) -> str:
+    if not (len(value) >= 8 and re.search(r'[A-Z]', value) and re.search(r'[a-z]', value)
+            and re.search(r'[0-9]', value) and re.search(r'[^a-zA-Z0-9\s]', value)):
+        raise ValueError('Password must have at least 8 characters, uppercase, lowercase, a number and a symbol')
+    return value
+
+
 class SendCodeRequest(BaseModel):
     """Request schema for sending a email verification code."""
     email: str = Field(..., description="User's email address")
@@ -87,13 +94,7 @@ class RegisterRequest(BaseModel):
 
     _phone = field_validator('phone')(normalize_phone)
 
-    @field_validator('password')
-    @classmethod
-    def strong_password(cls, value: str) -> str:
-        if not (re.search(r'[A-Z]', value) and re.search(r'[a-z]', value)
-                and re.search(r'[0-9]', value) and re.search(r'[^a-zA-Z0-9\s]', value)):
-            raise ValueError('Password must have at least 8 characters, uppercase, lowercase, a number and a symbol')
-        return value
+    _password = field_validator('password')(strong_password)
 
     @model_validator(mode="after")
     def validate_birth_date(self):
@@ -121,6 +122,23 @@ class LoginRequest(BaseModel):
     """Request schema for user login."""
     identifier: str = Field(..., description="Email, Phone number, or IC number")
     password: str = Field(..., min_length=1, description="Account password")
+
+
+class ForgotPasswordRequest(BaseModel):
+    """Request a password reset TAC for the account registered to this email."""
+    email: str
+
+    _email = field_validator('email')(valid_email)
+
+
+class VerifyResetCodeRequest(ForgotPasswordRequest):
+    code: str = Field(..., pattern=r"^[0-9]{6}$", description="6-digit reset code")
+
+
+class ResetPasswordRequest(VerifyResetCodeRequest):
+    new_password: str = Field(..., min_length=8)
+
+    _password = field_validator('new_password')(strong_password)
 
 
 class UserProfile(BaseModel):

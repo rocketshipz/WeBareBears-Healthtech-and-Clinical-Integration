@@ -1,6 +1,8 @@
 import '../localization.dart';
+
 import 'package:flutter/material.dart';
 
+import '../services/auth_service.dart';
 import '../theme.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -12,11 +14,13 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final emailController = TextEditingController();
+  final codeController = TextEditingController();
   final newPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  bool linkSent = false;
-  bool linkVerified = false;
+  bool codeSent = false;
+  bool codeVerified = false;
+  bool isBusy = false;
 
   bool hidePassword = true;
   bool hideConfirmPassword = true;
@@ -24,67 +28,101 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   void dispose() {
     emailController.dispose();
+    codeController.dispose();
     newPasswordController.dispose();
     confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _sendResetLink() {
-    if (emailController.text.trim().isEmpty) {
-      _showMessage(
-        'Please enter your email address.',
-      );
-      return;
+  bool _isStrongPassword(String password) =>
+      password.length >= 8 &&
+      RegExp(r'[A-Z]').hasMatch(password) &&
+      RegExp(r'[a-z]').hasMatch(password) &&
+      RegExp(r'[0-9]').hasMatch(password) &&
+      RegExp(r'[^a-zA-Z0-9\s]').hasMatch(password);
+
+  /// Runs an API call with the busy flag set, showing any error as a snack.
+  Future<void> _run(Future<void> Function() action) async {
+    if (isBusy) return;
+    setState(() => isBusy = true);
+    try {
+      await action();
+    } on AuthException catch (e) {
+      if (mounted) _showMessage(e.message);
+    } finally {
+      if (mounted) setState(() => isBusy = false);
     }
-
-    setState(() {
-      linkSent = true;
-      linkVerified = false;
-    });
-
-    _showMessage(
-      'Password reset link sent. Prototype mode.',
-    );
   }
 
-  void _verifyLink() {
-    setState(() {
-      linkVerified = true;
-    });
+  Future<void> _sendResetCode() async {
+    final email = emailController.text.trim();
+    if (email.isEmpty) {
+      _showMessage('Please enter your email address.');
+      return;
+    }
+    if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
+      _showMessage('Please enter a valid email address.');
+      return;
+    }
 
-    _showMessage(
-      'Email link verified.',
-    );
+    await _run(() async {
+      final response = await AuthService.requestPasswordReset(email: email);
+      if (!mounted) return;
+      setState(() {
+        codeSent = true;
+        codeVerified = false;
+        codeController.clear();
+      });
+      _showMessage(response['message'] ?? 'Reset code sent.');
+    });
   }
 
-  void _changePassword() {
-    if (newPasswordController.text.isEmpty ||
-        confirmPasswordController.text.isEmpty) {
+  Future<void> _verifyCode() async {
+    final code = codeController.text.trim();
+    if (!RegExp(r'^[0-9]{6}$').hasMatch(code)) {
+      _showMessage('Please enter the 6-digit verification code.');
+      return;
+    }
+
+    await _run(() async {
+      await AuthService.verifyResetCode(
+        email: emailController.text,
+        code: code,
+      );
+      if (!mounted) return;
+      setState(() => codeVerified = true);
+    });
+  }
+
+  Future<void> _changePassword() async {
+    final password = newPasswordController.text;
+    if (password.isEmpty || confirmPasswordController.text.isEmpty) {
+      _showMessage('Please enter your new password.');
+      return;
+    }
+
+    if (!_isStrongPassword(password)) {
       _showMessage(
-        'Please enter your new password.',
+        'Password needs at least 8 characters, uppercase, lowercase, a number and a symbol.',
       );
       return;
     }
 
-    if (newPasswordController.text.length < 8) {
-      _showMessage(
-        'Password must contain at least 8 characters.',
-      );
+    if (password != confirmPasswordController.text) {
+      _showMessage('Passwords do not match.');
       return;
     }
 
-    if (newPasswordController.text != confirmPasswordController.text) {
-      _showMessage(
-        'Passwords do not match.',
+    await _run(() async {
+      await AuthService.resetPassword(
+        email: emailController.text,
+        code: codeController.text,
+        newPassword: password,
       );
-      return;
-    }
-
-    _showMessage(
-      'Password changed successfully.',
-    );
-
-    Navigator.pop(context);
+      if (!mounted) return;
+      _showMessage('Password changed successfully.');
+      Navigator.pop(context);
+    });
   }
 
   void _showMessage(String message) {
@@ -94,7 +132,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     Localizations.localeOf(context);
-    final int currentStep = linkVerified ? 2 : (linkSent ? 1 : 0);
+    final int currentStep = codeVerified ? 2 : (codeSent ? 1 : 0);
 
     return Scaffold(
       body: GradientBackground(
@@ -157,11 +195,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          LocalizedText('Forgot your password?',
-                              style: AppText.display),
+                          LocalizedText(
+                            'Forgot your password?',
+                            style: AppText.display,
+                          ),
                           const SizedBox(height: 8),
                           LocalizedText(
-                            'Enter your registered email address and we\'ll send you a password reset link.',
+                            'Enter your registered email address and we\'ll send you a 6-digit code to reset your password.',
                             style: AppText.body,
                           ),
                           const SizedBox(height: 20),
@@ -169,7 +209,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             current: currentStep,
                             labels: const [
                               'Email',
-                              'Verify link',
+                              'Verify code',
                               'New password',
                             ],
                           ),
@@ -195,7 +235,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             TextField(
                               controller: emailController,
                               keyboardType: TextInputType.emailAddress,
-                              enabled: !linkVerified,
+                              enabled: !codeSent,
                               style: AppText.input,
                               decoration: appInputDecoration(
                                 hint: 'name@email.com',
@@ -203,18 +243,20 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               ),
                             ),
 
-                            // SEND LINK
-                            if (!linkSent) ...[
+                            // SEND CODE
+                            if (!codeSent) ...[
                               const SizedBox(height: 20),
                               PrimaryButton(
-                                label: 'Send Reset Link',
+                                label: isBusy
+                                    ? 'Sending code...'
+                                    : 'Send Reset Code',
                                 icon: Icons.send_rounded,
-                                onPressed: _sendResetLink,
+                                onPressed: isBusy ? null : _sendResetCode,
                               ),
                             ],
 
-                            // LINK SENT
-                            if (linkSent && !linkVerified) ...[
+                            // CODE SENT
+                            if (codeSent && !codeVerified) ...[
                               const SizedBox(height: 20),
                               Container(
                                 width: double.infinity,
@@ -234,8 +276,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: LocalizedText(
-                                        'A password reset link has been sent to '
-                                        '${emailController.text}.',
+                                        'If an account is registered to '
+                                        '${emailController.text.trim()}, a 6-digit reset code has been sent to it.',
                                         style: AppText.style(
                                           12,
                                           FontWeight.w500,
@@ -248,29 +290,62 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 ),
                               ),
                               const SizedBox(height: 18),
+                              fieldLabel('Enter 6-Digit Code'),
+                              const SizedBox(height: 8),
+                              TextField(
+                                controller: codeController,
+                                keyboardType: TextInputType.number,
+                                maxLength: 6,
+                                style: AppText.input,
+                                decoration: appInputDecoration(
+                                  hint: 'Enter 6-digit code',
+                                  icon: Icons.password_rounded,
+                                ).copyWith(counterText: ''),
+                              ),
+                              const SizedBox(height: 18),
                               PrimaryButton(
-                                label: 'Verify Reset Link',
+                                label: isBusy ? 'Verifying...' : 'Verify Code',
                                 icon: Icons.verified_outlined,
-                                onPressed: _verifyLink,
+                                onPressed: isBusy ? null : _verifyCode,
                               ),
                               const SizedBox(height: 4),
-                              Center(
-                                child: TextButton(
-                                  onPressed: _sendResetLink,
-                                  child: LocalizedText(
-                                    'Resend email',
-                                    style: AppText.style(
-                                      12,
-                                      FontWeight.w600,
-                                      AppColors.darkTeal,
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  TextButton(
+                                    onPressed: isBusy
+                                        ? null
+                                        : () => setState(() {
+                                            codeSent = false;
+                                            codeController.clear();
+                                          }),
+                                    child: LocalizedText(
+                                      'Change email',
+                                      style: AppText.style(
+                                        12,
+                                        FontWeight.w600,
+                                        AppColors.darkTeal,
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  TextButton(
+                                    onPressed: isBusy ? null : _sendResetCode,
+                                    child: LocalizedText(
+                                      'Resend Code',
+                                      style: AppText.style(
+                                        12,
+                                        FontWeight.w600,
+                                        AppColors.darkTeal,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
 
                             // RESET PASSWORD
-                            if (linkVerified) ...[
+                            if (codeVerified) ...[
                               const SizedBox(height: 20),
                               Container(
                                 width: double.infinity,
@@ -289,7 +364,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: LocalizedText(
-                                        'Email verified. You can now create a new password.',
+                                        'Code verified. You can now create a new password.',
                                         style: AppText.style(
                                           12,
                                           FontWeight.w500,
@@ -333,7 +408,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               const SizedBox(height: 6),
 
                               LocalizedText(
-                                'Use at least 8 characters.',
+                                'Use 8+ characters with uppercase, lowercase, a number and a symbol.',
                                 style: AppText.caption,
                               ),
 
@@ -369,9 +444,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               const SizedBox(height: 24),
 
                               PrimaryButton(
-                                label: 'Change Password',
+                                label: isBusy
+                                    ? 'Changing password...'
+                                    : 'Change Password',
                                 icon: Icons.check_rounded,
-                                onPressed: _changePassword,
+                                onPressed: isBusy ? null : _changePassword,
                               ),
                             ],
                           ],

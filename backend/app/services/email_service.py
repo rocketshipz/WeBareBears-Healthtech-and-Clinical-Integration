@@ -1,4 +1,4 @@
-"""Send signup TACs by SMTP (certificate-verified TLS) or the Brevo HTTP API.
+"""Send signup and password-reset TACs by SMTP (certificate-verified TLS) or the Brevo HTTP API.
 
 EMAIL_PROVIDER picks the transport. Use "brevo" on hosts that block SMTP ports
 (e.g. Render's free tier). Both send from SMTP_FROM_EMAIL.
@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 BREVO_SEND_URL = 'https://api.brevo.com/v3/smtp/email'
 SUBJECT = 'Your TriageMY verification code'
+RESET_SUBJECT = 'Reset your TriageMY password'
 NOT_CONFIGURED = 'Email verification is not configured. Please contact support.'
 SEND_FAILED = 'Unable to send email TAC. Please try again later or contact support.'
 
@@ -25,9 +26,10 @@ def _provider() -> str:
     return get_settings().EMAIL_PROVIDER.strip().lower()
 
 
-def _body(code: str) -> str:
+def _body(code: str, reset: bool = False) -> str:
+    purpose = 'password reset code' if reset else 'verification code'
     return (
-        f'Your TriageMY verification code is: {code}\n\n'
+        f'Your TriageMY {purpose} is: {code}\n\n'
         'This code expires in 5 minutes. Do not share it with anyone.\n'
         'If you did not request this code, you can ignore this email.\n'
     )
@@ -44,24 +46,26 @@ def email_configured() -> bool:
     return False
 
 
-def send_tac_email(recipient: str, code: str) -> None:
+def send_tac_email(recipient: str, code: str, reset: bool = False) -> None:
+    """Email a TAC; reset=True words it as a password reset code."""
     if not email_configured():
         raise ValueError(NOT_CONFIGURED)
+    subject, body = (RESET_SUBJECT if reset else SUBJECT), _body(code, reset)
     if _provider() == 'brevo':
-        _send_brevo(recipient, code)
+        _send_brevo(recipient, subject, body)
     else:
-        _send_smtp(recipient, code)
+        _send_smtp(recipient, subject, body)
 
 
-def _send_brevo(recipient: str, code: str) -> None:
+def _send_brevo(recipient: str, subject: str, body: str) -> None:
     settings = get_settings()
     try:
         resp = httpx.post(
             BREVO_SEND_URL,
             json={'sender': {'name': 'TriageMY', 'email': settings.SMTP_FROM_EMAIL},
                   'to': [{'email': recipient}],
-                  'subject': SUBJECT,
-                  'textContent': _body(code)},
+                  'subject': subject,
+                  'textContent': body},
             headers={'api-key': settings.BREVO_API_KEY, 'accept': 'application/json'},
             timeout=8,
         )
@@ -79,16 +83,16 @@ def _send_brevo(recipient: str, code: str) -> None:
         raise ValueError(SEND_FAILED) from exc
 
 
-def _send_smtp(recipient: str, code: str) -> None:
+def _send_smtp(recipient: str, subject: str, body: str) -> None:
     settings = get_settings()
     if settings.SMTP_PORT not in (465, 587):
         raise ValueError('Email delivery requires SMTP port 465 or 587 with TLS.')
 
     message = EmailMessage()
-    message['Subject'] = SUBJECT
+    message['Subject'] = subject
     message['From'] = formataddr(('TriageMY', settings.SMTP_FROM_EMAIL))
     message['To'] = recipient
-    message.set_content(_body(code))
+    message.set_content(body)
     password = settings.SMTP_PASSWORD.replace(' ', '')
     context = ssl.create_default_context()
     try:

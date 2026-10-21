@@ -94,16 +94,22 @@ class AuthService:
             (email.strip().lower() + '\n' + normalize_phone(phone)).encode()
         ).hexdigest()
 
-    def send_verification_code(self, email: str, phone: str) -> SendCodeResponse:
-        norm_email = email.strip().lower()
-        phone = normalize_phone(phone)
-        key = self._verification_key(norm_email, phone)
+    @staticmethod
+    def _tac_test_mode() -> bool:
+        """True when TACs are returned as debug codes instead of emailed; raises if email is unusable."""
         settings = get_settings()
         test_mode = settings.TAC_DELIVERY == 'test' and settings.ENVIRONMENT in ('test', 'development')
         if not test_mode and settings.TAC_DELIVERY != 'email':
             raise ValueError('Unsupported TAC delivery mode. Configure email delivery.')
         if not test_mode and not email_configured():
             raise ValueError('Email verification is not configured. Please contact support.')
+        return test_mode
+
+    def send_verification_code(self, email: str, phone: str) -> SendCodeResponse:
+        norm_email = email.strip().lower()
+        phone = normalize_phone(phone)
+        key = self._verification_key(norm_email, phone)
+        test_mode = self._tac_test_mode()
         with self._get_db() as session:
             repo = UserRepository(session)
             previous = repo.get_latest_verification_code(key)
@@ -120,52 +126,91 @@ class AuthService:
                      else f'TAC sent to {norm_email}. Please check your inbox or spam folder.'),
             expires_in_seconds=300, debug_code=code if test_mode else None)
 
+    @staticmethod
+    def _check_code(repo: UserRepository, key: str, code: str) -> Optional[str]:
+        """Validate a TAC for `key`, marking it verified. Returns an error message, or None on success."""
+        entry = repo.get_latest_verification_code(key)
+        if not entry:
+            return "No verification code found. Please request a new code."
+        if datetime.now(timezone.utc) > _as_utc(entry.expires_at):
+            return "Verification code has expired. Please request a new code."
+        if entry.attempts >= 5:
+            return "Too many failed attempts. Please request a new code."
+        if not secrets.compare_digest(entry.code, code.strip()):
+            repo.increment_attempts(entry.id)
+            return "Invalid verification code. Please check your email and try again."
+        repo.mark_code_verified(entry.id)
+        return None
+
     def verify_code(self, email: str, code: str, phone: str) -> VerifyCodeResponse:
         """Verify the 6-digit code against the recorded code in PostgreSQL."""
         norm_email = email.strip().lower()
+        with self._get_db() as session:
+            error = self._check_code(UserRepository(session), self._verification_key(norm_email, phone), code)
+        return VerifyCodeResponse(verified=error is None, email=norm_email,
+                                  message=error or "Email address successfully verified.")
 
+    # =========================================================================
+    # Password reset
+    # =========================================================================
+
+    @staticmethod
+    def _reset_key(email: str) -> str:
+        # Separate namespace from signup TACs so one can never be used as the other.
+        return 'reset:' + hashlib.sha256(email.strip().lower().encode()).hexdigest()
+
+    def request_password_reset(self, email: str) -> SendCodeResponse:
+        """Email a reset TAC to the account registered with `email`.
+
+        The response is the same whether or not an account exists, so the endpoint
+        cannot be used to discover which emails are registered.
+        """
+        norm_email = email.strip().lower()
+        test_mode = self._tac_test_mode()
+        response = SendCodeResponse(email=norm_email, expires_in_seconds=300,
+            message=f'If an account is registered to {norm_email}, a reset code has been sent to it.')
         with self._get_db() as session:
             repo = UserRepository(session)
-            entry = repo.get_latest_verification_code(self._verification_key(norm_email, phone))
+            if repo.get_by_email(norm_email) is None:
+                return response
+            key = self._reset_key(norm_email)
+            previous = repo.get_latest_verification_code(key)
+            if previous and datetime.now(timezone.utc) - _as_utc(previous.created_at) < timedelta(seconds=60):
+                return response  # the code already sent is still valid
+            code = f'{secrets.randbelow(900000) + 100000}'
+            if not test_mode:
+                send_tac_email(norm_email, code, reset=True)
+            repo.cleanup_codes_for_email(key)
+            repo.save_verification_code(email=key, code=code,
+                expires_at=datetime.now(timezone.utc) + timedelta(minutes=5))
+        if test_mode:
+            response.debug_code = code
+        return response
 
-            if not entry:
-                return VerifyCodeResponse(
-                    verified=False,
-                    email=norm_email,
-                    message="No verification code found. Please request a new code.",
-                )
+    def verify_reset_code(self, email: str, code: str) -> VerifyCodeResponse:
+        norm_email = email.strip().lower()
+        with self._get_db() as session:
+            error = self._check_code(UserRepository(session), self._reset_key(norm_email), code)
+        return VerifyCodeResponse(verified=error is None, email=norm_email,
+                                  message=error or "Code verified. You can now set a new password.")
 
-            # Check expiration
-            now = datetime.now(timezone.utc)
-            if now > _as_utc(entry.expires_at):
-                return VerifyCodeResponse(
-                    verified=False,
-                    email=norm_email,
-                    message="Verification code has expired. Please request a new code.",
-                )
-
-            # Check maximum attempts
-            if entry.attempts >= 5:
-                return VerifyCodeResponse(
-                    verified=False,
-                    email=norm_email,
-                    message="Too many failed attempts. Please request a new code.",
-                )
-
-            if not secrets.compare_digest(entry.code, code.strip()):
-                repo.increment_attempts(entry.id)
-                return VerifyCodeResponse(
-                    verified=False,
-                    email=norm_email,
-                    message="Invalid verification code. Please check your email and try again.",
-                )
-
-            repo.mark_code_verified(entry.id)
-            return VerifyCodeResponse(
-                verified=True,
-                email=norm_email,
-                message="Email address successfully verified.",
-            )
+    def reset_password(self, email: str, code: str, new_password: str) -> None:
+        """Set a new password after checking the reset TAC, then sign the account out everywhere."""
+        norm_email = email.strip().lower()
+        key = self._reset_key(norm_email)
+        with self._get_db() as session:
+            repo = UserRepository(session)
+            user = repo.get_by_email(norm_email)
+            error = self._check_code(repo, key, code)
+            if error or user is None:
+                raise ValueError(error or "No verification code found. Please request a new code.")
+            user.password_hash = _hash_password(new_password)
+            session.commit()
+            repo.cleanup_codes_for_email(key)
+            user_id = user.id
+        for token in [t for t, u in self._active_sessions.items() if u.get('id') == user_id]:
+            del self._active_sessions[token]
+        logger.info(f"Password reset for user {user_id}")
 
     def register(self, request: RegisterRequest) -> AuthTokenResponse:
         """Register a new patient account in PostgreSQL after email verification."""

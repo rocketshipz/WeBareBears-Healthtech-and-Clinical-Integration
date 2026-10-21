@@ -5,12 +5,15 @@ from fastapi import APIRouter, Depends, Header, HTTPException, status
 from app.schemas.common import APIResponse
 from app.schemas.auth import (
     AuthTokenResponse,
+    ForgotPasswordRequest,
     LoginRequest,
     RegisterRequest,
+    ResetPasswordRequest,
     SendCodeRequest,
     SendCodeResponse,
     VerifyCodeRequest,
     VerifyCodeResponse,
+    VerifyResetCodeRequest,
 )
 from app.services.auth_service import AuthService
 
@@ -156,6 +159,62 @@ async def login(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Login failed. Please try again later.",
         )
+
+
+@router.post(
+    "/forgot-password",
+    response_model=APIResponse[SendCodeResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Email a password reset code to a registered account",
+)
+def forgot_password(
+    request: ForgotPasswordRequest,
+    service: AuthService = Depends(get_auth_service),
+):
+    """Sends a 6-digit reset code if the email belongs to an account. Same response either way."""
+    try:
+        result = service.request_password_reset(request.email)
+        return APIResponse(success=True, data=result, message=result.message)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.post(
+    "/verify-reset-code",
+    response_model=APIResponse[VerifyCodeResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Check a password reset code",
+)
+def verify_reset_code(
+    request: VerifyResetCodeRequest,
+    service: AuthService = Depends(get_auth_service),
+):
+    result = service.verify_reset_code(request.email, request.code)
+    if not result.verified:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.message)
+    return APIResponse(success=True, data=result, message=result.message)
+
+
+@router.post(
+    "/reset-password",
+    response_model=APIResponse[dict],
+    status_code=status.HTTP_200_OK,
+    summary="Set a new password using a reset code",
+)
+def reset_password(
+    request: ResetPasswordRequest,
+    service: AuthService = Depends(get_auth_service),
+):
+    """Replaces the account password and signs out its existing sessions."""
+    try:
+        service.reset_password(request.email, request.code, request.new_password)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    return APIResponse(
+        success=True,
+        data={"password_reset": True},
+        message="Password changed successfully. Please log in with your new password.",
+    )
 
 
 @router.post(

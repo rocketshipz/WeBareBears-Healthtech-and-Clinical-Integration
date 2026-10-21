@@ -252,6 +252,69 @@ class AuthService {
     }
   }
 
+  /// Request a 6-digit password reset code for the account registered to [email].
+  ///
+  /// Sends a POST request to `/auth/forgot-password`. The backend answers the same
+  /// way whether or not the email is registered.
+  static Future<Map<String, dynamic>> requestPasswordReset({
+    required String email,
+  }) => _postPasswordReset('forgot-password', {
+    'email': email.trim().toLowerCase(),
+  });
+
+  /// Check a password reset code before asking for the new password.
+  ///
+  /// Sends a POST request to `/auth/verify-reset-code`.
+  static Future<Map<String, dynamic>> verifyResetCode({
+    required String email,
+    required String code,
+  }) => _postPasswordReset('verify-reset-code', {
+    'email': email.trim().toLowerCase(),
+    'code': code.trim(),
+  });
+
+  /// Set a new password using a verified reset code.
+  ///
+  /// Sends a POST request to `/auth/reset-password`.
+  static Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) => _postPasswordReset('reset-password', {
+    'email': email.trim().toLowerCase(),
+    'code': code.trim(),
+    'new_password': newPassword,
+  });
+
+  static Future<Map<String, dynamic>> _postPasswordReset(
+    String path,
+    Map<String, dynamic> body,
+  ) async {
+    final url = Uri.parse('${ApiService.baseUrl}/auth/$path');
+    try {
+      final response = await http
+          .post(url, headers: ApiService.defaultHeaders, body: jsonEncode(body))
+          .timeout(const Duration(seconds: 12));
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      throw AuthException(
+        _parseErrorMessage(response),
+        statusCode: response.statusCode,
+      );
+    } on SocketException {
+      throw AuthException(
+        'Unable to connect to the server. Please check your network or server status.',
+      );
+    } on TimeoutException {
+      throw AuthException('Connection timed out. Please try again.');
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      throw AuthException('Password reset failed: $e');
+    }
+  }
+
   static Future<Map<String, dynamic>> loadProfile() => _profileRequest();
 
   static Future<Map<String, dynamic>> saveProfile(
