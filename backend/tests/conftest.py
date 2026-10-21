@@ -23,6 +23,7 @@ def pytest_configure(config):
         "WAIT_LABEL_ENABLED": "false",
         "GOOGLE_MAPS_API_KEY": "",
         "ROUTING_TRAFFIC_ENABLED": "false",
+        "CLINIC_HOURS_LOOKUP": "false",
     }.items():
         _environment.setenv(key, value)
 

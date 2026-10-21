@@ -24,6 +24,9 @@ class HospitalInfo(BaseModel):
     available_ed_spaces: Optional[int] = None
     google_place_id: Optional[str] = None
     location_source: str = Field("database", description="database, or google when the DB coordinate was wrong")
+    facility_type: str = Field("hospital", description="hospital (emergency department) or clinic")
+    clinic_type: Optional[str] = Field(None, description="Clinics only: public or private")
+    open_status: Optional[str] = Field(None, description="Clinics only: open (Google hours) or unknown")
 
 
 class HospitalRoutingRequest(BaseModel):
@@ -51,3 +54,5 @@ class HospitalRoutingResponse(BaseModel):
     triage_level_used: Optional[int] = None
     triage_age_hours: Optional[float] = None
     recommendations: List[HospitalRecommendation] = Field(default_factory=list)
+    clinic_recommendations: List[HospitalRecommendation] = Field(
+        default_factory=list, description="With no recent triage and clinics requested: walk-in clinics, ranked")

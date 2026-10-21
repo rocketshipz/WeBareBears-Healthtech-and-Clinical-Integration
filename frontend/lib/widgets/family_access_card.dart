@@ -139,173 +139,212 @@ class _FamilyAccessCardState extends State<FamilyAccessCard> {
       });
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(24),
-    decoration: cardDecoration(radius: 20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.family_restroom, color: AppColors.teal),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text('Family progress access', style: AppText.heading),
-            ),
-            IconButton(
-              onPressed: busy ? null : refresh,
-              tooltip: 'Refresh requests',
-              icon: const Icon(Icons.refresh),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Send a one-use invitation through WhatsApp. Your family member requests access, then you accept or reject below.',
-          style: AppText.body.copyWith(height: 1.5),
-        ),
-        const SizedBox(height: 24),
-        Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 340),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: busy ? null : generate,
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.darkTeal,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(0, 56),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 18,
-                  ),
-                  textStyle: AppText.bodyStrong,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                icon: const Icon(Icons.add_link, size: 24),
-                label: Text(
-                  invitationUrl == null
-                      ? 'Create WhatsApp invitation'
-                      : 'Create another invitation',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
+  Widget build(BuildContext context) => Theme(
+    data: Theme.of(context).copyWith(
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.darkTeal,
+          foregroundColor: Colors.white,
+          minimumSize: const Size(0, 44),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          textStyle: AppText.bodyStrong.copyWith(fontSize: 13),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
-        if (invitationUrl != null) ...[
-          const SizedBox(height: 24),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.paleTeal,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: SelectableText(
-              invitationUrl!,
-              style: AppText.caption.copyWith(height: 1.5),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'One request per link · Expires ${expiresAt!.day}/${expiresAt!.month}/${expiresAt!.year} at ${TimeOfDay.fromDateTime(expiresAt!).format(context)}',
-            style: AppText.caption,
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 12,
-            runSpacing: 10,
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.darkTeal,
+          minimumSize: const Size(0, 44),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          textStyle: AppText.bodyStrong.copyWith(fontSize: 13),
+        ),
+      ),
+    ),
+    child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: cardDecoration(radius: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              FilledButton.icon(
-                onPressed: busy ? null : share,
-                icon: const Icon(Icons.chat_outlined),
-                label: const Text('Share via WhatsApp'),
+              const Icon(Icons.family_restroom, color: AppColors.teal),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text('Family progress access', style: AppText.heading),
               ),
-              TextButton.icon(
-                onPressed: busy
-                    ? null
-                    : () async {
-                        await Clipboard.setData(
-                          ClipboardData(text: invitationUrl!),
-                        );
-                        if (context.mounted) {
-                          showAppSnack(context, 'Invitation link copied.');
-                        }
-                      },
-                icon: const Icon(Icons.copy),
-                label: const Text('Copy link'),
+              IconButton(
+                onPressed: busy ? null : refresh,
+                tooltip: 'Refresh requests',
+                icon: const Icon(Icons.refresh),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Text(
-            'Create a separate invitation for each family member. Opening a link does not use it up; submitting a request does.',
-            style: AppText.caption.copyWith(height: 1.5),
+            'Send a one-use invitation through WhatsApp. Your family member requests access, then you accept or reject below.',
+            style: AppText.body.copyWith(height: 1.5),
           ),
-        ],
-        if (busy) const LinearProgressIndicator(),
-        if (error != null)
-          Text(error!, style: const TextStyle(color: AppColors.red)),
-        const SizedBox(height: 24),
-        const Divider(height: 1),
-        const SizedBox(height: 24),
-        Text('Who can follow you', style: AppText.bodyStrong),
-        const SizedBox(height: 6),
-        Text(
-          'Approved access continues until you revoke it.',
-          style: AppText.caption,
-        ),
-        const SizedBox(height: 12),
-        if (incoming.isEmpty) const Text('No family requests yet.'),
-        for (final row in incoming) ...[
-          const Divider(),
-          Text('${row['name']} · ${row['status']}', style: AppText.bodyStrong),
-          if (row['status'] == 'pending')
-            Wrap(
-              spacing: 8,
-              children: [
-                FilledButton(
-                  onPressed: busy
-                      ? null
-                      : () =>
-                            decide(Map<String, dynamic>.from(row), 'approved'),
-                  child: const Text('Accept'),
+          const SizedBox(height: 24),
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: double.infinity),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: busy ? null : generate,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.darkTeal,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(0, 56),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 18,
+                    ),
+                    textStyle: AppText.bodyStrong,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  icon: const Icon(Icons.add_link, size: 24),
+                  label: Text(
+                    invitationUrl == null
+                        ? 'Create WhatsApp invitation'
+                        : 'Create another invitation',
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-                TextButton(
+              ),
+            ),
+          ),
+          if (invitationUrl != null) ...[
+            const SizedBox(height: 24),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.paleTeal,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: SelectableText(
+                invitationUrl!,
+                style: AppText.caption.copyWith(height: 1.5),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'One request per link · Expires ${expiresAt!.day}/${expiresAt!.month}/${expiresAt!.year} at ${TimeOfDay.fromDateTime(expiresAt!).format(context)}',
+              style: AppText.caption,
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 10,
+              children: [
+                FilledButton.icon(
+                  onPressed: busy ? null : share,
+                  icon: const Icon(Icons.chat_outlined),
+                  label: const Text('Share via WhatsApp'),
+                ),
+                TextButton.icon(
                   onPressed: busy
                       ? null
-                      : () =>
-                            decide(Map<String, dynamic>.from(row), 'rejected'),
-                  child: const Text('Reject'),
+                      : () async {
+                          await Clipboard.setData(
+                            ClipboardData(text: invitationUrl!),
+                          );
+                          if (context.mounted) {
+                            showAppSnack(context, 'Invitation link copied.');
+                          }
+                        },
+                  icon: const Icon(Icons.copy),
+                  label: const Text('Copy link'),
                 ),
               ],
             ),
-          if (row['status'] == 'approved')
-            TextButton(
-              onPressed: busy
-                  ? null
-                  : () => decide(Map<String, dynamic>.from(row), 'revoked'),
-              child: const Text('Revoke access'),
+            const SizedBox(height: 12),
+            Text(
+              'Create a separate invitation for each family member. Opening a link does not use it up; submitting a request does.',
+              style: AppText.caption.copyWith(height: 1.5),
+            ),
+          ],
+          if (busy) const LinearProgressIndicator(),
+          if (error != null)
+            Text(error!, style: const TextStyle(color: AppColors.red)),
+          const SizedBox(height: 24),
+          const Divider(height: 1),
+          const SizedBox(height: 24),
+          Text('Who can follow you', style: AppText.bodyStrong),
+          const SizedBox(height: 6),
+          Text(
+            'Approved access continues until you revoke it.',
+            style: AppText.caption,
+          ),
+          const SizedBox(height: 12),
+          if (incoming.isEmpty) const Text('No family requests yet.'),
+          for (final row in incoming) ...[
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+            Text(
+              '${row['name']} · ${row['status']}',
+              style: AppText.bodyStrong.copyWith(height: 1.5),
+            ),
+            const SizedBox(height: 12),
+            if (row['status'] == 'pending')
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                children: [
+                  FilledButton(
+                    onPressed: busy
+                        ? null
+                        : () => decide(
+                            Map<String, dynamic>.from(row),
+                            'approved',
+                          ),
+                    child: const Text('Accept'),
+                  ),
+                  TextButton(
+                    onPressed: busy
+                        ? null
+                        : () => decide(
+                            Map<String, dynamic>.from(row),
+                            'rejected',
+                          ),
+                    child: const Text('Reject'),
+                  ),
+                ],
+              ),
+            if (row['status'] == 'approved')
+              TextButton(
+                onPressed: busy
+                    ? null
+                    : () => decide(Map<String, dynamic>.from(row), 'revoked'),
+                child: const Text('Revoke access'),
+              ),
+          ],
+          const SizedBox(height: 24),
+          const Divider(height: 1),
+          const SizedBox(height: 24),
+          Text('Patients you follow', style: AppText.bodyStrong),
+          const SizedBox(height: 10),
+          if (outgoing.isEmpty)
+            const Text(
+              'Open a patient’s WhatsApp invitation to request access.',
+            ),
+          for (final row in outgoing)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                '${row['name']} · ${row['status']}${row['status'] == 'approved' ? ' — Open Progress > Family' : ''}',
+              ),
             ),
         ],
-        const SizedBox(height: 24),
-        Text('Patients you follow', style: AppText.bodyStrong),
-        const SizedBox(height: 10),
-        if (outgoing.isEmpty)
-          const Text('Open a patient’s WhatsApp invitation to request access.'),
-        for (final row in outgoing)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              '${row['name']} · ${row['status']}${row['status'] == 'approved' ? ' — Open Progress > Family' : ''}',
-            ),
-          ),
-      ],
+      ),
     ),
   );
 }

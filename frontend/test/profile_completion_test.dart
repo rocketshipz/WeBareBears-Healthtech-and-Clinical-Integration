@@ -11,6 +11,25 @@ import 'package:triagemy/pages/profile_page.dart';
 import 'package:triagemy/services/auth_service.dart';
 
 void main() {
+  testWidgets('Medical profile reminder opens the profile editor directly', (
+    tester,
+  ) async {
+    GoogleFonts.config.allowRuntimeFetching = false;
+    AppLanguage.instance.value = const Locale('en');
+    AuthService.logout();
+    profileCompleted.value = false;
+    await tester.pumpWidget(const MaterialApp(home: MainNavigation()));
+    await tester.pump(const Duration(seconds: 2));
+    final reminder = find.text('Complete your medical profile');
+    await tester.ensureVisible(reminder);
+    await tester.tap(reminder);
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byKey(const ValueKey('profile-save-button')), findsOneWidget);
+    expect(find.text('Edit'), findsNothing);
+    expect(find.text('Personal Information'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets(
     'Saved complete profiles hide the reminder and medical rows align',
     (tester) async {

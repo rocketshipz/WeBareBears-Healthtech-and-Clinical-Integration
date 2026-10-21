@@ -99,3 +99,8 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# deploy_web.ps1 local state
+.deploy_api_url
+.vercel-web-link/
+.vercel

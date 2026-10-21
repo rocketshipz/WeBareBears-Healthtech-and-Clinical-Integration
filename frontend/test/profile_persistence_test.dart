@@ -45,6 +45,8 @@ void main() {
           expect(find.text('Registered Name'), findsNWidgets(2));
           expect(find.text('Change photo'), findsOneWidget);
           expect(find.text('User Profile'), findsNothing);
+          await tester.ensureVisible(find.text('Edit'));
+          await tester.pumpAndSettle();
           await tester.tap(find.text('Edit'));
           await tester.pumpAndSettle();
           final conditions = find.byKey(
@@ -93,6 +95,8 @@ void main() {
             {'substance': 'Peanuts'},
             {'substance': 'Penicillin'},
           ]);
+          await tester.ensureVisible(find.text('Edit'));
+          await tester.pumpAndSettle();
           await tester.tap(find.text('Edit'));
           await tester.pumpAndSettle();
           final changedHeight = find.byWidgetPredicate(

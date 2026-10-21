@@ -451,6 +451,33 @@ const malayTranslations = <String, String>{
   "Closest": "Terdekat",
   "Shortest wait": "Masa menunggu tersingkat",
   "Best match": "Paling sesuai",
+  "Open now": "Dibuka sekarang",
+  "Clear triage result": "Kosongkan keputusan triaj",
+  "Clear triage result?": "Kosongkan keputusan triaj?",
+  "Hospitals and clinics will no longer be ranked for your recent triage result":
+      "Hospital dan klinik tidak lagi disusun mengikut keputusan triaj terkini anda",
+  "Your triage report is kept.": "Laporan triaj anda disimpan.",
+  "Could not clear the triage result. Please try again.":
+      "Keputusan triaj tidak dapat dikosongkan. Sila cuba lagi.",
+  "No nearby clinic matches your search.":
+      "Tiada klinik berdekatan yang sepadan dengan carian anda.",
+  "Nearby emergency departments and walk-in clinics, ranked by travel time.":
+      "Jabatan kecemasan dan klinik berdekatan, disusun mengikut masa perjalanan.",
+  "Clinics": "Klinik",
+  "Clear": "Kosongkan",
+  "Hospitals are ranked by travel time and how busy each emergency department is":
+      "Hospital disusun mengikut masa perjalanan dan kesibukan jabatan kecemasan",
+  "Clinics are ranked by travel time and opening hours.":
+      "Klinik disusun mengikut masa perjalanan dan waktu operasi.",
+  "Call ahead": "Telefon dahulu",
+  "Google hours": "Waktu Google",
+  "Hours not verified": "Waktu belum disahkan",
+  "ED backup": "Kecemasan (sandaran)",
+  "Public": "Awam",
+  "Private": "Swasta",
+  "A walk-in clinic is suitable": "Klinik tanpa temu janji sesuai",
+  "The emergency department is listed in case symptoms get worse.":
+      "Jabatan kecemasan disenaraikan sekiranya gejala menjadi teruk.",
   "Open Now": "Dibuka Sekarang",
   "Open 24/7": "Dibuka 24 jam",
   "General Hospital": "Hospital Umum",
